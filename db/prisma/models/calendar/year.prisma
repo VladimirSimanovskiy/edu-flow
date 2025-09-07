@@ -1,0 +1,14 @@
+model Year {
+  id        Int      @id @default(autoincrement())
+  year      Int      @unique
+  // Является ли год високосным
+  isLeap    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  months   Month[]
+  quarters Quarter[]
+  weeks    Week[]
+  days     Date[]
+}

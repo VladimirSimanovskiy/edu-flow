@@ -1,0 +1,14 @@
+model Classroom {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  floor     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+  assignedTeachers Teacher[] @relation("TeacherClassroom")
+  // Calendar is independent - no direct relations
+
+  @@map("classrooms")
+}

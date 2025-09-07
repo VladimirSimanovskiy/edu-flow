@@ -21,6 +21,7 @@ process.on('SIGTERM', async () => {
 });
 
 export * from './services/scheduleService';
+export * from './services/scheduleVersionService';
 export * from './services/teacherService';
 export * from './services/classService';
 export * from './types';

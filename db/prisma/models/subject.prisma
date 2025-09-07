@@ -1,0 +1,15 @@
+// Subject model
+model Subject {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique // e.g., "MATH", "PHYS", "CHEM"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+  teacherSubjects TeacherSubject[]
+
+  @@map("subjects")
+}

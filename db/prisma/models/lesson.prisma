@@ -1,0 +1,28 @@
+// Lesson model - now tied to a schedule version and specific day
+
+model Lesson {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys - all dependencies are on primary key
+  idTeacher Int     @map("id_teacher")
+  teacher   Teacher @relation(fields: [idTeacher], references: [id], onDelete: Cascade)
+
+  idClass Int   @map("id_class")
+  class   Class @relation(fields: [idClass], references: [id], onDelete: Cascade)
+
+  idSubject Int     @map("id_subject")
+  subject   Subject @relation(fields: [idSubject], references: [id], onDelete: Cascade)
+
+  idClassroom Int       @map("id_classroom")
+  classroom   Classroom @relation(fields: [idClassroom], references: [id], onDelete: Cascade)
+
+  idCalendarDate Int  @map("id_calendar_date")
+  calendarDate   Date @relation(fields: [idCalendarDate], references: [id], onDelete: Cascade)
+
+  idScheduleVersion String          @map("id_schedule_version")
+  scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
+
+  @@unique([idTeacher, idClass, idSubject, idClassroom, idCalendarDate, idScheduleVersion])
+}

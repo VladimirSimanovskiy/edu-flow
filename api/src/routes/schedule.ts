@@ -17,6 +17,7 @@ const lessonSchema = z.object({
   classId: z.string().cuid(),
   subjectId: z.string().cuid(),
   classroomId: z.string().cuid(),
+  scheduleVersionId: z.string().cuid(),
 });
 
 const lessonFiltersSchema = z.object({
@@ -25,6 +26,7 @@ const lessonFiltersSchema = z.object({
   subjectId: z.string().cuid().optional(),
   dayOfWeek: z.number().min(0).max(6).optional(),
   weekNumber: z.number().optional(),
+  scheduleVersionId: z.string().cuid().optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
 });
@@ -40,6 +42,7 @@ router.get('/teachers', authenticateToken, async (req, res, next) => {
             class: true,
             subject: true,
             classroom: true,
+            scheduleVersion: true,
           },
         },
       },
@@ -61,11 +64,12 @@ router.get('/classes', authenticateToken, async (req, res, next) => {
       include: {
         lessons: {
           include: {
-            teacher: {
-              include: {
-                user: true,
-              },
+          teacher: {
+            include: {
+              user: true,
             },
+          },
+          scheduleVersion: true,
             subject: true,
             classroom: true,
           },
@@ -151,11 +155,12 @@ router.get('/lessons', authenticateToken, async (req, res, next) => {
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-        teacher: {
-          include: {
-            user: true,
+          teacher: {
+            include: {
+              user: true,
+            },
           },
-        },
+          scheduleVersion: true,
         class: true,
         subject: true,
         classroom: true,
@@ -188,11 +193,12 @@ router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-        teacher: {
-          include: {
-            user: true,
+          teacher: {
+            include: {
+              user: true,
+            },
           },
-        },
+          scheduleVersion: true,
         class: true,
         subject: true,
         classroom: true,
@@ -224,11 +230,12 @@ router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-        teacher: {
-          include: {
-            user: true,
+          teacher: {
+            include: {
+              user: true,
+            },
           },
-        },
+          scheduleVersion: true,
         class: true,
         subject: true,
         classroom: true,
@@ -258,11 +265,12 @@ router.post('/lessons', authenticateToken, requireRole(['ADMIN', 'TEACHER']), as
     const newLesson = await prisma.lesson.create({
       data: lessonData,
       include: {
-        teacher: {
-          include: {
-            user: true,
+          teacher: {
+            include: {
+              user: true,
+            },
           },
-        },
+          scheduleVersion: true,
         class: true,
         subject: true,
         classroom: true,
@@ -299,11 +307,12 @@ router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']),
       where: { id },
       data: lessonData,
       include: {
-        teacher: {
-          include: {
-            user: true,
+          teacher: {
+            include: {
+              user: true,
+            },
           },
-        },
+          scheduleVersion: true,
         class: true,
         subject: true,
         classroom: true,

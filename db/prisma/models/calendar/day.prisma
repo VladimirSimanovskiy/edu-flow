@@ -1,0 +1,27 @@
+model Date {
+  id      Int    @id @default(autoincrement())
+  idYear  String @map("id_year")
+  year    Year   @relation(fields: [idYear], references: [id], onDelete: Cascade)
+  idMonth Int    @map("id_month")
+  month   Month  @relation(fields: [idMonth], references: [id], onDelete: Cascade)
+  idWeek  Int?   @map("id_week")
+  week    Week?  @relation(fields: [idWeek], references: [id], onDelete: SetNull)
+
+  // Date components
+  date         DateTime @unique
+  day          Int
+  dayOfWeek    Int
+  dayOfMonth   Int
+  dayOfQuarter Int
+  dayOfYear    Int
+
+  // Day names
+  dayName      String
+  shortDayName String
+
+  // Additional properties
+  isLeapDay Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

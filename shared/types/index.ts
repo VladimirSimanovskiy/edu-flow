@@ -42,6 +42,28 @@ export interface Classroom {
   updatedAt: Date;
 }
 
+export interface ScheduleVersion {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  periods: SchedulePeriod[];
+  lessons: Lesson[];
+}
+
+export interface SchedulePeriod {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  isCurrent: boolean;
+  scheduleVersionId: string;
+  scheduleVersion: ScheduleVersion;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Lesson {
   id: string;
   startTime: string;
@@ -52,10 +74,12 @@ export interface Lesson {
   classId: string;
   subjectId: string;
   classroomId: string;
+  scheduleVersionId: string;
   teacher: Teacher;
   class: Class;
   subject: Subject;
   classroom: Classroom;
+  scheduleVersion: ScheduleVersion;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +110,27 @@ export interface RegisterRequest {
   role: 'ADMIN' | 'TEACHER' | 'STUDENT';
 }
 
+export interface CreateScheduleVersionRequest {
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface UpdateScheduleVersionRequest extends Partial<CreateScheduleVersionRequest> {
+  id: string;
+}
+
+export interface CreateSchedulePeriodRequest {
+  scheduleVersionId: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface UpdateSchedulePeriodRequest extends Partial<CreateSchedulePeriodRequest> {
+  id: string;
+}
+
 export interface CreateLessonRequest {
   startTime: string;
   endTime: string;
@@ -95,6 +140,7 @@ export interface CreateLessonRequest {
   classId: string;
   subjectId: string;
   classroomId: string;
+  scheduleVersionId: string;
 }
 
 export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {
@@ -102,14 +148,31 @@ export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {
 }
 
 // Filter types
+export interface ScheduleVersionFilters {
+  isActive?: boolean;
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface SchedulePeriodFilters {
+  scheduleVersionId?: string;
+  isCurrent?: boolean;
+  startDate?: string;
+  endDate?: string;
+  date?: string; // Get period for specific date
+}
+
 export interface LessonFilters {
   teacherId?: string;
   classId?: string;
   subjectId?: string;
   dayOfWeek?: number;
   weekNumber?: number;
+  scheduleVersionId?: string;
   startDate?: string;
   endDate?: string;
+  date?: string; // Get lessons for specific date
 }
 
 // Pagination types

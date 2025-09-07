@@ -1,0 +1,32 @@
+// Schedule-related models
+
+// Schedule Version model - represents a complete schedule version
+model ScheduleVersion {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Осенний семестр 2024", "Весенний семестр 2024"
+  description String?  // Optional description
+  isActive    Boolean  @default(false) // Only one version can be active at a time
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  periods     SchedulePeriod[]
+  lessons     Lesson[]
+
+  @@map("schedule_versions")
+}
+
+// Schedule Period model - defines when a schedule version is effective
+model SchedulePeriod {
+  id                String   @id @default(cuid())
+  startDate         DateTime // When this schedule becomes effective
+  endDate           DateTime // When this schedule expires (null means indefinite)
+  isCurrent         Boolean  @default(false) // Only one period can be current at a time
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  scheduleVersionId String
+  scheduleVersion   ScheduleVersion @relation(fields: [scheduleVersionId], references: [id], onDelete: Cascade)
+
+  @@map("schedule_periods")
+}

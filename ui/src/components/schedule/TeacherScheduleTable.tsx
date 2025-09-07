@@ -13,7 +13,6 @@ interface TeacherScheduleTableProps {
 }
 
 export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
-  teachers,
   departments,
   lessons,
   weekStart,

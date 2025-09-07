@@ -2,35 +2,41 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createError } from '../middleware/errorHandler';
+import { PrismaClient } from '../../../db/generated/prisma';
+import { z } from 'zod';
 
-const router = Router();
+const router: Router = Router();
+const prisma = new PrismaClient();
 
-// Mock users (в реальном проекте будет база данных)
-const users = [
-  {
-    id: '1',
-    email: 'admin@school.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-    role: 'admin',
-  },
-  {
-    id: '2',
-    email: 'teacher@school.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-    role: 'teacher',
-  },
-];
+// Validation schemas
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const registerSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['ADMIN', 'TEACHER', 'STUDENT']),
+});
 
 // Login
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return next(createError('Email and password are required', 400));
+    // Validate input
+    const validationResult = loginSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map(e => e.message).join(', '), 400));
     }
 
-    const user = users.find(u => u.email === email);
+    const { email, password } = validationResult.data;
+
+    // Find user in database
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { teacher: true },
+    });
+
     if (!user) {
       return next(createError('Invalid credentials', 401));
     }
@@ -57,6 +63,7 @@ router.post('/login', async (req, res, next) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        teacher: user.teacher,
       },
     });
   } catch (error) {
@@ -67,26 +74,32 @@ router.post('/login', async (req, res, next) => {
 // Register (только для админов)
 router.post('/register', async (req, res, next) => {
   try {
-    const { email, password, role } = req.body;
-
-    if (!email || !password || !role) {
-      return next(createError('Email, password, and role are required', 400));
+    // Validate input
+    const validationResult = registerSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map(e => e.message).join(', '), 400));
     }
 
-    const existingUser = users.find(u => u.email === email);
+    const { email, password, role } = validationResult.data;
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (existingUser) {
       return next(createError('User already exists', 409));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: (users.length + 1).toString(),
-      email,
-      password: hashedPassword,
-      role,
-    };
-
-    users.push(newUser);
+    
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        role,
+      },
+    });
 
     res.status(201).json({
       user: {
@@ -101,9 +114,45 @@ router.post('/register', async (req, res, next) => {
 });
 
 // Get current user
-router.get('/me', (req, res, next) => {
-  // В реальном проекте здесь будет middleware аутентификации
-  res.json({ message: 'Get current user endpoint' });
+router.get('/me', async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return next(createError('Access token required', 401));
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return next(createError('JWT secret not configured', 500));
+    }
+
+    const decoded = jwt.verify(token, secret) as any;
+    
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      include: { teacher: true },
+    });
+
+    if (!user) {
+      return next(createError('User not found', 404));
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        teacher: user.teacher,
+      },
+    });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return next(createError('Invalid or expired token', 403));
+    }
+    next(error);
+  }
 });
 
 export { router as authRoutes };

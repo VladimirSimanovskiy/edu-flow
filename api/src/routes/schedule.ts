@@ -1,106 +1,53 @@
 import { Router } from 'express';
 import { createError } from '../middleware/errorHandler';
-import { Lesson, Teacher, Class } from '../types/schedule';
+import { authenticateToken, requireRole } from '../middleware/auth';
+import { PrismaClient } from '../../../db/generated/prisma';
+import { z } from 'zod';
 
-const router = Router();
+const router: Router = Router();
+const prisma = new PrismaClient();
 
-// Mock data
-const teachers: Teacher[] = [
-  {
-    id: '1',
-    name: 'Иванова Анна Ивановна',
-    email: 'ivanova@school.com',
-    subjects: ['Математика', 'Алгебра'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'Петрова Мария Владимировна',
-    email: 'petrova@school.com',
-    subjects: ['Русский язык', 'Литература'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: 'Сидоров Петр Константинович',
-    email: 'sidorov@school.com',
-    subjects: ['Физика', 'Химия'],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+// Validation schemas
+const lessonSchema = z.object({
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
+  dayOfWeek: z.number().min(0).max(6),
+  weekNumber: z.number().optional(),
+  teacherId: z.string().cuid(),
+  classId: z.string().cuid(),
+  subjectId: z.string().cuid(),
+  classroomId: z.string().cuid(),
+});
 
-const classes: Class[] = [
-  {
-    id: '1',
-    name: '10А',
-    grade: 10,
-    students: 25,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    name: '10Б',
-    grade: 10,
-    students: 23,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    name: '11А',
-    grade: 11,
-    students: 27,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-const lessons: Lesson[] = [
-  {
-    id: '1',
-    subject: 'Математика',
-    teacher: 'Иванова А.И.',
-    classroom: '101',
-    startTime: '08:00',
-    endTime: '08:45',
-    dayOfWeek: 1, // Monday
-    weekNumber: 1,
-    teacherId: '1',
-    classId: '1',
-  },
-  {
-    id: '2',
-    subject: 'Русский язык',
-    teacher: 'Петрова М.В.',
-    classroom: '102',
-    startTime: '08:45',
-    endTime: '09:30',
-    dayOfWeek: 1,
-    weekNumber: 1,
-    teacherId: '2',
-    classId: '1',
-  },
-  {
-    id: '3',
-    subject: 'Физика',
-    teacher: 'Сидоров П.К.',
-    classroom: '201',
-    startTime: '10:15',
-    endTime: '11:00',
-    dayOfWeek: 1,
-    weekNumber: 1,
-    teacherId: '3',
-    classId: '1',
-  },
-];
+const lessonFiltersSchema = z.object({
+  teacherId: z.string().cuid().optional(),
+  classId: z.string().cuid().optional(),
+  subjectId: z.string().cuid().optional(),
+  dayOfWeek: z.number().min(0).max(6).optional(),
+  weekNumber: z.number().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
 
 // Get all teachers
-router.get('/teachers', (req, res, next) => {
+router.get('/teachers', authenticateToken, async (req, res, next) => {
   try {
+    const teachers = await prisma.teacher.findMany({
+      include: {
+        user: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
     res.json(teachers);
   } catch (error) {
     next(error);
@@ -108,37 +55,125 @@ router.get('/teachers', (req, res, next) => {
 });
 
 // Get all classes
-router.get('/classes', (req, res, next) => {
+router.get('/classes', authenticateToken, async (req, res, next) => {
   try {
+    const classes = await prisma.class.findMany({
+      include: {
+        lessons: {
+          include: {
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
+            subject: true,
+            classroom: true,
+          },
+        },
+      },
+      orderBy: [
+        { grade: 'asc' },
+        { name: 'asc' },
+      ],
+    });
+
     res.json(classes);
   } catch (error) {
     next(error);
   }
 });
 
-// Get lessons by date range
-router.get('/lessons', (req, res, next) => {
+// Get all subjects
+router.get('/subjects', authenticateToken, async (req, res, next) => {
   try {
-    const { startDate, endDate, teacherId, classId } = req.query;
+    const subjects = await prisma.subject.findMany({
+      include: {
+        lessons: {
+          include: {
+            teacher: true,
+            class: true,
+            classroom: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
 
-    let filteredLessons = lessons;
+    res.json(subjects);
+  } catch (error) {
+    next(error);
+  }
+});
 
-    if (teacherId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.teacherId === teacherId);
+// Get all classrooms
+router.get('/classrooms', authenticateToken, async (req, res, next) => {
+  try {
+    const classrooms = await prisma.classroom.findMany({
+      include: {
+        lessons: {
+          include: {
+            teacher: true,
+            class: true,
+            subject: true,
+          },
+        },
+      },
+      orderBy: {
+        number: 'asc',
+      },
+    });
+
+    res.json(classrooms);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get lessons with filters
+router.get('/lessons', authenticateToken, async (req, res, next) => {
+  try {
+    const validationResult = lessonFiltersSchema.safeParse(req.query);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
     }
 
-    if (classId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.classId === classId);
-    }
+    const filters = validationResult.data;
+    const where: any = {};
 
-    res.json(filteredLessons);
+    if (filters.teacherId) where.teacherId = filters.teacherId;
+    if (filters.classId) where.classId = filters.classId;
+    if (filters.subjectId) where.subjectId = filters.subjectId;
+    if (filters.dayOfWeek !== undefined) where.dayOfWeek = filters.dayOfWeek;
+    if (filters.weekNumber !== undefined) where.weekNumber = filters.weekNumber;
+
+    const lessons = await prisma.lesson.findMany({
+      where,
+      include: {
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        class: true,
+        subject: true,
+        classroom: true,
+      },
+      orderBy: [
+        { dayOfWeek: 'asc' },
+        { startTime: 'asc' },
+      ],
+    });
+
+    res.json(lessons);
   } catch (error) {
     next(error);
   }
 });
 
 // Get lessons for a specific day
-router.get('/lessons/day/:date', (req, res, next) => {
+router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
     const { teacherId, classId } = req.query;
@@ -146,24 +181,35 @@ router.get('/lessons/day/:date', (req, res, next) => {
     const targetDate = new Date(date);
     const dayOfWeek = targetDate.getDay();
 
-    let filteredLessons = lessons.filter(lesson => lesson.dayOfWeek === dayOfWeek);
+    const where: any = { dayOfWeek };
+    if (teacherId) where.teacherId = teacherId as string;
+    if (classId) where.classId = classId as string;
 
-    if (teacherId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.teacherId === teacherId);
-    }
+    const lessons = await prisma.lesson.findMany({
+      where,
+      include: {
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        class: true,
+        subject: true,
+        classroom: true,
+      },
+      orderBy: {
+        startTime: 'asc',
+      },
+    });
 
-    if (classId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.classId === classId);
-    }
-
-    res.json(filteredLessons);
+    res.json(lessons);
   } catch (error) {
     next(error);
   }
 });
 
 // Get lessons for a specific week
-router.get('/lessons/week/:date', (req, res, next) => {
+router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
     const { teacherId, classId } = req.query;
@@ -171,33 +217,58 @@ router.get('/lessons/week/:date', (req, res, next) => {
     const targetDate = new Date(date);
     const weekNumber = Math.ceil(targetDate.getDate() / 7);
 
-    let filteredLessons = lessons.filter(lesson => lesson.weekNumber === weekNumber);
+    const where: any = { weekNumber };
+    if (teacherId) where.teacherId = teacherId as string;
+    if (classId) where.classId = classId as string;
 
-    if (teacherId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.teacherId === teacherId);
-    }
+    const lessons = await prisma.lesson.findMany({
+      where,
+      include: {
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        class: true,
+        subject: true,
+        classroom: true,
+      },
+      orderBy: [
+        { dayOfWeek: 'asc' },
+        { startTime: 'asc' },
+      ],
+    });
 
-    if (classId) {
-      filteredLessons = filteredLessons.filter(lesson => lesson.classId === classId);
-    }
-
-    res.json(filteredLessons);
+    res.json(lessons);
   } catch (error) {
     next(error);
   }
 });
 
 // Create a new lesson
-router.post('/lessons', (req, res, next) => {
+router.post('/lessons', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
   try {
-    const lessonData = req.body;
-    
-    const newLesson: Lesson = {
-      id: (lessons.length + 1).toString(),
-      ...lessonData,
-    };
+    const validationResult = lessonSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
+    }
 
-    lessons.push(newLesson);
+    const lessonData = validationResult.data;
+    
+    const newLesson = await prisma.lesson.create({
+      data: lessonData,
+      include: {
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        class: true,
+        subject: true,
+        classroom: true,
+      },
+    });
+
     res.status(201).json(newLesson);
   } catch (error) {
     next(error);
@@ -205,34 +276,63 @@ router.post('/lessons', (req, res, next) => {
 });
 
 // Update a lesson
-router.put('/lessons/:id', (req, res, next) => {
+router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
   try {
     const { id } = req.params;
-    const lessonData = req.body;
+    const validationResult = lessonSchema.partial().safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
+    }
 
-    const lessonIndex = lessons.findIndex(lesson => lesson.id === id);
-    if (lessonIndex === -1) {
+    const lessonData = validationResult.data;
+
+    const existingLesson = await prisma.lesson.findUnique({
+      where: { id },
+    });
+
+    if (!existingLesson) {
       return next(createError('Lesson not found', 404));
     }
 
-    lessons[lessonIndex] = { ...lessons[lessonIndex], ...lessonData };
-    res.json(lessons[lessonIndex]);
+    const updatedLesson = await prisma.lesson.update({
+      where: { id },
+      data: lessonData,
+      include: {
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        class: true,
+        subject: true,
+        classroom: true,
+      },
+    });
+
+    res.json(updatedLesson);
   } catch (error) {
     next(error);
   }
 });
 
 // Delete a lesson
-router.delete('/lessons/:id', (req, res, next) => {
+router.delete('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const lessonIndex = lessons.findIndex(lesson => lesson.id === id);
-    if (lessonIndex === -1) {
+    const existingLesson = await prisma.lesson.findUnique({
+      where: { id },
+    });
+
+    if (!existingLesson) {
       return next(createError('Lesson not found', 404));
     }
 
-    lessons.splice(lessonIndex, 1);
+    await prisma.lesson.delete({
+      where: { id },
+    });
+
     res.status(204).send();
   } catch (error) {
     next(error);

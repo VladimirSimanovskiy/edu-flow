@@ -1,0 +1,35 @@
+{
+  "name": "edu-flow",
+  "version": "1.0.0",
+  "description": "Система управления школьным расписанием",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter api dev\" \"pnpm --filter ui dev\"",
+    "build": "pnpm --filter api build && pnpm --filter ui build",
+    "start": "concurrently \"pnpm --filter api start\" \"pnpm --filter ui preview\"",
+    "lint": "pnpm --filter api lint && pnpm --filter ui lint",
+    "lint:fix": "pnpm --filter api lint:fix && pnpm --filter ui lint:fix",
+    "type-check": "pnpm --filter api type-check && pnpm --filter ui type-check",
+    "clean": "pnpm --filter api clean && pnpm --filter ui clean && pnpm --filter db clean",
+    "db:generate": "pnpm --filter db db:generate",
+    "db:migrate": "pnpm --filter db db:migrate",
+    "db:seed": "pnpm --filter db db:seed",
+    "db:studio": "pnpm --filter db db:studio",
+    "db:reset": "pnpm --filter db db:reset"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "education",
+    "schedule",
+    "school",
+    "react",
+    "typescript",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Edu-Flow Team",
+  "license": "MIT"
+}

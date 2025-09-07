@@ -13,7 +13,6 @@ interface TeacherDayScheduleProps {
 }
 
 export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
-  teachers,
   departments,
   lessons,
   date,

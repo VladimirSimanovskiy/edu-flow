@@ -1,0 +1,117 @@
+// School Schedule Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(TEACHER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  teacher Teacher?
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+// Teacher model
+model Teacher {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  subjects  String[] // Array of subjects
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+
+  @@map("teachers")
+}
+
+// Class model
+model Class {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "10А", "11Б"
+  grade     Int
+  students  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+
+  @@map("classes")
+}
+
+// Subject model
+model Subject {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+
+  @@map("subjects")
+}
+
+// Classroom model
+model Classroom {
+  id        String   @id @default(cuid())
+  number    String   @unique
+  capacity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons Lesson[]
+
+  @@map("classrooms")
+}
+
+// Lesson model
+model Lesson {
+  id          String   @id @default(cuid())
+  startTime   String   // Format: "08:00"
+  endTime     String   // Format: "08:45"
+  dayOfWeek   Int      // 0-6 (Sunday-Saturday)
+  weekNumber  Int?     // Optional week number
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  teacherId   String
+  teacher     Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  
+  classId     String
+  class       Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  subjectId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
+}

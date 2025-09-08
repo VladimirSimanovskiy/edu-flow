@@ -2,10 +2,13 @@ import { prisma } from '../index';
 import { Teacher, Prisma } from '../../generated/prisma';
 
 export interface CreateTeacherData {
-  name: string;
-  email: string;
-  subjects: string[];
-  userId: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email?: string;
+  phone?: string;
+  userId?: string;
+  idAssignedClassroom?: number;
 }
 
 export interface UpdateTeacherData extends Partial<CreateTeacherData> {
@@ -121,21 +124,28 @@ export class TeacherService {
         },
       },
       orderBy: {
-        name: 'asc',
+        lastName: 'asc',
       },
     });
   }
 
   // Get teachers by subject
-  static async getTeachersBySubject(subject: string): Promise<Teacher[]> {
+  static async getTeachersBySubject(subjectId: number): Promise<Teacher[]> {
     return await prisma.teacher.findMany({
       where: {
         subjects: {
-          has: subject,
+          some: {
+            idSubject: subjectId,
+          },
         },
       },
       include: {
         user: true,
+        subjects: {
+          include: {
+            subject: true,
+          },
+        },
         lessons: {
           include: {
             class: true,
@@ -145,7 +155,7 @@ export class TeacherService {
         },
       },
       orderBy: {
-        name: 'asc',
+        lastName: 'asc',
       },
     });
   }
@@ -156,7 +166,13 @@ export class TeacherService {
       where: {
         OR: [
           {
-            name: {
+            firstName: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
               contains: query,
               mode: 'insensitive',
             },
@@ -167,15 +183,15 @@ export class TeacherService {
               mode: 'insensitive',
             },
           },
-          {
-            subjects: {
-              hasSome: [query],
-            },
-          },
         ],
       },
       include: {
         user: true,
+        subjects: {
+          include: {
+            subject: true,
+          },
+        },
         lessons: {
           include: {
             class: true,
@@ -185,7 +201,7 @@ export class TeacherService {
         },
       },
       orderBy: {
-        name: 'asc',
+        lastName: 'asc',
       },
     });
   }

@@ -1,0 +1,20 @@
+model Student {
+  id             Int       @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  middleName     String?
+  email          String?
+  phone          String?
+  enrollmentDate DateTime
+  dateBirth      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  idUser Int? @unique @map("id_user")
+  user   User?   @relation(fields: [idUser], references: [id], onDelete: SetNull)
+
+  // Historical class assignments
+  classHistory StudentClassHistory[]
+}

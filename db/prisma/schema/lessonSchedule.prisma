@@ -1,0 +1,11 @@
+model LessonSchedule {
+    id           Int      @id @default(autoincrement())
+    lessonNumber Int
+    timeBegin    DateTime @db.Time
+    timeEnd      DateTime @db.Time
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    // Relations
+    lessons Lesson[]
+}

@@ -1,0 +1,15 @@
+model Class {
+  id        Int      @id @default(autoincrement())
+  grade     Int
+  letter    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lessons              Lesson[]
+  idClassLeaderTeacher Int?
+  classLeader          Teacher?  @relation("TeacherClassLeadership", fields: [idClassLeaderTeacher], references: [id], onDelete: SetNull)
+  
+  // Historical student assignments
+  studentHistory       StudentClassHistory[]
+}

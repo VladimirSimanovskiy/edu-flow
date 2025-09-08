@@ -2,48 +2,44 @@ import { prisma } from '../index';
 
 // Temporary types until Prisma client is generated
 interface Lesson {
-  id: string;
-  startTime: string;
-  endTime: string;
+  id: number;
   dayOfWeek: number;
-  weekNumber?: number | null;
-  teacherId: string;
-  classId: string;
-  subjectId: string;
-  classroomId: string;
-  scheduleVersionId: string;
+  idTeacher: number;
+  idClass: number;
+  idSubject: number;
+  idClassroom: number;
+  idLessonSchedule: number;
+  idScheduleVersion: number;
   teacher?: any;
   class?: any;
   subject?: any;
   classroom?: any;
+  lessonSchedule?: any;
   scheduleVersion?: any;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreateLessonData {
-  startTime: string;
-  endTime: string;
   dayOfWeek: number;
-  weekNumber?: number;
-  teacherId: string;
-  classId: string;
-  subjectId: string;
-  classroomId: string;
-  scheduleVersionId: string;
+  idTeacher: number;
+  idClass: number;
+  idSubject: number;
+  idClassroom: number;
+  idLessonSchedule: number;
+  idScheduleVersion: number;
 }
 
 export interface UpdateLessonData extends Partial<CreateLessonData> {
-  id: string;
+  id: number;
 }
 
 export interface LessonFilters {
-  teacherId?: string;
-  classId?: string;
-  subjectId?: string;
+  idTeacher?: number;
+  idClass?: number;
+  idSubject?: number;
   dayOfWeek?: number;
-  weekNumber?: number;
-  scheduleVersionId?: string;
+  idScheduleVersion?: number;
   startDate?: Date;
   endDate?: Date;
   date?: Date; // Get lessons for specific date
@@ -59,6 +55,7 @@ export class ScheduleService {
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
         scheduleVersion: true,
       },
     });
@@ -73,6 +70,7 @@ export class ScheduleService {
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
         scheduleVersion: true,
       },
     });
@@ -89,6 +87,7 @@ export class ScheduleService {
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
         scheduleVersion: true,
       },
     });
@@ -105,28 +104,24 @@ export class ScheduleService {
   static async getLessons(filters: LessonFilters = {}): Promise<Lesson[]> {
     const where: Record<string, any> = {};
 
-    if (filters.teacherId) {
-      where.teacherId = filters.teacherId;
+    if (filters.idTeacher) {
+      where.idTeacher = filters.idTeacher;
     }
 
-    if (filters.classId) {
-      where.classId = filters.classId;
+    if (filters.idClass) {
+      where.idClass = filters.idClass;
     }
 
-    if (filters.subjectId) {
-      where.subjectId = filters.subjectId;
+    if (filters.idSubject) {
+      where.idSubject = filters.idSubject;
     }
 
     if (filters.dayOfWeek !== undefined) {
       where.dayOfWeek = filters.dayOfWeek;
     }
 
-    if (filters.weekNumber !== undefined) {
-      where.weekNumber = filters.weekNumber;
-    }
-
-    if (filters.scheduleVersionId) {
-      where.scheduleVersionId = filters.scheduleVersionId;
+    if (filters.idScheduleVersion) {
+      where.idScheduleVersion = filters.idScheduleVersion;
     }
 
     // If date is provided, get lessons from the current schedule version for that date
@@ -134,7 +129,7 @@ export class ScheduleService {
       const { ScheduleVersionService } = await import('./scheduleVersionService');
       const currentVersion = await ScheduleVersionService.getScheduleVersionForDate(filters.date);
       if (currentVersion) {
-        where.scheduleVersionId = currentVersion.id;
+        where.idScheduleVersion = currentVersion.id;
       } else {
         // If no current version for the date, return empty array
         return [];
@@ -148,11 +143,12 @@ export class ScheduleService {
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
         scheduleVersion: true,
       },
       orderBy: [
         { dayOfWeek: 'asc' },
-        { startTime: 'asc' },
+        { lessonSchedule: { lessonNumber: 'asc' } },
       ],
     });
   }
@@ -167,33 +163,36 @@ export class ScheduleService {
   }
 
   // Get lessons for a specific week
-  static async getLessonsForWeek(date: Date, filters: Omit<LessonFilters, 'weekNumber'> = {}): Promise<Lesson[]> {
-    const weekNumber = Math.ceil(date.getDate() / 7);
-    return await this.getLessons({
-      ...filters,
-      weekNumber,
-    });
+  static async getLessonsForWeek(date: Date, filters: Omit<LessonFilters, 'dayOfWeek'> = {}): Promise<Lesson[]> {
+    // For now, we'll get all lessons for the week (Monday to Sunday)
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay() + 1); // Monday
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+    
+    return await this.getLessonsForDateRange(startOfWeek, endOfWeek, filters);
   }
 
 
   // Get teacher's schedule
-  static async getTeacherSchedule(teacherId: string, filters: Omit<LessonFilters, 'teacherId'> = {}): Promise<Lesson[]> {
+  static async getTeacherSchedule(idTeacher: number, filters: Omit<LessonFilters, 'idTeacher'> = {}): Promise<Lesson[]> {
     return await this.getLessons({
       ...filters,
-      teacherId,
+      idTeacher,
     });
   }
 
   // Get class schedule
-  static async getClassSchedule(classId: string, filters: Omit<LessonFilters, 'classId'> = {}): Promise<Lesson[]> {
+  static async getClassSchedule(idClass: number, filters: Omit<LessonFilters, 'idClass'> = {}): Promise<Lesson[]> {
     return await this.getLessons({
       ...filters,
-      classId,
+      idClass,
     });
   }
 
   // Get lessons for current schedule version
-  static async getCurrentLessons(filters: Omit<LessonFilters, 'scheduleVersionId' | 'date'> = {}): Promise<Lesson[]> {
+  static async getCurrentLessons(filters: Omit<LessonFilters, 'idScheduleVersion' | 'date'> = {}): Promise<Lesson[]> {
     const { ScheduleVersionService } = await import('./scheduleVersionService');
     const currentVersion = await ScheduleVersionService.getCurrentScheduleVersion();
     
@@ -203,15 +202,15 @@ export class ScheduleService {
 
     return await this.getLessons({
       ...filters,
-      scheduleVersionId: currentVersion.id,
+      idScheduleVersion: currentVersion.id,
     });
   }
 
   // Get lessons for a specific schedule version
-  static async getLessonsForVersion(versionId: string, filters: Omit<LessonFilters, 'scheduleVersionId'> = {}): Promise<Lesson[]> {
+  static async getLessonsForVersion(versionId: number, filters: Omit<LessonFilters, 'idScheduleVersion'> = {}): Promise<Lesson[]> {
     return await this.getLessons({
       ...filters,
-      scheduleVersionId: versionId,
+      idScheduleVersion: versionId,
     });
   }
 
@@ -243,34 +242,34 @@ export class ScheduleService {
   }
 
   // Get teacher's schedule for current version
-  static async getCurrentTeacherSchedule(teacherId: string, filters: Omit<LessonFilters, 'teacherId' | 'scheduleVersionId' | 'date'> = {}): Promise<Lesson[]> {
+  static async getCurrentTeacherSchedule(idTeacher: number, filters: Omit<LessonFilters, 'idTeacher' | 'idScheduleVersion' | 'date'> = {}): Promise<Lesson[]> {
     return await this.getCurrentLessons({
       ...filters,
-      teacherId,
+      idTeacher,
     });
   }
 
   // Get class schedule for current version
-  static async getCurrentClassSchedule(classId: string, filters: Omit<LessonFilters, 'classId' | 'scheduleVersionId' | 'date'> = {}): Promise<Lesson[]> {
+  static async getCurrentClassSchedule(idClass: number, filters: Omit<LessonFilters, 'idClass' | 'idScheduleVersion' | 'date'> = {}): Promise<Lesson[]> {
     return await this.getCurrentLessons({
       ...filters,
-      classId,
+      idClass,
     });
   }
 
   // Get teacher's schedule for a specific date
-  static async getTeacherScheduleForDate(teacherId: string, date: Date, filters: Omit<LessonFilters, 'teacherId' | 'date'> = {}): Promise<Lesson[]> {
+  static async getTeacherScheduleForDate(idTeacher: number, date: Date, filters: Omit<LessonFilters, 'idTeacher' | 'date'> = {}): Promise<Lesson[]> {
     return await this.getLessonsForDate(date, {
       ...filters,
-      teacherId,
+      idTeacher,
     });
   }
 
   // Get class schedule for a specific date
-  static async getClassScheduleForDate(classId: string, date: Date, filters: Omit<LessonFilters, 'classId' | 'date'> = {}): Promise<Lesson[]> {
+  static async getClassScheduleForDate(idClass: number, date: Date, filters: Omit<LessonFilters, 'idClass' | 'date'> = {}): Promise<Lesson[]> {
     return await this.getLessonsForDate(date, {
       ...filters,
-      classId,
+      idClass,
     });
   }
 }

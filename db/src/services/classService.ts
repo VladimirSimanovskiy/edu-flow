@@ -2,9 +2,9 @@ import { prisma } from '../index';
 import { Class, Prisma } from '../../generated/prisma';
 
 export interface CreateClassData {
-  name: string;
   grade: number;
-  students: number;
+  letter: string;
+  idClassLeaderTeacher?: number;
 }
 
 export interface UpdateClassData extends Partial<CreateClassData> {
@@ -52,10 +52,13 @@ export class ClassService {
     });
   }
 
-  // Get class by name
-  static async getClassByName(name: string): Promise<Class | null> {
-    return await prisma.class.findUnique({
-      where: { name },
+  // Get class by grade and letter
+  static async getClassByGradeAndLetter(grade: number, letter: string): Promise<Class | null> {
+    return await prisma.class.findFirst({
+      where: { 
+        grade,
+        letter,
+      },
       include: {
         lessons: {
           include: {
@@ -142,7 +145,7 @@ export class ClassService {
         },
       },
       orderBy: {
-        name: 'asc',
+        letter: 'asc',
       },
     });
   }
@@ -153,7 +156,7 @@ export class ClassService {
       where: {
         OR: [
           {
-            name: {
+            letter: {
               contains: query,
               mode: 'insensitive',
             },
@@ -175,7 +178,7 @@ export class ClassService {
       },
       orderBy: [
         { grade: 'asc' },
-        { name: 'asc' },
+        { letter: 'asc' },
       ],
     });
   }
@@ -200,7 +203,7 @@ export class ClassService {
 
     const totalLessons = classData.lessons.length;
     const subjects = [...new Set(classData.lessons.map(lesson => lesson.subject.name))];
-    const teachers = [...new Set(classData.lessons.map(lesson => lesson.teacher.name))];
+    const teachers = [...new Set(classData.lessons.map(lesson => `${lesson.teacher.firstName} ${lesson.teacher.lastName}`))];
 
     return {
       class: classData,

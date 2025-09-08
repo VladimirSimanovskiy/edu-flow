@@ -1,0 +1,13 @@
+model StudentClassHistory {
+  id        Int       @id @default(autoincrement())
+  idStudent Int
+  idClass   Int
+  dateBegin DateTime
+  dateEnd   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  student Student @relation(fields: [idStudent], references: [id], onDelete: Cascade)
+  class   Class   @relation(fields: [idClass], references: [id], onDelete: Cascade)
+}

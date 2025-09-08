@@ -1,0 +1,12 @@
+model TeacherSubject {
+  id        Int      @id @default(autoincrement())
+  idTeacher Int
+  idSubject Int
+  createdAt DateTime @default(now())
+
+  // Relations
+  teacher Teacher @relation(fields: [idTeacher], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [idSubject], references: [id], onDelete: Cascade)
+
+  @@unique([idTeacher, idSubject])
+}

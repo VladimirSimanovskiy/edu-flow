@@ -1,0 +1,10 @@
+model ScheduleVersion {
+  id          Int       @id @default(autoincrement())
+  dateBegin   DateTime
+  dateEnd     DateTime?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lessons Lesson[]
+}

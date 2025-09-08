@@ -1,7 +1,7 @@
-// Lesson model - now tied to a schedule version and specific day
-
 model Lesson {
-  id        String   @id @default(cuid())
+  id        Int @id @default(autoincrement())
+  dayOfWeek Int
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -18,11 +18,11 @@ model Lesson {
   idClassroom Int       @map("id_classroom")
   classroom   Classroom @relation(fields: [idClassroom], references: [id], onDelete: Cascade)
 
-  idCalendarDate Int  @map("id_calendar_date")
-  calendarDate   Date @relation(fields: [idCalendarDate], references: [id], onDelete: Cascade)
+  idLessonSchedule Int            @map("id_lessonSchedule")
+  lessonSchedule   LessonSchedule @relation(fields: [idLessonSchedule], references: [id], onDelete: Cascade)
 
-  idScheduleVersion String          @map("id_schedule_version")
+  idScheduleVersion Int             @map("id_scheduleVersion")
   scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
 
-  @@unique([idTeacher, idClass, idSubject, idClassroom, idCalendarDate, idScheduleVersion])
+  @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion])
 }

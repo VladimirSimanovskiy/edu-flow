@@ -25,29 +25,29 @@ export interface RegisterRequest {
 }
 
 export interface CreateLessonRequest {
-  startTime: string;
-  endTime: string;
   dayOfWeek: number;
-  weekNumber?: number;
-  teacherId: string;
-  classId: string;
-  subjectId: string;
-  classroomId: string;
+  idTeacher: number;
+  idClass: number;
+  idSubject: number;
+  idClassroom: number;
+  idLessonSchedule: number;
+  idScheduleVersion: number;
 }
 
 export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {
-  id: string;
+  id: number;
 }
 
 // Filter types
 export interface LessonFilters {
-  teacherId?: string;
-  classId?: string;
-  subjectId?: string;
+  idTeacher?: number;
+  idClass?: number;
+  idSubject?: number;
   dayOfWeek?: number;
-  weekNumber?: number;
+  idScheduleVersion?: number;
   startDate?: string;
   endDate?: string;
+  date?: string;
 }
 
 // Pagination types

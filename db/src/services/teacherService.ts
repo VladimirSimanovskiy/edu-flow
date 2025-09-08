@@ -7,12 +7,12 @@ export interface CreateTeacherData {
   middleName?: string;
   email?: string;
   phone?: string;
-  userId?: string;
+  idUser?: number;
   idAssignedClassroom?: number;
 }
 
 export interface UpdateTeacherData extends Partial<CreateTeacherData> {
-  id: string;
+  id: number;
 }
 
 export class TeacherService {
@@ -34,7 +34,7 @@ export class TeacherService {
   }
 
   // Get teacher by ID
-  static async getTeacherById(id: string): Promise<Teacher | null> {
+  static async getTeacherById(id: number): Promise<Teacher | null> {
     return await prisma.teacher.findUnique({
       where: { id },
       include: {
@@ -52,7 +52,7 @@ export class TeacherService {
 
   // Get teacher by email
   static async getTeacherByEmail(email: string): Promise<Teacher | null> {
-    return await prisma.teacher.findUnique({
+    return await prisma.teacher.findFirst({
       where: { email },
       include: {
         user: true,
@@ -68,9 +68,9 @@ export class TeacherService {
   }
 
   // Get teacher by user ID
-  static async getTeacherByUserId(userId: string): Promise<Teacher | null> {
-    return await prisma.teacher.findUnique({
-      where: { userId },
+  static async getTeacherByUserId(idUser: number): Promise<Teacher | null> {
+    return await prisma.teacher.findFirst({
+      where: { idUser },
       include: {
         user: true,
         lessons: {
@@ -104,7 +104,7 @@ export class TeacherService {
   }
 
   // Delete teacher
-  static async deleteTeacher(id: string): Promise<void> {
+  static async deleteTeacher(id: number): Promise<void> {
     await prisma.teacher.delete({
       where: { id },
     });
@@ -133,7 +133,7 @@ export class TeacherService {
   static async getTeachersBySubject(subjectId: number): Promise<Teacher[]> {
     return await prisma.teacher.findMany({
       where: {
-        subjects: {
+        lessons: {
           some: {
             idSubject: subjectId,
           },
@@ -141,11 +141,6 @@ export class TeacherService {
       },
       include: {
         user: true,
-        subjects: {
-          include: {
-            subject: true,
-          },
-        },
         lessons: {
           include: {
             class: true,
@@ -178,6 +173,12 @@ export class TeacherService {
             },
           },
           {
+            middleName: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
             email: {
               contains: query,
               mode: 'insensitive',
@@ -187,11 +188,6 @@ export class TeacherService {
       },
       include: {
         user: true,
-        subjects: {
-          include: {
-            subject: true,
-          },
-        },
         lessons: {
           include: {
             class: true,

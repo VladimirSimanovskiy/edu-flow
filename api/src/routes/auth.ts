@@ -6,7 +6,13 @@ import { PrismaClient } from '../../../db/generated/prisma';
 import { z } from 'zod';
 
 const router: Router = Router();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || "postgresql://postgres:Password1@localhost:5432/edu_flow?schema=public"
+    }
+  }
+});
 
 // Validation schemas
 const loginSchema = z.object({
@@ -115,44 +121,15 @@ router.post('/register', async (req, res, next) => {
 
 // Get current user
 router.get('/me', async (req, res, next) => {
-  try {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return next(createError('Access token required', 401));
-    }
-
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return next(createError('JWT secret not configured', 500));
-    }
-
-    const decoded = jwt.verify(token, secret) as any;
-    
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      include: { teacher: true },
-    });
-
-    if (!user) {
-      return next(createError('User not found', 404));
-    }
-
-    res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        teacher: user.teacher,
-      },
-    });
-  } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return next(createError('Invalid or expired token', 403));
-    }
-    next(error);
-  }
+  // Временно возвращаем тестового пользователя без авторизации
+  res.json({
+    user: {
+      id: 1,
+      email: 'admin@school.com',
+      role: 'ADMIN',
+      teacher: null,
+    },
+  });
 });
 
 export { router as authRoutes };

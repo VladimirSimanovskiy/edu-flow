@@ -2,7 +2,13 @@ import React from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
-import type { Teacher, Lesson, Department } from '../../types/schedule';
+import type { Teacher, Lesson } from '../../types/schedule';
+
+interface Department {
+  id: number;
+  name: string;
+  teachers: Teacher[];
+}
 
 interface TeacherDayScheduleProps {
   teachers: Teacher[];
@@ -21,9 +27,9 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
   const lessonNumbers = [1, 2, 3, 4, 5, 6, 7];
 
   // Получаем уроки для конкретного учителя и номера урока на выбранный день
-  const getLessonForTeacher = (teacherId: string, lessonNumber: number) => {
+  const getLessonForTeacher = (teacherId: number, lessonNumber: number) => {
     return lessons.find(lesson => 
-      lesson.teacherId === teacherId &&
+      lesson.idTeacher === teacherId &&
       lesson.dayOfWeek === date.getDay() &&
       lesson.lessonNumber === lessonNumber
     );
@@ -88,7 +94,7 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                         {teacher.fullName}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {teacher.subjects.join(', ')}
+                        {teacher.subjectNames.join(', ')}
                       </div>
                     </td>
                     <td className="p-1">
@@ -106,7 +112,7 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                                   : 'bg-gray-50 border-gray-200'
                               )}
                             >
-                              {lesson ? lesson.class : ''}
+                              {lesson ? lesson.className : ''}
                             </div>
                           );
                         })}

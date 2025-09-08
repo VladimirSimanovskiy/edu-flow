@@ -4,7 +4,9 @@ import type {
   Class, 
   Subject, 
   Classroom, 
-  Lesson 
+  Lesson,
+  LessonSchedule,
+  ScheduleVersion
 } from '../types/database';
 import type { 
   LoginRequest, 
@@ -88,7 +90,7 @@ class ApiClient {
     return this.request<Teacher[]>('/schedule/teachers');
   }
 
-  async getTeacherById(id: string): Promise<Teacher> {
+  async getTeacherById(id: number): Promise<Teacher> {
     return this.request<Teacher>(`/schedule/teachers/${id}`);
   }
 
@@ -97,7 +99,7 @@ class ApiClient {
     return this.request<Class[]>('/schedule/classes');
   }
 
-  async getClassById(id: string): Promise<Class> {
+  async getClassById(id: number): Promise<Class> {
     return this.request<Class>(`/schedule/classes/${id}`);
   }
 
@@ -144,7 +146,7 @@ class ApiClient {
     return this.request<Lesson[]>(endpoint);
   }
 
-  async getLessonsForWeek(date: string, filters?: Omit<LessonFilters, 'weekNumber'>): Promise<Lesson[]> {
+  async getLessonsForWeek(date: string, filters?: Omit<LessonFilters, 'date'>): Promise<Lesson[]> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -158,6 +160,20 @@ class ApiClient {
     const endpoint = queryString ? `/schedule/lessons/week/${date}?${queryString}` : `/schedule/lessons/week/${date}`;
     
     return this.request<Lesson[]>(endpoint);
+  }
+
+  // Lesson schedules methods
+  async getLessonSchedules(): Promise<LessonSchedule[]> {
+    return this.request<LessonSchedule[]>('/schedule/lesson-schedules');
+  }
+
+  // Schedule versions methods
+  async getScheduleVersions(): Promise<ScheduleVersion[]> {
+    return this.request<ScheduleVersion[]>('/schedule/schedule-versions');
+  }
+
+  async getCurrentScheduleVersion(): Promise<ScheduleVersion> {
+    return this.request<ScheduleVersion>('/schedule/schedule-versions/current');
   }
 
   async createLesson(lessonData: CreateLessonRequest): Promise<Lesson> {
@@ -175,7 +191,7 @@ class ApiClient {
     });
   }
 
-  async deleteLesson(id: string): Promise<void> {
+  async deleteLesson(id: number): Promise<void> {
     return this.request<void>(`/schedule/lessons/${id}`, {
       method: 'DELETE',
     });

@@ -1,6 +1,6 @@
 // Database types
 export interface User {
-  id: string;
+  id: number;
   email: string;
   role: 'ADMIN' | 'TEACHER' | 'STUDENT';
   createdAt: Date;
@@ -8,54 +8,130 @@ export interface User {
 }
 
 export interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  subjects: string[];
-  userId: string;
-  user: User;
+  id: number;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email?: string;
+  phone?: string;
+  isActive: boolean;
+  idUser?: number;
+  idAssignedClassroom?: number;
+  user?: User;
+  subjects: TeacherSubject[];
+  lessons: Lesson[];
+  assignedClassroom?: Classroom;
+  classLeaderships: Class[];
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface TeacherSubject {
+  id: number;
+  idTeacher: number;
+  idSubject: number;
+  teacher: Teacher;
+  subject: Subject;
+  createdAt: Date;
+}
+
 export interface Class {
-  id: string;
-  name: string;
+  id: number;
   grade: number;
-  students: number;
+  letter: string;
+  idClassLeaderTeacher?: number;
+  classLeader?: Teacher;
+  lessons: Lesson[];
+  studentHistory: StudentClassHistory[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StudentClassHistory {
+  id: number;
+  idStudent: number;
+  idClass: number;
+  dateBegin: Date;
+  dateEnd?: Date;
+  student: Student;
+  class: Class;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Student {
+  id: number;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  email?: string;
+  phone?: string;
+  enrollmentDate: Date;
+  dateBirth?: Date;
+  isActive: boolean;
+  idUser?: number;
+  user?: User;
+  classHistory: StudentClassHistory[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Subject {
-  id: string;
+  id: number;
   name: string;
+  code: string;
+  description?: string;
+  lessons: Lesson[];
+  teacherSubjects: TeacherSubject[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Classroom {
-  id: string;
-  number: string;
-  capacity: number;
+  id: number;
+  number: number;
+  floor: number;
+  lessons: Lesson[];
+  assignedTeachers: Teacher[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface LessonSchedule {
+  id: number;
+  lessonNumber: number;
+  timeBegin: Date;
+  timeEnd: Date;
+  lessons: Lesson[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ScheduleVersion {
+  id: number;
+  dateBegin: Date;
+  dateEnd?: Date;
+  description?: string;
+  lessons: Lesson[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Lesson {
-  id: string;
-  startTime: string;
-  endTime: string;
+  id: number;
   dayOfWeek: number;
-  weekNumber?: number;
-  teacherId: string;
-  classId: string;
-  subjectId: string;
-  classroomId: string;
+  idTeacher: number;
+  idClass: number;
+  idSubject: number;
+  idClassroom: number;
+  idLessonSchedule: number;
+  idScheduleVersion: number;
   teacher: Teacher;
   class: Class;
   subject: Subject;
   classroom: Classroom;
+  lessonSchedule: LessonSchedule;
+  scheduleVersion: ScheduleVersion;
   createdAt: Date;
   updatedAt: Date;
 }

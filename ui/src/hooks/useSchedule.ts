@@ -5,20 +5,33 @@ import type {
   UpdateLessonRequest,
   LessonFilters,
 } from "../types/api";
+import {
+  transformTeachers,
+  transformClasses,
+  transformLessons,
+  transformLessonSchedules,
+  transformScheduleVersions,
+} from "../utils/dataTransform";
 
 // Teachers hooks
 export const useTeachers = () => {
   return useQuery({
     queryKey: ["teachers"],
-    queryFn: () => apiClient.getTeachers(),
+    queryFn: async () => {
+      const teachers = await apiClient.getTeachers();
+      return transformTeachers(teachers);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
-export const useTeacher = (id: string) => {
+export const useTeacher = (id: number) => {
   return useQuery({
     queryKey: ["teachers", id],
-    queryFn: () => apiClient.getTeacherById(id),
+    queryFn: async () => {
+      const teacher = await apiClient.getTeacherById(id);
+      return transformTeachers([teacher])[0];
+    },
     enabled: !!id,
   });
 };
@@ -27,15 +40,21 @@ export const useTeacher = (id: string) => {
 export const useClasses = () => {
   return useQuery({
     queryKey: ["classes"],
-    queryFn: () => apiClient.getClasses(),
+    queryFn: async () => {
+      const classes = await apiClient.getClasses();
+      return transformClasses(classes);
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
-export const useClass = (id: string) => {
+export const useClass = (id: number) => {
   return useQuery({
     queryKey: ["classes", id],
-    queryFn: () => apiClient.getClassById(id),
+    queryFn: async () => {
+      const classData = await apiClient.getClassById(id);
+      return transformClasses([classData])[0];
+    },
     enabled: !!id,
   });
 };
@@ -62,7 +81,10 @@ export const useClassrooms = () => {
 export const useLessons = (filters?: LessonFilters) => {
   return useQuery({
     queryKey: ["lessons", filters],
-    queryFn: () => apiClient.getLessons(filters),
+    queryFn: async () => {
+      const lessons = await apiClient.getLessons(filters);
+      return transformLessons(lessons);
+    },
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };
@@ -73,7 +95,10 @@ export const useLessonsForDay = (
 ) => {
   return useQuery({
     queryKey: ["lessons", "day", date, filters],
-    queryFn: () => apiClient.getLessonsForDay(date, filters),
+    queryFn: async () => {
+      const lessons = await apiClient.getLessonsForDay(date, filters);
+      return transformLessons(lessons);
+    },
     enabled: !!date,
     staleTime: 1 * 60 * 1000, // 1 minute
   });
@@ -81,11 +106,14 @@ export const useLessonsForDay = (
 
 export const useLessonsForWeek = (
   date: string,
-  filters?: Omit<LessonFilters, "weekNumber">
+  filters?: Omit<LessonFilters, "date">
 ) => {
   return useQuery({
     queryKey: ["lessons", "week", date, filters],
-    queryFn: () => apiClient.getLessonsForWeek(date, filters),
+    queryFn: async () => {
+      const lessons = await apiClient.getLessonsForWeek(date, filters);
+      return transformLessons(lessons);
+    },
     enabled: !!date,
     staleTime: 1 * 60 * 1000, // 1 minute
   });
@@ -120,9 +148,44 @@ export const useDeleteLesson = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => apiClient.deleteLesson(id),
+    mutationFn: (id: number) => apiClient.deleteLesson(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
     },
+  });
+};
+
+// Lesson schedules hooks
+export const useLessonSchedules = () => {
+  return useQuery({
+    queryKey: ["lesson-schedules"],
+    queryFn: async () => {
+      const schedules = await apiClient.getLessonSchedules();
+      return transformLessonSchedules(schedules);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+// Schedule versions hooks
+export const useScheduleVersions = () => {
+  return useQuery({
+    queryKey: ["schedule-versions"],
+    queryFn: async () => {
+      const versions = await apiClient.getScheduleVersions();
+      return transformScheduleVersions(versions);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+export const useCurrentScheduleVersion = () => {
+  return useQuery({
+    queryKey: ["schedule-versions", "current"],
+    queryFn: async () => {
+      const version = await apiClient.getCurrentScheduleVersion();
+      return transformScheduleVersions([version])[0];
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };

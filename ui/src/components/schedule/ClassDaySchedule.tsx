@@ -20,9 +20,9 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
   const lessonNumbers = [1, 2, 3, 4, 5, 6, 7];
 
   // Получаем уроки для конкретного класса и номера урока на выбранный день
-  const getLessonForClass = (classId: string, lessonNumber: number) => {
+  const getLessonForClass = (classId: number, lessonNumber: number) => {
     return lessons.find(lesson => 
-      lesson.classId === classId &&
+      lesson.idClass === classId &&
       lesson.dayOfWeek === date.getDay() &&
       lesson.lessonNumber === lessonNumber
     );
@@ -91,10 +91,10 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
                           {lesson ? (
                             <>
                               <div className="font-medium truncate w-full text-center">
-                                {lesson.teacher}
+                                {lesson.teacherName}
                               </div>
                               <div className="text-xs text-blue-600 truncate w-full text-center">
-                                {lesson.classroom}
+                                {lesson.classroomNumber}
                               </div>
                             </>
                           ) : null}

@@ -2,7 +2,13 @@ import React from 'react';
 import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
-import type { Teacher, Lesson, Department } from '../../types/schedule';
+import type { Teacher, Lesson } from '../../types/schedule';
+
+interface Department {
+  id: number;
+  name: string;
+  teachers: Teacher[];
+}
 
 interface TeacherScheduleTableProps {
   teachers: Teacher[];
@@ -22,9 +28,9 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
   const lessonNumbers = [1, 2, 3, 4, 5, 6, 7];
 
   // Получаем уроки для конкретного учителя, дня и номера урока
-  const getLessonForTeacher = (teacherId: string, day: Date, lessonNumber: number) => {
+  const getLessonForTeacher = (teacherId: number, day: Date, lessonNumber: number) => {
     return lessons.find(lesson => 
-      lesson.teacherId === teacherId &&
+      lesson.idTeacher === teacherId &&
       lesson.dayOfWeek === day.getDay() &&
       lesson.lessonNumber === lessonNumber
     );
@@ -102,7 +108,7 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
                         {teacher.fullName}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {teacher.subjects.join(', ')}
+                        {teacher.subjectNames.join(', ')}
                       </div>
                     </td>
                     {days.map((day) => (
@@ -121,7 +127,7 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
                                     : 'bg-gray-50 border-gray-200'
                                 )}
                               >
-                                {lesson ? lesson.class : ''}
+                                {lesson ? lesson.className : ''}
                               </div>
                             );
                           })}

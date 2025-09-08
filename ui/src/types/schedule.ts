@@ -1,38 +1,26 @@
-export interface Lesson {
-  id: string;
-  subject: string;
-  teacher: string;
-  teacherId: string;
-  class: string;
-  classId: string;
-  classroom: string;
+import type { Lesson as DatabaseLesson, Teacher as DatabaseTeacher, Class as DatabaseClass, LessonSchedule, ScheduleVersion } from './database';
+
+export interface Lesson extends DatabaseLesson {
+  // Computed fields for UI
+  subjectName: string;
+  teacherName: string;
+  className: string;
+  classroomNumber: number;
   startTime: string;
   endTime: string;
-  dayOfWeek: number; // 0-6 (Sunday-Saturday)
-  weekNumber?: number; // For weekly view
-  lessonNumber: number; // 1-7 (номер урока)
+  lessonNumber: number;
 }
 
-export interface Teacher {
-  id: string;
-  name: string;
-  fullName: string; // ФИО
-  email: string;
-  subjects: string[];
-  department: string; // кафедра
+export interface Teacher extends DatabaseTeacher {
+  // Computed fields for UI
+  fullName: string;
+  subjectNames: string[];
 }
 
-export interface Class {
-  id: string;
+export interface Class extends DatabaseClass {
+  // Computed fields for UI
   name: string;
-  grade: number;
-  students: number;
-}
-
-export interface Department {
-  id: string;
-  name: string;
-  teachers: Teacher[];
+  classLeaderName?: string;
 }
 
 export interface ScheduleCell {
@@ -41,6 +29,7 @@ export interface ScheduleCell {
   teacher?: string; // для расписания классов
   classroom?: string; // для расписания классов
   subject?: string;
+  lesson?: Lesson;
 }
 
 export interface ScheduleView {
@@ -49,7 +38,21 @@ export interface ScheduleView {
 }
 
 export interface ScheduleFilters {
-  teacherId?: string;
-  classId?: string;
-  subject?: string;
+  idTeacher?: number;
+  idClass?: number;
+  idSubject?: number;
+  dayOfWeek?: number;
+  idScheduleVersion?: number;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface LessonScheduleWithTimes extends LessonSchedule {
+  startTime: string;
+  endTime: string;
+}
+
+export interface ScheduleVersionWithLessons extends ScheduleVersion {
+  lessons: Lesson[];
 }

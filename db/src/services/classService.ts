@@ -8,7 +8,7 @@ export interface CreateClassData {
 }
 
 export interface UpdateClassData extends Partial<CreateClassData> {
-  id: string;
+  id: number;
 }
 
 export class ClassService {
@@ -33,7 +33,7 @@ export class ClassService {
   }
 
   // Get class by ID
-  static async getClassById(id: string): Promise<Class | null> {
+  static async getClassById(id: number): Promise<Class | null> {
     return await prisma.class.findUnique({
       where: { id },
       include: {
@@ -55,7 +55,7 @@ export class ClassService {
   // Get class by grade and letter
   static async getClassByGradeAndLetter(grade: number, letter: string): Promise<Class | null> {
     return await prisma.class.findFirst({
-      where: { 
+      where: {
         grade,
         letter,
       },
@@ -98,7 +98,7 @@ export class ClassService {
   }
 
   // Delete class
-  static async deleteClass(id: string): Promise<void> {
+  static async deleteClass(id: number): Promise<void> {
     await prisma.class.delete({
       where: { id },
     });
@@ -122,7 +122,7 @@ export class ClassService {
       },
       orderBy: [
         { grade: 'asc' },
-        { name: 'asc' },
+        { letter: 'asc' },
       ],
     });
   }
@@ -184,7 +184,7 @@ export class ClassService {
   }
 
   // Get class statistics
-  static async getClassStatistics(classId: string) {
+  static async getClassStatistics(classId: number) {
     const classData = await prisma.class.findUnique({
       where: { id: classId },
       include: {

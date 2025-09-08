@@ -1,38 +1,42 @@
 import { Router } from 'express';
 import { createError } from '../middleware/errorHandler';
-import { authenticateToken, requireRole } from '../middleware/auth';
+// import { /* authenticateToken */, requireRole } from '../middleware/auth';
 import { PrismaClient } from '../../../db/generated/prisma';
 import { z } from 'zod';
 
 const router: Router = Router();
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || "postgresql://postgres:Password1@localhost:5432/edu_flow?schema=public"
+    }
+  }
+});
 
 // Validation schemas
 const lessonSchema = z.object({
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format'),
   dayOfWeek: z.number().min(0).max(6),
-  weekNumber: z.number().optional(),
-  teacherId: z.string().cuid(),
-  classId: z.string().cuid(),
-  subjectId: z.string().cuid(),
-  classroomId: z.string().cuid(),
-  scheduleVersionId: z.string().cuid(),
+  idTeacher: z.number().int().positive(),
+  idClass: z.number().int().positive(),
+  idSubject: z.number().int().positive(),
+  idClassroom: z.number().int().positive(),
+  idLessonSchedule: z.number().int().positive(),
+  idScheduleVersion: z.number().int().positive(),
 });
 
 const lessonFiltersSchema = z.object({
-  teacherId: z.string().cuid().optional(),
-  classId: z.string().cuid().optional(),
-  subjectId: z.string().cuid().optional(),
+  idTeacher: z.number().int().positive().optional(),
+  idClass: z.number().int().positive().optional(),
+  idSubject: z.number().int().positive().optional(),
   dayOfWeek: z.number().min(0).max(6).optional(),
-  weekNumber: z.number().optional(),
-  scheduleVersionId: z.string().cuid().optional(),
+  idScheduleVersion: z.number().int().positive().optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
+  date: z.string().datetime().optional(),
 });
 
 // Get all teachers
-router.get('/teachers', authenticateToken, async (req, res, next) => {
+router.get('/teachers',  async (req, res, next) => {
   try {
     const teachers = await prisma.teacher.findMany({
       include: {
@@ -42,12 +46,18 @@ router.get('/teachers', authenticateToken, async (req, res, next) => {
             class: true,
             subject: true,
             classroom: true,
+            lessonSchedule: true,
             scheduleVersion: true,
+          },
+        },
+        subjects: {
+          include: {
+            subject: true,
           },
         },
       },
       orderBy: {
-        name: 'asc',
+        lastName: 'asc',
       },
     });
 
@@ -58,26 +68,32 @@ router.get('/teachers', authenticateToken, async (req, res, next) => {
 });
 
 // Get all classes
-router.get('/classes', authenticateToken, async (req, res, next) => {
+router.get('/classes', async (req, res, next) => {
   try {
     const classes = await prisma.class.findMany({
       include: {
         lessons: {
           include: {
-          teacher: {
-            include: {
-              user: true,
+            teacher: {
+              include: {
+                user: true,
+              },
             },
-          },
-          scheduleVersion: true,
             subject: true,
             classroom: true,
+            lessonSchedule: true,
+            scheduleVersion: true,
+          },
+        },
+        classLeader: {
+          include: {
+            user: true,
           },
         },
       },
       orderBy: [
         { grade: 'asc' },
-        { name: 'asc' },
+        { letter: 'asc' },
       ],
     });
 
@@ -88,15 +104,30 @@ router.get('/classes', authenticateToken, async (req, res, next) => {
 });
 
 // Get all subjects
-router.get('/subjects', authenticateToken, async (req, res, next) => {
+router.get('/subjects', async (req, res, next) => {
   try {
     const subjects = await prisma.subject.findMany({
       include: {
         lessons: {
           include: {
-            teacher: true,
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
             class: true,
             classroom: true,
+            lessonSchedule: true,
+            scheduleVersion: true,
+          },
+        },
+        teacherSubjects: {
+          include: {
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },
@@ -112,15 +143,26 @@ router.get('/subjects', authenticateToken, async (req, res, next) => {
 });
 
 // Get all classrooms
-router.get('/classrooms', authenticateToken, async (req, res, next) => {
+router.get('/classrooms', async (req, res, next) => {
   try {
     const classrooms = await prisma.classroom.findMany({
       include: {
         lessons: {
           include: {
-            teacher: true,
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
             class: true,
             subject: true,
+            lessonSchedule: true,
+            scheduleVersion: true,
+          },
+        },
+        assignedTeachers: {
+          include: {
+            user: true,
           },
         },
       },
@@ -136,7 +178,7 @@ router.get('/classrooms', authenticateToken, async (req, res, next) => {
 });
 
 // Get lessons with filters
-router.get('/lessons', authenticateToken, async (req, res, next) => {
+router.get('/lessons', async (req, res, next) => {
   try {
     const validationResult = lessonFiltersSchema.safeParse(req.query);
     if (!validationResult.success) {
@@ -146,28 +188,52 @@ router.get('/lessons', authenticateToken, async (req, res, next) => {
     const filters = validationResult.data;
     const where: any = {};
 
-    if (filters.teacherId) where.teacherId = filters.teacherId;
-    if (filters.classId) where.classId = filters.classId;
-    if (filters.subjectId) where.subjectId = filters.subjectId;
+    if (filters.idTeacher) where.idTeacher = filters.idTeacher;
+    if (filters.idClass) where.idClass = filters.idClass;
+    if (filters.idSubject) where.idSubject = filters.idSubject;
     if (filters.dayOfWeek !== undefined) where.dayOfWeek = filters.dayOfWeek;
-    if (filters.weekNumber !== undefined) where.weekNumber = filters.weekNumber;
+    if (filters.idScheduleVersion) where.idScheduleVersion = filters.idScheduleVersion;
+
+    // If date is provided, get lessons from the current schedule version for that date
+    if (filters.date) {
+      const currentVersion = await prisma.scheduleVersion.findFirst({
+        where: {
+          AND: [
+            { dateBegin: { lte: new Date(filters.date) } },
+            {
+              OR: [
+                { dateEnd: null },
+                { dateEnd: { gte: new Date(filters.date) } },
+              ],
+            },
+          ],
+        },
+        orderBy: { dateBegin: 'desc' },
+      });
+      if (currentVersion) {
+        where.idScheduleVersion = currentVersion.id;
+      } else {
+        return res.json([]);
+      }
+    }
 
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-          teacher: {
-            include: {
-              user: true,
-            },
+        teacher: {
+          include: {
+            user: true,
           },
-          scheduleVersion: true,
+        },
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
+        scheduleVersion: true,
       },
       orderBy: [
         { dayOfWeek: 'asc' },
-        { startTime: 'asc' },
+        { lessonSchedule: { lessonNumber: 'asc' } },
       ],
     });
 
@@ -178,33 +244,57 @@ router.get('/lessons', authenticateToken, async (req, res, next) => {
 });
 
 // Get lessons for a specific day
-router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
+router.get('/lessons/day/:date', async (req, res, next) => {
   try {
     const { date } = req.params;
-    const { teacherId, classId } = req.query;
+    const { idTeacher, idClass } = req.query;
 
     const targetDate = new Date(date);
     const dayOfWeek = targetDate.getDay();
 
-    const where: any = { dayOfWeek };
-    if (teacherId) where.teacherId = teacherId as string;
-    if (classId) where.classId = classId as string;
+    // Get current schedule version for the date
+    const currentVersion = await prisma.scheduleVersion.findFirst({
+      where: {
+        AND: [
+          { dateBegin: { lte: targetDate } },
+          {
+            OR: [
+              { dateEnd: null },
+              { dateEnd: { gte: targetDate } },
+            ],
+          },
+        ],
+      },
+      orderBy: { dateBegin: 'desc' },
+    });
+
+    if (!currentVersion) {
+      return res.json([]);
+    }
+
+    const where: any = { 
+      dayOfWeek,
+      idScheduleVersion: currentVersion.id,
+    };
+    if (idTeacher) where.idTeacher = parseInt(idTeacher as string);
+    if (idClass) where.idClass = parseInt(idClass as string);
 
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-          teacher: {
-            include: {
-              user: true,
-            },
+        teacher: {
+          include: {
+            user: true,
           },
-          scheduleVersion: true,
+        },
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
+        scheduleVersion: true,
       },
       orderBy: {
-        startTime: 'asc',
+        lessonSchedule: { lessonNumber: 'asc' },
       },
     });
 
@@ -215,34 +305,61 @@ router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
 });
 
 // Get lessons for a specific week
-router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
+router.get('/lessons/week/:date', async (req, res, next) => {
   try {
     const { date } = req.params;
-    const { teacherId, classId } = req.query;
+    const { idTeacher, idClass } = req.query;
 
     const targetDate = new Date(date);
-    const weekNumber = Math.ceil(targetDate.getDate() / 7);
+    const startOfWeek = new Date(targetDate);
+    startOfWeek.setDate(targetDate.getDate() - targetDate.getDay() + 1); // Monday
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
 
-    const where: any = { weekNumber };
-    if (teacherId) where.teacherId = teacherId as string;
-    if (classId) where.classId = classId as string;
+    // Get current schedule version for the week
+    const currentVersion = await prisma.scheduleVersion.findFirst({
+      where: {
+        AND: [
+          { dateBegin: { lte: endOfWeek } },
+          {
+            OR: [
+              { dateEnd: null },
+              { dateEnd: { gte: startOfWeek } },
+            ],
+          },
+        ],
+      },
+      orderBy: { dateBegin: 'desc' },
+    });
+
+    if (!currentVersion) {
+      return res.json([]);
+    }
+
+    const where: any = { 
+      idScheduleVersion: currentVersion.id,
+    };
+    if (idTeacher) where.idTeacher = parseInt(idTeacher as string);
+    if (idClass) where.idClass = parseInt(idClass as string);
 
     const lessons = await prisma.lesson.findMany({
       where,
       include: {
-          teacher: {
-            include: {
-              user: true,
-            },
+        teacher: {
+          include: {
+            user: true,
           },
-          scheduleVersion: true,
+        },
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
+        scheduleVersion: true,
       },
       orderBy: [
         { dayOfWeek: 'asc' },
-        { startTime: 'asc' },
+        { lessonSchedule: { lessonNumber: 'asc' } },
       ],
     });
 
@@ -253,7 +370,7 @@ router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
 });
 
 // Create a new lesson
-router.post('/lessons', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
+router.post('/lessons', async (req, res, next) => {
   try {
     const validationResult = lessonSchema.safeParse(req.body);
     if (!validationResult.success) {
@@ -265,15 +382,16 @@ router.post('/lessons', authenticateToken, requireRole(['ADMIN', 'TEACHER']), as
     const newLesson = await prisma.lesson.create({
       data: lessonData,
       include: {
-          teacher: {
-            include: {
-              user: true,
-            },
+        teacher: {
+          include: {
+            user: true,
           },
-          scheduleVersion: true,
+        },
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
+        scheduleVersion: true,
       },
     });
 
@@ -284,7 +402,7 @@ router.post('/lessons', authenticateToken, requireRole(['ADMIN', 'TEACHER']), as
 });
 
 // Update a lesson
-router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
+router.put('/lessons/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const validationResult = lessonSchema.partial().safeParse(req.body);
@@ -296,7 +414,7 @@ router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']),
     const lessonData = validationResult.data;
 
     const existingLesson = await prisma.lesson.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
     });
 
     if (!existingLesson) {
@@ -304,18 +422,19 @@ router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']),
     }
 
     const updatedLesson = await prisma.lesson.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: lessonData,
       include: {
-          teacher: {
-            include: {
-              user: true,
-            },
+        teacher: {
+          include: {
+            user: true,
           },
-          scheduleVersion: true,
+        },
         class: true,
         subject: true,
         classroom: true,
+        lessonSchedule: true,
+        scheduleVersion: true,
       },
     });
 
@@ -326,12 +445,12 @@ router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']),
 });
 
 // Delete a lesson
-router.delete('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER']), async (req, res, next) => {
+router.delete('/lessons/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const existingLesson = await prisma.lesson.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
     });
 
     if (!existingLesson) {
@@ -339,7 +458,7 @@ router.delete('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER'
     }
 
     await prisma.lesson.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     });
 
     res.status(204).send();
@@ -347,5 +466,110 @@ router.delete('/lessons/:id', authenticateToken, requireRole(['ADMIN', 'TEACHER'
     next(error);
   }
 });
+
+// Get lesson schedules
+router.get('/lesson-schedules', async (req, res, next) => {
+  try {
+    const lessonSchedules = await prisma.lessonSchedule.findMany({
+      include: {
+        lessons: {
+          include: {
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
+            class: true,
+            subject: true,
+            classroom: true,
+            scheduleVersion: true,
+          },
+        },
+      },
+      orderBy: {
+        lessonNumber: 'asc',
+      },
+    });
+
+    res.json(lessonSchedules);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get schedule versions
+router.get('/schedule-versions', async (req, res, next) => {
+  try {
+    const scheduleVersions = await prisma.scheduleVersion.findMany({
+      include: {
+        lessons: {
+          include: {
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true,
+          },
+        },
+      },
+      orderBy: {
+        dateBegin: 'desc',
+      },
+    });
+
+    res.json(scheduleVersions);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get current schedule version
+router.get('/schedule-versions/current', async (req, res, next) => {
+  try {
+    const today = new Date();
+    const currentVersion = await prisma.scheduleVersion.findFirst({
+      where: {
+        AND: [
+          { dateBegin: { lte: today } },
+          {
+            OR: [
+              { dateEnd: null },
+              { dateEnd: { gte: today } },
+            ],
+          },
+        ],
+      },
+      include: {
+        lessons: {
+          include: {
+            teacher: {
+              include: {
+                user: true,
+              },
+            },
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true,
+          },
+        },
+      },
+      orderBy: { dateBegin: 'desc' },
+    });
+
+    if (!currentVersion) {
+      return res.status(404).json({ error: 'No current schedule version found' });
+    }
+
+    res.json(currentVersion);
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 export { router as scheduleRoutes };

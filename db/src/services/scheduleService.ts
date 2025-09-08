@@ -62,7 +62,7 @@ export class ScheduleService {
   }
 
   // Get lesson by ID
-  static async getLessonById(id: string): Promise<Lesson | null> {
+  static async getLessonById(id: number): Promise<Lesson | null> {
     return await prisma.lesson.findUnique({
       where: { id },
       include: {
@@ -94,7 +94,7 @@ export class ScheduleService {
   }
 
   // Delete lesson
-  static async deleteLesson(id: string): Promise<void> {
+  static async deleteLesson(id: number): Promise<void> {
     await prisma.lesson.delete({
       where: { id },
     });

@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
 import type { Class, Lesson } from '../../types/schedule';
+import { useLessonNumbers } from '../../hooks/useLessonNumbers';
 
 interface ClassDayScheduleProps {
   classes: Class[];
@@ -17,13 +18,28 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
   date,
   className,
 }) => {
-  const lessonNumbers = [1, 2, 3, 4, 5, 6, 7];
+  const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
+
+  // Показываем загрузку, если номера уроков еще не загружены
+  if (lessonNumbersLoading) {
+    return (
+      <div className={cn('bg-white rounded-lg border shadow-sm p-8', className)}>
+        <div className="flex items-center justify-center">
+          <div className="text-gray-500">Загрузка расписания уроков...</div>
+        </div>
+      </div>
+    );
+  }
+
 
   // Получаем уроки для конкретного класса и номера урока на выбранный день
   const getLessonForClass = (classId: number, lessonNumber: number) => {
+    // Приводим день недели к стандарту базы данных (понедельник = 1, воскресенье = 7)
+    const dbDayOfWeek = date.getDay() === 0 ? 7 : date.getDay();
+    
     return lessons.find(lesson => 
       lesson.idClass === classId &&
-      lesson.dayOfWeek === date.getDay() &&
+      lesson.dayOfWeek === dbDayOfWeek &&
       lesson.lessonNumber === lessonNumber
     );
   };

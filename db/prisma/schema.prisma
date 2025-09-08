@@ -71,6 +71,9 @@ model Lesson {
   scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
 
   @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion])
+  @@unique([idTeacher, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_teacher_time_slot")
+  @@unique([idClass, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_class_time_slot")
+  @@unique([idClassroom, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_classroom_time_slot")
 }
 
 model LessonSchedule {

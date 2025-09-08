@@ -91,7 +91,8 @@ export const useLessons = (filters?: LessonFilters) => {
 
 export const useLessonsForDay = (
   date: string,
-  filters?: Omit<LessonFilters, "dayOfWeek">
+  filters?: Omit<LessonFilters, "dayOfWeek">,
+  options?: { enabled?: boolean }
 ) => {
   return useQuery({
     queryKey: ["lessons", "day", date, filters],
@@ -99,14 +100,15 @@ export const useLessonsForDay = (
       const lessons = await apiClient.getLessonsForDay(date, filters);
       return transformLessons(lessons);
     },
-    enabled: !!date,
+    enabled: !!date && (options?.enabled !== false),
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 };
 
 export const useLessonsForWeek = (
   date: string,
-  filters?: Omit<LessonFilters, "date">
+  filters?: Omit<LessonFilters, "date">,
+  options?: { enabled?: boolean }
 ) => {
   return useQuery({
     queryKey: ["lessons", "week", date, filters],
@@ -114,7 +116,7 @@ export const useLessonsForWeek = (
       const lessons = await apiClient.getLessonsForWeek(date, filters);
       return transformLessons(lessons);
     },
-    enabled: !!date,
+    enabled: !!date && (options?.enabled !== false),
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 };

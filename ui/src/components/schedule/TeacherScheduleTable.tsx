@@ -3,35 +3,43 @@ import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
 import type { Teacher, Lesson } from '../../types/schedule';
-
-interface Department {
-  id: number;
-  name: string;
-  teachers: Teacher[];
-}
+import { useLessonNumbers } from '../../hooks/useLessonNumbers';
 
 interface TeacherScheduleTableProps {
   teachers: Teacher[];
-  departments: Department[];
   lessons: Lesson[];
   weekStart: Date;
   className?: string;
 }
 
 export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
-  departments,
+  teachers,
   lessons,
   weekStart,
   className,
 }) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const lessonNumbers = [1, 2, 3, 4, 5, 6, 7];
+  const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
+
+  // Показываем загрузку, если номера уроков еще не загружены
+  if (lessonNumbersLoading) {
+    return (
+      <div className={cn('bg-white rounded-lg border shadow-sm p-8', className)}>
+        <div className="flex items-center justify-center">
+          <div className="text-gray-500">Загрузка расписания уроков...</div>
+        </div>
+      </div>
+    );
+  }
 
   // Получаем уроки для конкретного учителя, дня и номера урока
   const getLessonForTeacher = (teacherId: number, day: Date, lessonNumber: number) => {
+    // Приводим день недели к стандарту базы данных (понедельник = 1, воскресенье = 7)
+    const dbDayOfWeek = day.getDay() === 0 ? 7 : day.getDay();
+    
     return lessons.find(lesson => 
       lesson.idTeacher === teacherId &&
-      lesson.dayOfWeek === day.getDay() &&
+      lesson.dayOfWeek === dbDayOfWeek &&
       lesson.lessonNumber === lessonNumber
     );
   };
@@ -82,61 +90,40 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {departments.map((department) => (
-              <React.Fragment key={department.id}>
-                {/* Заголовок кафедры */}
-                <tr className="border-b bg-blue-50">
-                  <td className="p-3 font-semibold text-blue-900 border-r">
-                    {department.name}
+            {teachers.map((teacher) => (
+              <tr key={teacher.id} className="border-b hover:bg-gray-50">
+                <td className="p-3 text-sm border-r">
+                  <div className="font-medium text-gray-900">
+                    {teacher.fullName}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {teacher.subjectNames.join(', ')}
+                  </div>
+                </td>
+                {days.map((day) => (
+                  <td key={`${teacher.id}-${day.toISOString()}`} className="p-1 border-r last:border-r-0">
+                    <div className="grid grid-cols-7 gap-1">
+                      {lessonNumbers.map(lessonNumber => {
+                        const lesson = getLessonForTeacher(teacher.id, day, lessonNumber);
+                        
+                        return (
+                          <div
+                            key={lessonNumber}
+                            className={cn(
+                              'h-8 border rounded text-xs flex items-center justify-center',
+                              lesson 
+                                ? 'bg-green-100 border-green-300 text-green-800 font-medium' 
+                                : 'bg-gray-50 border-gray-200'
+                            )}
+                          >
+                            {lesson ? lesson.className : ''}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </td>
-                  {days.map((day) => (
-                    <td key={`dept-${day.toISOString()}`} className="p-1 border-r last:border-r-0">
-                      <div className="grid grid-cols-7 gap-1 h-8">
-                        {lessonNumbers.map(num => (
-                          <div key={num} className="border border-blue-200 rounded bg-blue-100"></div>
-                        ))}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-                
-                {/* Учителя кафедры */}
-                {department.teachers.map((teacher) => (
-                  <tr key={teacher.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 text-sm border-r">
-                      <div className="font-medium text-gray-900">
-                        {teacher.fullName}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {teacher.subjectNames.join(', ')}
-                      </div>
-                    </td>
-                    {days.map((day) => (
-                      <td key={`${teacher.id}-${day.toISOString()}`} className="p-1 border-r last:border-r-0">
-                        <div className="grid grid-cols-7 gap-1">
-                          {lessonNumbers.map(lessonNumber => {
-                            const lesson = getLessonForTeacher(teacher.id, day, lessonNumber);
-                            
-                            return (
-                              <div
-                                key={lessonNumber}
-                                className={cn(
-                                  'h-8 border rounded text-xs flex items-center justify-center',
-                                  lesson 
-                                    ? 'bg-green-100 border-green-300 text-green-800 font-medium' 
-                                    : 'bg-gray-50 border-gray-200'
-                                )}
-                              >
-                                {lesson ? lesson.className : ''}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
                 ))}
-              </React.Fragment>
+              </tr>
             ))}
           </tbody>
         </table>

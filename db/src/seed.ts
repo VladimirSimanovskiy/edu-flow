@@ -369,8 +369,8 @@ async function main() {
     create: {
       id: 1,
       dateBegin: new Date('2024-09-01'),
-      dateEnd: new Date('2024-12-31'),
-      description: 'Осенний семестр 2024',
+      dateEnd: new Date('2026-12-31'),
+      description: 'Расписание 2024-2026',
     },
   });
 
@@ -383,7 +383,9 @@ async function main() {
     for (let dayOfWeek = 1; dayOfWeek <= 5; dayOfWeek++) {
       for (let lessonNumber = 1; lessonNumber <= 6; lessonNumber++) {
         const subjectIndex = (lessonNumber - 1) % subjects.length;
-        const teacherIndex = subjectIndex;
+        // Используем комбинацию класса, дня и номера урока для распределения учителей
+        // Это предотвращает назначение одного учителя на несколько уроков одновременно
+        const teacherIndex = (classItem.id + dayOfWeek + lessonNumber) % teachers.length;
         const classroomIndex = ((lessonNumber - 1) + classItem.id + dayOfWeek) % classrooms.length;
         
         const lesson = await prisma.lesson.create({

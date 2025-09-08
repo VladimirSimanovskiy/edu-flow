@@ -249,8 +249,12 @@ router.get('/lessons/day/:date', async (req, res, next) => {
     const { date } = req.params;
     const { idTeacher, idClass } = req.query;
 
-    const targetDate = new Date(date);
-    const dayOfWeek = targetDate.getDay();
+    // Парсим дату из строки YYYY-MM-DD
+    const [year, month, day] = date.split('-').map(Number);
+    const targetDate = new Date(year, month - 1, day); // month - 1, так как месяцы в JS начинаются с 0
+    // Приводим день недели к стандарту базы данных (понедельник = 1, воскресенье = 7)
+    const dayOfWeek = targetDate.getDay() === 0 ? 7 : targetDate.getDay();
+
 
     // Get current schedule version for the date
     const currentVersion = await prisma.scheduleVersion.findFirst({
@@ -310,7 +314,9 @@ router.get('/lessons/week/:date', async (req, res, next) => {
     const { date } = req.params;
     const { idTeacher, idClass } = req.query;
 
-    const targetDate = new Date(date);
+    // Парсим дату из строки YYYY-MM-DD
+    const [year, month, day] = date.split('-').map(Number);
+    const targetDate = new Date(year, month - 1, day); // month - 1, так как месяцы в JS начинаются с 0
     const startOfWeek = new Date(targetDate);
     startOfWeek.setDate(targetDate.getDate() - targetDate.getDay() + 1); // Monday
     

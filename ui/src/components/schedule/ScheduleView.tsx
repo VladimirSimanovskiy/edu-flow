@@ -1,30 +1,46 @@
 import React from 'react';
 import { startOfWeek } from 'date-fns';
 import { useScheduleStore } from '../../store/scheduleStore';
-import { useTeachers, useClasses, useLessonsForWeek } from '../../hooks/useSchedule';
-import { TeacherScheduleTable } from './TeacherScheduleTable';
-import { ClassScheduleTable } from './ClassScheduleTable';
-import { TeacherDaySchedule } from './TeacherDaySchedule';
-import { ClassDaySchedule } from './ClassDaySchedule';
+import { useTeachers, useClasses, useLessonsForWeek, useLessonsForDay } from '../../hooks/useSchedule';
 import { DatePicker } from '../ui/DatePicker';
 import { ViewToggle } from '../ui/ViewToggle';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
-
+import { useScheduleConfig, renderScheduleComponent } from './ScheduleComponentFactory';
+import type { ScheduleType } from '../../types/scheduleConfig';
+import { useScheduleDate } from '../../hooks/useScheduleDate';
 
 interface ScheduleViewProps {
-  type: 'teachers' | 'classes';
+  type: ScheduleType;
 }
 
 export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
   const { currentView, setDate, setViewType } = useScheduleStore();
+  const scheduleConfig = useScheduleConfig(type);
+  const { apiDateString } = useScheduleDate(currentView.date);
 
   // Загружаем данные из API
   const { data: teachers, isLoading: teachersLoading, error: teachersError } = useTeachers();
   const { data: classes, isLoading: classesLoading, error: classesError } = useClasses();
-  const { data: lessons, isLoading: lessonsLoading, error: lessonsError } = useLessonsForWeek(
-    currentView.date.toISOString().split('T')[0] // YYYY-MM-DD format
+  
+  // Всегда вызываем оба хука, но включаем только нужный
+  const { data: dayLessons, isLoading: dayLessonsLoading, error: dayLessonsError } = useLessonsForDay(
+    apiDateString,
+    undefined,
+    { enabled: currentView.type === 'day' }
   );
+  
+  const { data: weekLessons, isLoading: weekLessonsLoading, error: weekLessonsError } = useLessonsForWeek(
+    apiDateString,
+    undefined,
+    { enabled: currentView.type === 'week' }
+  );
+  
+  // Используем соответствующие данные в зависимости от типа представления
+  const lessons = currentView.type === 'day' ? dayLessons : weekLessons;
+  const lessonsLoading = currentView.type === 'day' ? dayLessonsLoading : weekLessonsLoading;
+  const lessonsError = currentView.type === 'day' ? dayLessonsError : weekLessonsError;
+
 
   const handleDateChange = (date: Date) => {
     setDate(date);
@@ -47,7 +63,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
     return (
       <div className="space-y-4">
         <h1 className="text-2xl font-bold">
-          {type === 'teachers' ? 'Расписание учителей' : 'Расписание классов'}
+          {scheduleConfig.title}
         </h1>
         {teachersError && <ErrorMessage error={`Ошибка загрузки учителей: ${teachersError.message}`} />}
         {classesError && <ErrorMessage error={`Ошибка загрузки классов: ${classesError.message}`} />}
@@ -62,13 +78,10 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">
-            {type === 'teachers' ? 'Расписание учителей' : 'Расписание классов'}
+            {scheduleConfig.title}
           </h1>
           <p className="text-gray-600">
-            {type === 'teachers' 
-              ? 'Просмотр расписания преподавателей' 
-              : 'Просмотр расписания учебных классов'
-            }
+            {scheduleConfig.description}
           </p>
         </div>
       </div>
@@ -90,36 +103,16 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
       </div>
 
       {/* Schedule Content */}
-      {type === 'teachers' ? (
-        currentView.type === 'day' ? (
-          <TeacherDaySchedule
-            teachers={teachers || []}
-            departments={[]} // TODO: Добавить загрузку департаментов
-            lessons={lessons || []}
-            date={currentView.date}
-          />
-        ) : (
-          <TeacherScheduleTable
-            teachers={teachers || []}
-            departments={[]} // TODO: Добавить загрузку департаментов
-            lessons={lessons || []}
-            weekStart={weekStart}
-          />
-        )
-      ) : (
-        currentView.type === 'day' ? (
-          <ClassDaySchedule
-            classes={classes || []}
-            lessons={lessons || []}
-            date={currentView.date}
-          />
-        ) : (
-          <ClassScheduleTable
-            classes={classes || []}
-            lessons={lessons || []}
-            weekStart={weekStart}
-          />
-        )
+      {renderScheduleComponent(
+        type,
+        currentView.type,
+        {
+          teachers: teachers || [],
+          classes: classes || [],
+          lessons: lessons || [],
+          date: currentView.date,
+          weekStart: currentView.type === 'week' ? weekStart : undefined,
+        }
       )}
     </div>
   );

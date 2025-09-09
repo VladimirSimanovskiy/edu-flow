@@ -23,12 +23,24 @@ const formatTime = (date: Date | string): string => {
   });
 };
 
+// Функция для сокращения ФИО в формат "Иванов А.Д."
+const shortenTeacherName = (firstName: string, lastName: string, middleName?: string): string => {
+  if (!middleName) {
+    return `${lastName} ${firstName.charAt(0).toUpperCase()}.`;
+  }
+  
+  const firstInitial = firstName.charAt(0).toUpperCase();
+  const middleInitial = middleName.charAt(0).toUpperCase();
+  
+  return `${lastName} ${firstInitial}.${middleInitial}.`;
+};
+
 // Transform database lesson to UI lesson
 export const transformLesson = (dbLesson: DatabaseLesson): Lesson => {
   return {
     ...dbLesson,
     subjectName: dbLesson.subject.name,
-    teacherName: `${dbLesson.teacher.firstName} ${dbLesson.teacher.lastName}`,
+    teacherName: shortenTeacherName(dbLesson.teacher.firstName, dbLesson.teacher.lastName, dbLesson.teacher.middleName),
     className: `${dbLesson.class.grade}${dbLesson.class.letter}`,
     classroomNumber: dbLesson.classroom.number,
     startTime: formatTime(dbLesson.lessonSchedule.timeBegin),

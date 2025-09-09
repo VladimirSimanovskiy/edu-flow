@@ -52,14 +52,15 @@ export const LessonCell: React.FC<LessonCellProps> = ({
   return (
     <div
       className={cn(
-        'h-8 border rounded text-xs flex flex-col items-center justify-center transition-colors',
+        'h-16 sm:h-18 md:h-20 w-full border rounded text-xs flex flex-col items-center justify-center transition-colors p-1',
         className
       )}
       style={{
         ...styles,
         transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`,
         fontSize: tokens.typography.fontSize.xs,
-        borderRadius: tokens.borderRadius.base
+        borderRadius: tokens.borderRadius.base,
+        minHeight: '4rem' // Минимальная высота для мобильных
       }}
     >
       {hasLesson ? (
@@ -67,28 +68,57 @@ export const LessonCell: React.FC<LessonCellProps> = ({
           {variant === 'class' ? (
             <>
               <div 
-                className="font-medium truncate w-full text-center"
+                className="font-medium w-full text-center leading-tight text-xs sm:text-sm truncate mb-0.5"
                 style={{ fontWeight: tokens.typography.fontWeight.medium }}
+              >
+                {lesson?.subjectName}
+              </div>
+              <div 
+                className="text-xs w-full text-center leading-tight truncate mb-0.5"
+                style={{ 
+                  fontSize: tokens.typography.fontSize.xs,
+                  color: tokens.colors.primary[600]
+                }}
               >
                 {lesson?.teacherName}
               </div>
               <div 
-                className="text-xs truncate w-full text-center"
+                className="text-xs w-full text-center leading-tight truncate"
                 style={{ 
                   fontSize: tokens.typography.fontSize.xs,
-                  color: variant === 'class' ? tokens.colors.primary[600] : tokens.colors.success[600]
+                  color: tokens.colors.primary[500]
                 }}
               >
-                {lesson?.classroomNumber}
+                {lesson?.classroomNumber ? `каб. ${lesson.classroomNumber}` : ''}
               </div>
             </>
           ) : (
-            <div 
-              className="font-medium truncate w-full text-center"
-              style={{ fontWeight: tokens.typography.fontWeight.medium }}
-            >
-              {lesson?.className}
-            </div>
+            <>
+              <div 
+                className="font-medium w-full text-center leading-tight text-xs sm:text-sm truncate mb-0.5"
+                style={{ fontWeight: tokens.typography.fontWeight.medium }}
+              >
+                {lesson?.subjectName}
+              </div>
+              <div 
+                className="text-xs w-full text-center leading-tight truncate mb-0.5"
+                style={{ 
+                  fontSize: tokens.typography.fontSize.xs,
+                  color: tokens.colors.success[600]
+                }}
+              >
+                {lesson?.className}
+              </div>
+              <div 
+                className="text-xs w-full text-center leading-tight truncate"
+                style={{ 
+                  fontSize: tokens.typography.fontSize.xs,
+                  color: tokens.colors.success[500]
+                }}
+              >
+                {lesson?.classroomNumber ? `каб. ${lesson.classroomNumber}` : ''}
+              </div>
+            </>
           )}
         </>
       ) : null}

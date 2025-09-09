@@ -60,12 +60,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
       <button
         onClick={handlePrevious}
         disabled={disabled}
         className={cn(
-          'p-2 rounded-md border transition-colors',
+          'p-1.5 sm:p-2 rounded-md border transition-colors',
           disabled 
             ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
@@ -76,7 +76,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         }}
       >
         <svg 
-          className="w-4 h-4" 
+          className="w-3 h-3 sm:w-4 sm:h-4" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"
@@ -94,28 +94,27 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         onClick={handleToday}
         disabled={disabled}
         className={cn(
-          'px-4 py-2 rounded-md border transition-colors',
+          'px-2 sm:px-4 py-1.5 sm:py-2 rounded-md border transition-colors text-xs sm:text-sm',
           disabled 
             ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
         )}
         style={{
-          fontSize: tokens.typography.fontSize.sm,
           fontWeight: tokens.typography.fontWeight.medium,
           borderRadius: tokens.borderRadius.md,
           transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
         }}
       >
-        Сегодня
+        <span className="hidden sm:inline">Сегодня</span>
+        <span className="sm:hidden">Сег</span>
       </button>
 
       <div 
-        className="px-4 py-2 text-center font-medium"
+        className="px-2 sm:px-4 py-1.5 sm:py-2 text-center font-medium text-xs sm:text-sm"
         style={{
-          fontSize: tokens.typography.fontSize.sm,
           fontWeight: tokens.typography.fontWeight.medium,
           color: tokens.colors.gray[900],
-          minWidth: '200px'
+          minWidth: '120px'
         }}
       >
         {formatDisplayDate()}
@@ -125,7 +124,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         onClick={handleNext}
         disabled={disabled}
         className={cn(
-          'p-2 rounded-md border transition-colors',
+          'p-1.5 sm:p-2 rounded-md border transition-colors',
           disabled 
             ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
@@ -136,7 +135,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         }}
       >
         <svg 
-          className="w-4 h-4" 
+          className="w-3 h-3 sm:w-4 sm:h-4" 
           fill="none" 
           stroke="currentColor" 
           viewBox="0 0 24 24"

@@ -12,7 +12,7 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({
   className,
 }) => {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
       <table className={cn('w-full', className)}>
         {children}
       </table>
@@ -90,6 +90,7 @@ interface ScheduleTableCellProps {
   className?: string;
   header?: boolean;
   width?: string;
+  style?: React.CSSProperties;
 }
 
 export const ScheduleTableCell: React.FC<ScheduleTableCellProps> = ({
@@ -97,13 +98,14 @@ export const ScheduleTableCell: React.FC<ScheduleTableCellProps> = ({
   className,
   header = false,
   width,
+  style,
 }) => {
   const Component = header ? 'th' : 'td';
   
   return (
     <Component
       className={cn(
-        'p-3 text-sm',
+        'p-1 sm:p-2 md:p-3 text-xs sm:text-sm',
         header && 'text-left font-medium text-gray-600',
         className
       )}
@@ -113,7 +115,8 @@ export const ScheduleTableCell: React.FC<ScheduleTableCellProps> = ({
           fontSize: tokens.typography.fontSize.sm,
           fontWeight: tokens.typography.fontWeight.medium,
           color: tokens.colors.gray[600]
-        })
+        }),
+        ...style
       }}
     >
       {children}

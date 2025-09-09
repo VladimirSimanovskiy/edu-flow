@@ -29,30 +29,42 @@ const Navigation: React.FC = () => {
     <nav className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-xl font-bold text-gray-900">
+          <Link to="/" className="text-lg sm:text-xl font-bold text-gray-900 truncate">
             Школьное расписание
           </Link>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link to="/teachers">
-              <Button variant="ghost">Учителя</Button>
+              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                Учителя
+              </Button>
+              <Button variant="ghost" size="sm" className="sm:hidden">
+                У
+              </Button>
             </Link>
             <Link to="/classes">
-              <Button variant="ghost">Классы</Button>
+              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                Классы
+              </Button>
+              <Button variant="ghost" size="sm" className="sm:hidden">
+                К
+              </Button>
             </Link>
             
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
                   {user.email}
                 </span>
                 <Button variant="outline" size="sm" onClick={logout}>
-                  Выйти
+                  <span className="hidden sm:inline">Выйти</span>
+                  <span className="sm:hidden">В</span>
                 </Button>
               </div>
             ) : (
               <Button variant="outline" size="sm">
-                Войти
+                <span className="hidden sm:inline">Войти</span>
+                <span className="sm:hidden">В</span>
               </Button>
             )}
           </div>

@@ -102,14 +102,14 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
   }
 
   return (
-    <div style={{ padding: tokens.spacing[6], display: 'flex', flexDirection: 'column', gap: tokens.spacing[6] }}>
+    <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
       {/* Header */}
       <Card variant="elevated">
         <CardHeader>
-          <CardTitle style={{ fontSize: tokens.typography.fontSize['2xl'] }}>
+          <CardTitle className="text-xl sm:text-2xl">
             {scheduleConfig.title}
           </CardTitle>
-          <CardDescription style={{ fontSize: tokens.typography.fontSize.base }}>
+          <CardDescription className="text-sm sm:text-base">
             {scheduleConfig.description}
           </CardDescription>
         </CardHeader>
@@ -118,14 +118,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
       {/* Controls */}
       <Card variant="outlined">
         <CardContent padding="md">
-          <div 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              gap: tokens.spacing[4]
-            }}
-          >
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <ViewToggle
               viewType={currentView.type}
               onChange={handleViewTypeChange}

@@ -17,9 +17,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
 }) => {
   return (
     <div 
-      className={cn('grid gap-1', className)}
+      className={cn('grid gap-0.5 sm:gap-1 md:gap-1.5', className)}
       style={{ 
-        gridTemplateColumns: `repeat(${lessonNumbers.length}, 1fr)` 
+        gridTemplateColumns: `repeat(${lessonNumbers.length}, minmax(5rem, 1fr))` 
       }}
     >
       {lessonNumbers.map(lessonNumber => {

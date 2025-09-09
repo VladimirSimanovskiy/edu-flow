@@ -2,10 +2,8 @@ import { useMemo } from 'react';
 import type { Lesson } from '../types/schedule';
 
 export interface LessonData {
-  teacherName?: string;
-  classroomNumber?: string | number;
-  className?: string;
-  subjectName?: string;
+  primary?: string; // Основная строка (предмет для классов, класс для учителей)
+  secondary?: string[]; // Массив дополнительных строк (учитель и кабинет для классов, предмет и кабинет для учителей)
 }
 
 export const useScheduleLogic = (lessons: Lesson[]) => {
@@ -19,11 +17,13 @@ export const useScheduleLogic = (lessons: Lesson[]) => {
 
       if (!lesson) return undefined;
 
+      const secondary: string[] = [];
+      if (lesson.teacherName) secondary.push(lesson.teacherName);
+      if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
+
       return {
-        teacherName: lesson.teacherName,
-        classroomNumber: lesson.classroomNumber,
-        className: lesson.className,
-        subjectName: lesson.subjectName
+        primary: lesson.subjectName, // Для классов primary - это предмет
+        secondary
       };
     };
   }, [lessons]);
@@ -38,11 +38,13 @@ export const useScheduleLogic = (lessons: Lesson[]) => {
 
       if (!lesson) return undefined;
 
+      const secondary: string[] = [];
+      if (lesson.subjectName) secondary.push(lesson.subjectName);
+      if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
+
       return {
-        teacherName: lesson.teacherName,
-        classroomNumber: lesson.classroomNumber,
-        className: lesson.className,
-        subjectName: lesson.subjectName
+        primary: lesson.className, // Для учителей primary - это класс
+        secondary
       };
     };
   }, [lessons]);

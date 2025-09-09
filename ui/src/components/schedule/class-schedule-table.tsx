@@ -24,7 +24,6 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
       lessons={lessons}
       weekStart={weekStart}
       className={className}
-      variant="class"
       getLessonForEntity={(classId, day, lessonNumber) => 
         getLessonForClass(lessons, classId, day, lessonNumber)
       }

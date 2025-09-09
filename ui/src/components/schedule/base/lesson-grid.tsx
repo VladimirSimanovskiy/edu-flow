@@ -5,14 +5,12 @@ import { LessonCell, type LessonData } from './lesson-cell';
 interface LessonGridProps {
   lessonNumbers: number[];
   getLesson: (lessonNumber: number) => LessonData | undefined;
-  variant?: 'class' | 'teacher';
   className?: string;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   lessonNumbers,
   getLesson,
-  variant = 'class',
   className,
 }) => {
   return (
@@ -30,7 +28,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             key={lessonNumber}
             lesson={lesson}
             lessonNumber={lessonNumber}
-            variant={variant}
           />
         );
       })}

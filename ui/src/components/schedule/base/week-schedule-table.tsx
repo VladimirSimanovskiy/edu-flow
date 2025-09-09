@@ -13,6 +13,7 @@ import {
 import { LessonHeader } from './lesson-header';
 import { LessonGrid } from './lesson-grid';
 import type { Lesson } from '../../../types/schedule';
+import type { LessonData } from './lesson-cell';
 
 export interface ScheduleEntity {
   id: number;
@@ -25,8 +26,7 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   lessons: Lesson[];
   weekStart: Date;
   className?: string;
-  variant: 'class' | 'teacher';
-  getLessonForEntity: (entityId: number, day: Date, lessonNumber: number) => Lesson | undefined;
+  getLessonForEntity: (entityId: number, day: Date, lessonNumber: number) => LessonData | undefined;
   entityLabel: string;
   entitySubLabel: string;
 }
@@ -35,7 +35,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   entities,
   weekStart,
   className,
-  variant,
   getLessonForEntity,
   entityLabel,
   entitySubLabel,
@@ -140,7 +139,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                   <LessonGrid
                     lessonNumbers={lessonNumbers}
                     getLesson={(lessonNumber) => getLessonForEntity(entity.id, day, lessonNumber)}
-                    variant={variant}
                   />
                 </ScheduleTableCell>
               ))}

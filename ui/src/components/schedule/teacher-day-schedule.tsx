@@ -88,7 +88,6 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                 <LessonGrid
                   lessonNumbers={lessonNumbers}
                   getLesson={(lessonNumber) => getLesson(teacher.id, lessonNumber)}
-                  variant="teacher"
                 />
               </ScheduleTableCell>
             </ScheduleTableRow>

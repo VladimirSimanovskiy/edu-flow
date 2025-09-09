@@ -1,5 +1,6 @@
 import type { Class, Teacher } from '../../../types/schedule';
 import type { ScheduleEntity } from '../base/week-schedule-table';
+import type { LessonData } from '../base/lesson-cell';
 
 // Функция для сокращения ФИО в формат "Иванов А.Д."
 const shortenTeacherName = (fullName: string): string => {
@@ -32,22 +33,44 @@ export const teacherToScheduleEntity = (teacher: Teacher): ScheduleEntity => ({
 });
 
 // Функции для получения уроков
-export const getLessonForClass = (lessons: any[], classId: number, day: Date, lessonNumber: number) => {
+export const getLessonForClass = (lessons: any[], classId: number, day: Date, lessonNumber: number): LessonData | undefined => {
   const dbDayOfWeek = day.getDay() === 0 ? 7 : day.getDay();
   
-  return lessons.find(lesson => 
+  const lesson = lessons.find(lesson => 
     lesson.idClass === classId &&
     lesson.dayOfWeek === dbDayOfWeek &&
     lesson.lessonNumber === lessonNumber
   );
+
+  if (!lesson) return undefined;
+
+  const secondary: string[] = [];
+  if (lesson.teacherName) secondary.push(lesson.teacherName);
+  if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
+
+  return {
+    primary: lesson.subjectName, // Для классов primary - это предмет
+    secondary
+  };
 };
 
-export const getLessonForTeacher = (lessons: any[], teacherId: number, day: Date, lessonNumber: number) => {
+export const getLessonForTeacher = (lessons: any[], teacherId: number, day: Date, lessonNumber: number): LessonData | undefined => {
   const dbDayOfWeek = day.getDay() === 0 ? 7 : day.getDay();
   
-  return lessons.find(lesson => 
+  const lesson = lessons.find(lesson => 
     lesson.idTeacher === teacherId &&
     lesson.dayOfWeek === dbDayOfWeek &&
     lesson.lessonNumber === lessonNumber
   );
+
+  if (!lesson) return undefined;
+
+  const secondary: string[] = [];
+  if (lesson.subjectName) secondary.push(lesson.subjectName);
+  if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
+
+  return {
+    primary: lesson.className, // Для учителей primary - это класс
+    secondary
+  };
 };

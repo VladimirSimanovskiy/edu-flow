@@ -1,79 +1,189 @@
-import * as React from "react"
+import React from 'react';
+import { cn } from '../../utils/cn';
+import { tokens } from '../../design-system/tokens';
 
-import { cn } from "@/utils/cn"
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'elevated' | 'outlined';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+}
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+export const Card: React.FC<CardProps> = ({
+  children,
+  className,
+  variant = 'default',
+  padding = 'md',
+}) => {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'elevated':
+        return {
+          backgroundColor: 'white',
+          border: 'none',
+          boxShadow: tokens.boxShadow.lg
+        };
+      case 'outlined':
+        return {
+          backgroundColor: 'white',
+          borderColor: tokens.colors.gray[200],
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          boxShadow: 'none'
+        };
+      default:
+        return {
+          backgroundColor: 'white',
+          borderColor: tokens.colors.gray[200],
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          boxShadow: tokens.boxShadow.sm
+        };
+    }
+  };
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+  const getPaddingStyles = () => {
+    switch (padding) {
+      case 'none':
+        return { padding: 0 };
+      case 'sm':
+        return { padding: tokens.spacing[3] };
+      case 'lg':
+        return { padding: tokens.spacing[6] };
+      default:
+        return { padding: tokens.spacing[4] };
+    }
+  };
 
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+  const variantStyles = getVariantStyles();
+  const paddingStyles = getPaddingStyles();
 
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
+  return (
+    <div
+      className={cn('rounded-lg', className)}
+      style={{
+        ...variantStyles,
+        ...paddingStyles,
+        borderRadius: tokens.borderRadius.lg
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+interface CardHeaderProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+export const CardHeader: React.FC<CardHeaderProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <div 
+      className={cn('border-b', className)}
+      style={{
+        paddingBottom: tokens.spacing[4],
+        marginBottom: tokens.spacing[4],
+        borderColor: tokens.colors.gray[200],
+        borderBottomWidth: '1px',
+        borderBottomStyle: 'solid'
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+interface CardTitleProps {
+  children: React.ReactNode;
+  className?: string;
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
+export const CardTitle: React.FC<CardTitleProps> = ({
+  children,
+  className,
+  as: Component = 'h3',
+}) => {
+  return (
+    <Component
+      className={cn('font-semibold', className)}
+      style={{
+        fontSize: tokens.typography.fontSize.lg,
+        fontWeight: tokens.typography.fontWeight.semibold,
+        color: tokens.colors.gray[900],
+        lineHeight: tokens.typography.lineHeight.tight
+      }}
+    >
+      {children}
+    </Component>
+  );
+};
+
+interface CardDescriptionProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardDescription: React.FC<CardDescriptionProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <p
+      className={cn('text-gray-600', className)}
+      style={{
+        fontSize: tokens.typography.fontSize.sm,
+        color: tokens.colors.gray[600],
+        lineHeight: tokens.typography.lineHeight.normal,
+        marginTop: tokens.spacing[1]
+      }}
+    >
+      {children}
+    </p>
+  );
+};
+
+interface CardContentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardContent: React.FC<CardContentProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <div className={className}>
+      {children}
+    </div>
+  );
+};
+
+interface CardFooterProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardFooter: React.FC<CardFooterProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <div 
+      className={cn('border-t pt-4', className)}
+      style={{
+        paddingTop: tokens.spacing[4],
+        marginTop: tokens.spacing[4],
+        borderColor: tokens.colors.gray[200],
+        borderTopWidth: '1px',
+        borderTopStyle: 'solid'
+      }}
+    >
+      {children}
+    </div>
+  );
+};

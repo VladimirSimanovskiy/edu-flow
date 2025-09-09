@@ -1,31 +1,63 @@
-import * as React from "react"
-import { cn } from "@/utils/cn"
+import React from 'react';
+import { cn } from '../../utils/cn';
+import { tokens } from '../../design-system/tokens';
 
-interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
-  size?: "sm" | "md" | "lg"
+interface LoadingSpinnerProps {
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  text?: string;
 }
 
-const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
-  ({ className, size = "md", ...props }, ref) => {
-    const sizeClasses = {
-      sm: "h-4 w-4",
-      md: "h-6 w-6", 
-      lg: "h-8 w-8"
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'md',
+  className,
+  text,
+}) => {
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'sm':
+        return {
+          width: '1rem',
+          height: '1rem',
+          borderWidth: '2px'
+        };
+      case 'lg':
+        return {
+          width: '3rem',
+          height: '3rem',
+          borderWidth: '4px'
+        };
+      default:
+        return {
+          width: '2rem',
+          height: '2rem',
+          borderWidth: '3px'
+        };
     }
+  };
 
-    return (
+  const sizeStyles = getSizeStyles();
+
+  return (
+    <div className={cn('flex flex-col items-center justify-center p-8', className)}>
       <div
-        ref={ref}
-        className={cn(
-          "animate-spin rounded-full border-2 border-current border-t-transparent",
-          sizeClasses[size],
-          className
-        )}
-        {...props}
+        className="animate-spin rounded-full border-solid border-gray-300 border-t-blue-600"
+        style={{
+          ...sizeStyles,
+          animation: `spin ${tokens.animation.duration.slow} linear infinite`
+        }}
       />
-    )
-  }
-)
-LoadingSpinner.displayName = "LoadingSpinner"
-
-export { LoadingSpinner }
+      {text && (
+        <p 
+          className="mt-4 text-gray-600"
+          style={{
+            fontSize: tokens.typography.fontSize.sm,
+            color: tokens.colors.gray[600]
+          }}
+        >
+          {text}
+        </p>
+      )}
+    </div>
+  );
+};

@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, startOfWeek, addDays, addWeeks, subWeeks } from 'date-fns';
+import React from 'react';
+import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
-import { Button } from './Button';
+import { tokens } from '../../design-system/tokens';
 
 interface DatePickerProps {
   value: Date;
   onChange: (date: Date) => void;
   viewType: 'day' | 'week';
   className?: string;
+  disabled?: boolean;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -17,23 +17,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   viewType,
   className,
+  disabled = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
   const handlePrevious = () => {
+    const newDate = new Date(value);
     if (viewType === 'day') {
-      onChange(addDays(value, -1));
+      newDate.setDate(newDate.getDate() - 1);
     } else {
-      onChange(subWeeks(value, 1));
+      newDate.setDate(newDate.getDate() - 7);
     }
+    onChange(newDate);
   };
 
   const handleNext = () => {
+    const newDate = new Date(value);
     if (viewType === 'day') {
-      onChange(addDays(value, 1));
+      newDate.setDate(newDate.getDate() + 1);
     } else {
-      onChange(addWeeks(value, 1));
+      newDate.setDate(newDate.getDate() + 7);
     }
+    onChange(newDate);
   };
 
   const handleToday = () => {
@@ -44,60 +47,108 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     if (viewType === 'day') {
       return format(value, 'd MMMM yyyy', { locale: ru });
     } else {
-      const startWeek = startOfWeek(value, { weekStartsOn: 1 });
-      const endWeek = addDays(startWeek, 6);
-      return `${format(startWeek, 'd MMM', { locale: ru })} - ${format(endWeek, 'd MMM yyyy', { locale: ru })}`;
+      const weekStart = new Date(value);
+      const dayOfWeek = weekStart.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      weekStart.setDate(weekStart.getDate() + diff);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      return `${format(weekStart, 'd MMM', { locale: ru })} - ${format(weekEnd, 'd MMM yyyy', { locale: ru })}`;
     }
   };
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={handlePrevious}
-        className="h-8 w-8 p-0"
+        disabled={disabled}
+        className={cn(
+          'p-2 rounded-md border transition-colors',
+          disabled 
+            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+        )}
+        style={{
+          borderRadius: tokens.borderRadius.md,
+          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
+        }}
       >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
+        <svg 
+          className="w-4 h-4" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M15 19l-7-7 7-7" 
+          />
+        </svg>
+      </button>
 
-      <Button
-        variant="outline"
-        onClick={() => setIsOpen(!isOpen)}
-        className="min-w-[200px] justify-start"
-      >
-        <Calendar className="mr-2 h-4 w-4" />
-        {formatDisplayDate()}
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleNext}
-        className="h-8 w-8 p-0"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
+      <button
         onClick={handleToday}
-        className="text-sm"
+        disabled={disabled}
+        className={cn(
+          'px-4 py-2 rounded-md border transition-colors',
+          disabled 
+            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+        )}
+        style={{
+          fontSize: tokens.typography.fontSize.sm,
+          fontWeight: tokens.typography.fontWeight.medium,
+          borderRadius: tokens.borderRadius.md,
+          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
+        }}
       >
         Сегодня
-      </Button>
+      </button>
 
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white border rounded-md shadow-lg z-10 p-4">
-          <input
-            type="date"
-            value={format(value, 'yyyy-MM-dd')}
-            onChange={(e) => onChange(new Date(e.target.value))}
-            className="w-full p-2 border rounded"
+      <div 
+        className="px-4 py-2 text-center font-medium"
+        style={{
+          fontSize: tokens.typography.fontSize.sm,
+          fontWeight: tokens.typography.fontWeight.medium,
+          color: tokens.colors.gray[900],
+          minWidth: '200px'
+        }}
+      >
+        {formatDisplayDate()}
+      </div>
+
+      <button
+        onClick={handleNext}
+        disabled={disabled}
+        className={cn(
+          'p-2 rounded-md border transition-colors',
+          disabled 
+            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+        )}
+        style={{
+          borderRadius: tokens.borderRadius.md,
+          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
+        }}
+      >
+        <svg 
+          className="w-4 h-4" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M9 5l7 7-7 7" 
           />
-        </div>
-      )}
+        </svg>
+      </button>
     </div>
   );
 };

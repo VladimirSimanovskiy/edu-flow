@@ -97,7 +97,7 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
                     {classItem.name}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {classItem.grade} класс • {classItem.students} учеников
+                    {classItem.grade} класс
                   </div>
                 </td>
                 {days.map((day) => (

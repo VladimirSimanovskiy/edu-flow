@@ -1,10 +1,12 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { Button } from './Button';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { ErrorMessage } from './error-message';
+import { Card, CardContent, CardHeader, CardTitle } from './card';
+import { tokens } from '../../design-system/tokens';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
@@ -24,9 +26,13 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
-  handleReset = () => {
+  handleRetry = () => {
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -37,42 +43,54 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="w-8 h-8 text-red-600" />
-            </div>
-            
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Что-то пошло не так
-            </h2>
-            
-            <p className="text-gray-600 mb-6">
-              Произошла непредвиденная ошибка. Пожалуйста, попробуйте обновить страницу.
-            </p>
-
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="mb-6 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500 mb-2">
-                  Детали ошибки (только для разработки)
-                </summary>
-                <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
-                  {this.state.error.stack}
-                </pre>
-              </details>
-            )}
-
-            <div className="flex gap-3 justify-center">
-              <Button onClick={this.handleReset} variant="outline">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Попробовать снова
-              </Button>
+        <div style={{ padding: tokens.spacing[6] }}>
+          <Card variant="outlined">
+            <CardHeader>
+              <CardTitle style={{ color: tokens.colors.error[600] }}>
+                Что-то пошло не так
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ErrorMessage
+                error={this.state.error?.message || 'Произошла непредвиденная ошибка'}
+                variant="banner"
+                onRetry={this.handleRetry}
+              />
               
-              <Button onClick={() => window.location.reload()}>
-                Обновить страницу
-              </Button>
-            </div>
-          </div>
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <details 
+                  style={{ 
+                    marginTop: tokens.spacing[4],
+                    padding: tokens.spacing[3],
+                    backgroundColor: tokens.colors.gray[50],
+                    borderRadius: tokens.borderRadius.md,
+                    border: `1px solid ${tokens.colors.gray[200]}`
+                  }}
+                >
+                  <summary 
+                    style={{ 
+                      cursor: 'pointer',
+                      fontWeight: tokens.typography.fontWeight.medium,
+                      color: tokens.colors.gray[700]
+                    }}
+                  >
+                    Детали ошибки (только в режиме разработки)
+                  </summary>
+                  <pre 
+                    style={{ 
+                      marginTop: tokens.spacing[2],
+                      fontSize: tokens.typography.fontSize.xs,
+                      color: tokens.colors.gray[600],
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {this.state.error.stack}
+                  </pre>
+                </details>
+              )}
+            </CardContent>
+          </Card>
         </div>
       );
     }

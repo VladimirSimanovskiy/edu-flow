@@ -6,9 +6,11 @@ import { DatePicker } from '../ui/date-picker';
 import { ViewToggle } from '../ui/view-toggle';
 import { LoadingSpinner } from '../ui/loading-spinner';
 import { ErrorMessage } from '../ui/error-message';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { useScheduleConfig, renderScheduleComponent } from './schedule-component-factory';
 import type { ScheduleType } from '../../types/scheduleConfig';
 import { useScheduleDate } from '../../hooks/useScheduleDate';
+import { tokens } from '../../design-system/tokens';
 
 interface ScheduleViewProps {
   type: ScheduleType;
@@ -41,7 +43,6 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
   const lessonsLoading = currentView.type === 'day' ? dayLessonsLoading : weekLessonsLoading;
   const lessonsError = currentView.type === 'day' ? dayLessonsError : weekLessonsError;
 
-
   const handleDateChange = (date: Date) => {
     setDate(date);
   };
@@ -50,70 +51,109 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
     setViewType(viewType);
   };
 
-
   const weekStart = startOfWeek(currentView.date, { weekStartsOn: 1 });
 
   // Показываем загрузку
   if (teachersLoading || classesLoading || lessonsLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div style={{ padding: tokens.spacing[8] }}>
+        <LoadingSpinner 
+          size="lg" 
+          text="Загрузка расписания..." 
+        />
+      </div>
+    );
   }
 
   // Показываем ошибки
   if (teachersError || classesError || lessonsError) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">
-          {scheduleConfig.title}
-        </h1>
-        {teachersError && <ErrorMessage error={`Ошибка загрузки учителей: ${teachersError.message}`} />}
-        {classesError && <ErrorMessage error={`Ошибка загрузки классов: ${classesError.message}`} />}
-        {lessonsError && <ErrorMessage error={`Ошибка загрузки уроков: ${lessonsError.message}`} />}
+      <div style={{ padding: tokens.spacing[6] }}>
+        <Card variant="outlined">
+          <CardHeader>
+            <CardTitle>{scheduleConfig.title}</CardTitle>
+            <CardDescription>{scheduleConfig.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[4] }}>
+              {teachersError && (
+                <ErrorMessage 
+                  error={`Ошибка загрузки учителей: ${teachersError.message}`}
+                  variant="banner"
+                />
+              )}
+              {classesError && (
+                <ErrorMessage 
+                  error={`Ошибка загрузки классов: ${classesError.message}`}
+                  variant="banner"
+                />
+              )}
+              {lessonsError && (
+                <ErrorMessage 
+                  error={`Ошибка загрузки уроков: ${lessonsError.message}`}
+                  variant="banner"
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ padding: tokens.spacing[6], display: 'flex', flexDirection: 'column', gap: tokens.spacing[6] }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
+      <Card variant="elevated">
+        <CardHeader>
+          <CardTitle style={{ fontSize: tokens.typography.fontSize['2xl'] }}>
             {scheduleConfig.title}
-          </h1>
-          <p className="text-gray-600">
+          </CardTitle>
+          <CardDescription style={{ fontSize: tokens.typography.fontSize.base }}>
             {scheduleConfig.description}
-          </p>
-        </div>
-      </div>
+          </CardDescription>
+        </CardHeader>
+      </Card>
 
       {/* Controls */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center gap-4">
-          <ViewToggle
-            viewType={currentView.type}
-            onChange={handleViewTypeChange}
-          />
-        </div>
-        
-        <DatePicker
-          value={currentView.date}
-          onChange={handleDateChange}
-          viewType={currentView.type}
-        />
-      </div>
+      <Card variant="outlined">
+        <CardContent padding="md">
+          <div 
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              gap: tokens.spacing[4]
+            }}
+          >
+            <ViewToggle
+              viewType={currentView.type}
+              onChange={handleViewTypeChange}
+            />
+            
+            <DatePicker
+              value={currentView.date}
+              onChange={handleDateChange}
+              viewType={currentView.type}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Schedule Content */}
-      {renderScheduleComponent(
-        type,
-        currentView.type,
-        {
-          teachers: teachers || [],
-          classes: classes || [],
-          lessons: lessons || [],
-          date: currentView.date,
-          weekStart: currentView.type === 'week' ? weekStart : undefined,
-        }
-      )}
+      <div>
+        {renderScheduleComponent(
+          type,
+          currentView.type,
+          {
+            teachers: teachers || [],
+            classes: classes || [],
+            lessons: lessons || [],
+            date: currentView.date,
+            weekStart: currentView.type === 'week' ? weekStart : undefined,
+          }
+        )}
+      </div>
     </div>
   );
 };

@@ -1,9 +1,19 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { cn } from '../../utils/cn';
 import type { Class, Lesson } from '../../types/schedule';
 import { useLessonNumbers } from '../../hooks/useLessonNumbers';
+import { useScheduleLogic } from '../../hooks/useScheduleLogic';
+import { ScheduleContainer } from './base/schedule-container';
+import { 
+  ScheduleTable,
+  ScheduleTableHeader,
+  ScheduleTableBody,
+  ScheduleTableRow,
+  ScheduleTableCell
+} from './base/schedule-table';
+import { LessonHeader } from './base/lesson-header';
+import { LessonGrid } from './base/lesson-grid';
 
 interface ClassDayScheduleProps {
   classes: Class[];
@@ -19,108 +29,61 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
   className,
 }) => {
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
+  const { getLessonForClass, getDayOfWeek } = useScheduleLogic(lessons);
 
-  // Показываем загрузку, если номера уроков еще не загружены
-  if (lessonNumbersLoading) {
-    return (
-      <div className={cn('bg-white rounded-lg border shadow-sm p-8', className)}>
-        <div className="flex items-center justify-center">
-          <div className="text-gray-500">Загрузка расписания уроков...</div>
-        </div>
-      </div>
-    );
-  }
+  const dayOfWeek = getDayOfWeek(date);
+  const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ru });
 
-
-  // Получаем уроки для конкретного класса и номера урока на выбранный день
-  const getLessonForClass = (classId: number, lessonNumber: number) => {
-    // Приводим день недели к стандарту базы данных (понедельник = 1, воскресенье = 7)
-    const dbDayOfWeek = date.getDay() === 0 ? 7 : date.getDay();
-    
-    return lessons.find(lesson => 
-      lesson.idClass === classId &&
-      lesson.dayOfWeek === dbDayOfWeek &&
-      lesson.lessonNumber === lessonNumber
-    );
+  const getLesson = (classId: number, lessonNumber: number) => {
+    return getLessonForClass(classId, dayOfWeek, lessonNumber);
   };
 
   return (
-    <div className={cn('bg-white rounded-lg border shadow-sm overflow-hidden', className)}>
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-semibold">
-          {format(date, 'EEEE, d MMMM yyyy', { locale: ru })}
-        </h3>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-gray-50">
-              <th className="w-48 p-3 text-left text-sm font-medium text-gray-600 border-r">
-                Классы
-              </th>
-              <th className="p-2 text-center text-sm font-medium text-gray-600">
-                <div className="grid grid-cols-7 gap-1">
-                  {lessonNumbers.map(num => (
-                    <div key={num} className="text-center font-semibold">
-                      {num}
-                    </div>
-                  ))}
+    <ScheduleContainer
+      className={className}
+      title={formattedDate}
+      loading={lessonNumbersLoading}
+      loadingText="Загрузка расписания уроков..."
+    >
+      <ScheduleTable>
+        <ScheduleTableHeader>
+          <ScheduleTableRow className="bg-gray-50">
+            <ScheduleTableCell header width="w-48" className="border-r">
+              Классы
+            </ScheduleTableCell>
+            <ScheduleTableCell header className="text-center p-2">
+              <LessonHeader lessonNumbers={lessonNumbers} />
+            </ScheduleTableCell>
+          </ScheduleTableRow>
+          <ScheduleTableRow className="bg-gray-50">
+            <ScheduleTableCell header width="w-48" className="border-r">
+              Класс
+            </ScheduleTableCell>
+            <ScheduleTableCell header className="text-center p-1 text-xs text-gray-500">
+              Номера уроков
+            </ScheduleTableCell>
+          </ScheduleTableRow>
+        </ScheduleTableHeader>
+        
+        <ScheduleTableBody>
+          {classes.map((classItem) => (
+            <ScheduleTableRow key={classItem.id}>
+              <ScheduleTableCell className="border-r">
+                <div className="font-medium text-gray-900">
+                  {classItem.name}
                 </div>
-              </th>
-            </tr>
-            <tr className="border-b bg-gray-50">
-              <th className="w-48 p-3 text-left text-sm font-medium text-gray-600 border-r">
-                Класс
-              </th>
-              <th className="p-1 text-center text-xs font-medium text-gray-500">
-                Номера уроков
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {classes.map((classItem) => (
-              <tr key={classItem.id} className="border-b hover:bg-gray-50">
-                <td className="p-3 text-sm border-r">
-                  <div className="font-medium text-gray-900">
-                    {classItem.name}
-                  </div>
-                </td>
-                <td className="p-1">
-                  <div className="grid grid-cols-7 gap-1">
-                    {lessonNumbers.map(lessonNumber => {
-                      const lesson = getLessonForClass(classItem.id, lessonNumber);
-                      
-                      return (
-                        <div
-                          key={lessonNumber}
-                          className={cn(
-                            'h-8 border rounded text-xs flex flex-col items-center justify-center',
-                            lesson 
-                              ? 'bg-blue-100 border-blue-300 text-blue-800' 
-                              : 'bg-gray-50 border-gray-200'
-                          )}
-                        >
-                          {lesson ? (
-                            <>
-                              <div className="font-medium truncate w-full text-center">
-                                {lesson.teacherName}
-                              </div>
-                              <div className="text-xs text-blue-600 truncate w-full text-center">
-                                {lesson.classroomNumber}
-                              </div>
-                            </>
-                          ) : null}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+              </ScheduleTableCell>
+              <ScheduleTableCell className="p-1">
+                <LessonGrid
+                  lessonNumbers={lessonNumbers}
+                  getLesson={(lessonNumber) => getLesson(classItem.id, lessonNumber)}
+                  variant="class"
+                />
+              </ScheduleTableCell>
+            </ScheduleTableRow>
+          ))}
+        </ScheduleTableBody>
+      </ScheduleTable>
+    </ScheduleContainer>
   );
 };

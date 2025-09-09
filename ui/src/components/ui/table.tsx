@@ -1,6 +1,6 @@
 import * as React from "react"
-
-import { cn } from "@/utils/cn"
+import { cn } from "../../utils/cn"
+import { tokens } from "../../design-system/tokens"
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -10,6 +10,10 @@ const Table = React.forwardRef<
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-sm", className)}
+      style={{
+        fontSize: tokens.typography.fontSize.sm,
+        lineHeight: tokens.typography.lineHeight.normal
+      }}
       {...props}
     />
   </div>
@@ -20,7 +24,14 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead 
+    ref={ref} 
+    className={cn("[&_tr]:border-b", className)} 
+    style={{
+      borderColor: tokens.colors.gray[200]
+    }}
+    {...props} 
+  />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -43,9 +54,14 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+      "border-t bg-gray-50 font-medium [&>tr]:last:border-b-0",
       className
     )}
+    style={{
+      borderColor: tokens.colors.gray[200],
+      backgroundColor: tokens.colors.gray[50],
+      fontWeight: tokens.typography.fontWeight.medium
+    }}
     {...props}
   />
 ))
@@ -58,9 +74,13 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "border-b transition-colors hover:bg-gray-50 data-[state=selected]:bg-gray-100",
       className
     )}
+    style={{
+      borderColor: tokens.colors.gray[200],
+      transition: `background-color ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
+    }}
     {...props}
   />
 ))
@@ -73,9 +93,16 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-medium text-gray-600 [&:has([role=checkbox])]:pr-0",
       className
     )}
+    style={{
+      height: '3rem',
+      padding: `0 ${tokens.spacing[4]}`,
+      fontSize: tokens.typography.fontSize.sm,
+      fontWeight: tokens.typography.fontWeight.medium,
+      color: tokens.colors.gray[600]
+    }}
     {...props}
   />
 ))
@@ -88,6 +115,9 @@ const TableCell = React.forwardRef<
   <td
     ref={ref}
     className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+    style={{
+      padding: tokens.spacing[4]
+    }}
     {...props}
   />
 ))
@@ -99,7 +129,12 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn("mt-4 text-sm text-gray-600", className)}
+    style={{
+      marginTop: tokens.spacing[4],
+      fontSize: tokens.typography.fontSize.sm,
+      color: tokens.colors.gray[600]
+    }}
     {...props}
   />
 ))

@@ -1,8 +1,8 @@
 import React from 'react';
-import { TeacherScheduleTable } from './TeacherScheduleTable';
-import { ClassScheduleTable } from './ClassScheduleTable';
-import { TeacherDaySchedule } from './TeacherDaySchedule';
-import { ClassDaySchedule } from './ClassDaySchedule';
+import { TeacherScheduleTable } from './teacher-schedule-table';
+import { ClassScheduleTable } from './class-schedule-table';
+import { TeacherDaySchedule } from './teacher-day-schedule';
+import { ClassDaySchedule } from './class-day-schedule';
 import type { 
   ScheduleType, 
   ViewType, 

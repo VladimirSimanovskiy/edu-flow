@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScheduleView } from '../components/schedule/ScheduleView';
+import { ScheduleView } from '../components/schedule/schedule-view';
 
 export const TeacherSchedule: React.FC = () => {
   return (

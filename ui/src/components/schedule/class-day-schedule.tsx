@@ -85,9 +85,6 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
                   <div className="font-medium text-gray-900">
                     {classItem.name}
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {classItem.grade} класс • {classItem.students} учеников
-                  </div>
                 </td>
                 <td className="p-1">
                   <div className="grid grid-cols-7 gap-1">

@@ -2,11 +2,11 @@ import React from 'react';
 import { startOfWeek } from 'date-fns';
 import { useScheduleStore } from '../../store/scheduleStore';
 import { useTeachers, useClasses, useLessonsForWeek, useLessonsForDay } from '../../hooks/useSchedule';
-import { DatePicker } from '../ui/DatePicker';
-import { ViewToggle } from '../ui/ViewToggle';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { ErrorMessage } from '../ui/ErrorMessage';
-import { useScheduleConfig, renderScheduleComponent } from './ScheduleComponentFactory';
+import { DatePicker } from '../ui/date-picker';
+import { ViewToggle } from '../ui/view-toggle';
+import { LoadingSpinner } from '../ui/loading-spinner';
+import { ErrorMessage } from '../ui/error-message';
+import { useScheduleConfig, renderScheduleComponent } from './schedule-component-factory';
 import type { ScheduleType } from '../../types/scheduleConfig';
 import { useScheduleDate } from '../../hooks/useScheduleDate';
 

@@ -112,6 +112,7 @@ public
 # IDEs and editors
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~

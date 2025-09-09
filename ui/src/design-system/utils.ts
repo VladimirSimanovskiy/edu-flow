@@ -7,19 +7,24 @@ import { tokens } from './tokens';
 /**
  * Получить цвет из палитры
  */
-export const getColor = (color: string, shade?: number) => {
+export const getColor = (color: string, shade?: number): string | undefined => {
   const colorPath = color.split('.');
-  let colorValue: any = tokens.colors;
+  let colorValue: unknown = tokens.colors;
   
   for (const segment of colorPath) {
-    colorValue = colorValue[segment];
+    if (colorValue && typeof colorValue === 'object' && segment in colorValue) {
+      colorValue = (colorValue as Record<string, unknown>)[segment];
+    } else {
+      return undefined;
+    }
   }
   
-  if (typeof colorValue === 'object' && shade !== undefined) {
-    return colorValue[shade];
+  if (typeof colorValue === 'object' && colorValue !== null && shade !== undefined) {
+    const shadeValue = (colorValue as Record<string, string>)[shade.toString()];
+    return shadeValue;
   }
   
-  return colorValue;
+  return typeof colorValue === 'string' ? colorValue : undefined;
 };
 
 /**

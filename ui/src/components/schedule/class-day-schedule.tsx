@@ -55,14 +55,6 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
               <LessonHeader lessonNumbers={lessonNumbers} />
             </ScheduleTableCell>
           </ScheduleTableRow>
-          <ScheduleTableRow className="bg-gray-50">
-            <ScheduleTableCell header width="w-48" className="border-r">
-              Класс
-            </ScheduleTableCell>
-            <ScheduleTableCell header className="text-center p-1 text-xs text-gray-500">
-              Номера уроков
-            </ScheduleTableCell>
-          </ScheduleTableRow>
         </ScheduleTableHeader>
         
         <ScheduleTableBody>

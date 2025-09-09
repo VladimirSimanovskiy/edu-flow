@@ -3,7 +3,7 @@ import type { Lesson } from '../types/schedule';
 
 export interface LessonData {
   teacherName?: string;
-  classroomNumber?: string;
+  classroomNumber?: string | number;
   className?: string;
   subjectName?: string;
 }

@@ -1,5 +1,5 @@
-import { ComponentType } from 'react';
-import { Teacher, Class, Lesson } from './schedule';
+import type { ComponentType } from 'react';
+import type { Teacher, Class, Lesson } from './schedule';
 
 // Типы для конфигурации расписания
 export type ScheduleType = 'teachers' | 'classes';

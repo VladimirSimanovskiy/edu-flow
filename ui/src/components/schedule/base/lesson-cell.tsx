@@ -4,7 +4,7 @@ import { tokens } from '../../../design-system/tokens';
 
 export interface LessonData {
   teacherName?: string;
-  classroomNumber?: string;
+  classroomNumber?: string | number;
   className?: string;
   subjectName?: string;
 }
@@ -18,7 +18,6 @@ interface LessonCellProps {
 
 export const LessonCell: React.FC<LessonCellProps> = ({
   lesson,
-  lessonNumber,
   variant = 'class',
   className,
 }) => {

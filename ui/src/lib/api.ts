@@ -14,7 +14,6 @@ import type {
   CreateLessonRequest, 
   UpdateLessonRequest, 
   LessonFilters,
-  ApiResponse,
   ApiError 
 } from '../types/api';
 
@@ -40,7 +39,7 @@ class ApiClient {
     };
 
     if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+      (headers as Record<string, string>).Authorization = `Bearer ${this.token}`;
     }
 
     const response = await fetch(url, {

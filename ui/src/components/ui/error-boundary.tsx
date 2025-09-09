@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { ErrorMessage } from './error-message';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { tokens } from '../../design-system/tokens';

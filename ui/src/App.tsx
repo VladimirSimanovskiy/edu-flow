@@ -5,8 +5,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Home } from './pages/home';
 import { TeacherSchedule } from './pages/teacher-schedule';
 import { ClassSchedule } from './pages/class-schedule';
-import { Button } from '@/components/ui/button';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { Button } from './components/ui/button';
+import { ErrorBoundary } from './components/ui/error-boundary';
 import { useAuth } from './hooks/useAuth';
 
 const queryClient = new QueryClient({

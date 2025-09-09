@@ -101,12 +101,14 @@ interface CardTitleProps {
   children: React.ReactNode;
   className?: string;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  style?: React.CSSProperties;
 }
 
 export const CardTitle: React.FC<CardTitleProps> = ({
   children,
   className,
   as: Component = 'h3',
+  style,
 }) => {
   return (
     <Component
@@ -115,7 +117,8 @@ export const CardTitle: React.FC<CardTitleProps> = ({
         fontSize: tokens.typography.fontSize.lg,
         fontWeight: tokens.typography.fontWeight.semibold,
         color: tokens.colors.gray[900],
-        lineHeight: tokens.typography.lineHeight.tight
+        lineHeight: tokens.typography.lineHeight.tight,
+        ...style
       }}
     >
       {children}
@@ -126,11 +129,13 @@ export const CardTitle: React.FC<CardTitleProps> = ({
 interface CardDescriptionProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const CardDescription: React.FC<CardDescriptionProps> = ({
   children,
   className,
+  style,
 }) => {
   return (
     <p
@@ -139,7 +144,8 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
         fontSize: tokens.typography.fontSize.sm,
         color: tokens.colors.gray[600],
         lineHeight: tokens.typography.lineHeight.normal,
-        marginTop: tokens.spacing[1]
+        marginTop: tokens.spacing[1],
+        ...style
       }}
     >
       {children}
@@ -150,14 +156,34 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
 interface CardContentProps {
   children: React.ReactNode;
   className?: string;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 export const CardContent: React.FC<CardContentProps> = ({
   children,
   className,
+  padding = 'md',
 }) => {
+  const getPaddingStyles = () => {
+    switch (padding) {
+      case 'none':
+        return { padding: 0 };
+      case 'sm':
+        return { padding: tokens.spacing[3] };
+      case 'lg':
+        return { padding: tokens.spacing[6] };
+      default:
+        return { padding: tokens.spacing[4] };
+    }
+  };
+
+  const paddingStyles = getPaddingStyles();
+
   return (
-    <div className={className}>
+    <div 
+      className={className}
+      style={paddingStyles}
+    >
       {children}
     </div>
   );

@@ -12,7 +12,6 @@ interface ViewToggleProps {
 export const ViewToggle: React.FC<ViewToggleProps> = ({
   viewType,
   onChange,
-  className,
   disabled = false,
 }) => {
   const options = [

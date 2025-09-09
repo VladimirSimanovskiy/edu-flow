@@ -36,10 +36,10 @@ export const useDesignTokens = () => {
     zIndex: tokens.zIndex,
     
     // Утилиты для создания стилей
-    createStyles: (styles: Record<string, any>) => styles,
+    createStyles: (styles: Record<string, unknown>) => styles,
     
     // Утилиты для создания вариантов
-    createVariant: (baseStyles: Record<string, any>, variants: Record<string, Record<string, any>>) => {
+    createVariant: (baseStyles: Record<string, unknown>, variants: Record<string, Record<string, unknown>>) => {
       return (variant: string) => ({
         ...baseStyles,
         ...variants[variant]

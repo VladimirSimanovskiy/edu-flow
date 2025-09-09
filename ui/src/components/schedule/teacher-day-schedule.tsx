@@ -4,6 +4,8 @@ import { ru } from 'date-fns/locale';
 import type { Teacher, Lesson } from '../../types/schedule';
 import { useLessonNumbers } from '../../hooks/useLessonNumbers';
 import { useScheduleLogic } from '../../hooks/useScheduleLogic';
+import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
+import type { LessonData } from './base/lesson-cell';
 
 // Функция для сокращения ФИО в формат "Иванов А.Д."
 const shortenTeacherName = (fullName: string): string => {
@@ -46,12 +48,59 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
 }) => {
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
   const { getLessonForTeacher, getDayOfWeek } = useScheduleLogic(lessons);
+  const { highlight, setHighlightedClass, clearHighlight } = useTeacherScheduleStore();
 
   const dayOfWeek = getDayOfWeek(date);
   const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ru });
 
   const getLesson = (teacherId: number, lessonNumber: number) => {
     return getLessonForTeacher(teacherId, dayOfWeek, lessonNumber);
+  };
+
+  // Обработчик клика по уроку в расписании учителей
+  const handleLessonClick = (teacherId: number, lessonNumber: number, _lesson: LessonData) => {
+    console.log('Teacher lesson clicked:', { teacherId, lessonNumber, dayOfWeek });
+    
+    // Находим урок и извлекаем ID класса
+    const lessonData = lessons.find(l => 
+      l.idTeacher === teacherId && 
+      l.dayOfWeek === dayOfWeek &&
+      l.lessonNumber === lessonNumber
+    );
+
+    if (!lessonData) {
+      console.log('No lesson data found');
+      return;
+    }
+
+    const classId = lessonData.idClass;
+    const currentHighlightedClassId = highlight.highlightedClassId;
+
+    console.log('Lesson data:', { classId, currentHighlightedClassId });
+
+    // Если кликнули по тому же классу - снимаем подсветку
+    if (currentHighlightedClassId === classId) {
+      console.log('Clearing highlight');
+      clearHighlight();
+    } else {
+      // Иначе подсвечиваем новый класс
+      console.log('Setting highlight for class:', classId);
+      setHighlightedClass(classId, date);
+    }
+  };
+
+  // Проверка, должен ли урок быть подсвечен
+  const isLessonHighlighted = (teacherId: number, lessonNumber: number, _lesson: LessonData): boolean => {
+    if (!highlight.highlightedClassId) return false;
+
+    // Находим урок и проверяем, что это тот же класс
+    const lessonData = lessons.find(l => 
+      l.idTeacher === teacherId && 
+      l.dayOfWeek === dayOfWeek &&
+      l.lessonNumber === lessonNumber
+    );
+
+    return lessonData ? lessonData.idClass === highlight.highlightedClassId : false;
   };
 
   return (
@@ -88,6 +137,8 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                 <LessonGrid
                   lessonNumbers={lessonNumbers}
                   getLesson={(lessonNumber) => getLesson(teacher.id, lessonNumber)}
+                  onLessonClick={(lessonNumber, lesson) => handleLessonClick(teacher.id, lessonNumber, lesson)}
+                  isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(teacher.id, lessonNumber, lesson)}
                 />
               </ScheduleTableCell>
             </ScheduleTableRow>

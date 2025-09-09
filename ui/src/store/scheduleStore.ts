@@ -11,6 +11,7 @@ interface ScheduleFilters {
   subject?: string;
 }
 
+
 interface ScheduleState {
   currentView: ScheduleView;
   filters: ScheduleFilters;

@@ -29,6 +29,8 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   getLessonForEntity: (entityId: number, day: Date, lessonNumber: number) => LessonData | undefined;
   entityLabel: string;
   entitySubLabel: string;
+  onLessonClick?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => void;
+  isLessonHighlighted?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
 }
 
 export const WeekScheduleTable = <T extends ScheduleEntity>({
@@ -38,6 +40,8 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   getLessonForEntity,
   entityLabel,
   entitySubLabel,
+  onLessonClick,
+  isLessonHighlighted,
 }: WeekScheduleTableProps<T>) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
@@ -139,6 +143,8 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                   <LessonGrid
                     lessonNumbers={lessonNumbers}
                     getLesson={(lessonNumber) => getLessonForEntity(entity.id, day, lessonNumber)}
+                    onLessonClick={onLessonClick ? (lessonNumber, lesson) => onLessonClick(entity.id, day, lessonNumber, lesson) : undefined}
+                    isLessonHighlighted={isLessonHighlighted ? (lessonNumber, lesson) => isLessonHighlighted(entity.id, day, lessonNumber, lesson) : undefined}
                   />
                 </ScheduleTableCell>
               ))}

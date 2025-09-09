@@ -2,6 +2,8 @@ import React from 'react';
 import type { Class, Lesson } from '../../types/schedule';
 import { WeekScheduleTable } from './base/week-schedule-table';
 import { classToScheduleEntity, getLessonForClass } from './adapters/schedule-adapters';
+import { useClassScheduleStore } from '../../store/classScheduleStore';
+import type { LessonData } from './base/lesson-cell';
 
 interface ClassScheduleTableProps {
   classes: Class[];
@@ -16,7 +18,45 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
   weekStart,
   className,
 }) => {
+  const { highlight, setHighlightedTeacher, clearHighlight } = useClassScheduleStore();
   const scheduleEntities = classes.map(classToScheduleEntity);
+
+  // Обработчик клика по уроку в расписании классов
+  const handleLessonClick = (classId: number, day: Date, lessonNumber: number, _lesson: LessonData) => {
+    // Находим урок и извлекаем ID учителя
+    const lessonData = lessons.find(l => 
+      l.idClass === classId && 
+      l.dayOfWeek === (day.getDay() === 0 ? 7 : day.getDay()) &&
+      l.lessonNumber === lessonNumber
+    );
+
+    if (!lessonData) return;
+
+    const teacherId = lessonData.idTeacher;
+    const currentHighlightedTeacherId = highlight.highlightedTeacherId;
+
+    // Если кликнули по тому же учителю - снимаем подсветку
+    if (currentHighlightedTeacherId === teacherId) {
+      clearHighlight();
+    } else {
+      // Иначе подсвечиваем нового учителя
+      setHighlightedTeacher(teacherId, day);
+    }
+  };
+
+  // Проверка, должен ли урок быть подсвечен
+  const isLessonHighlighted = (classId: number, day: Date, lessonNumber: number, _lesson: LessonData): boolean => {
+    if (!highlight.highlightedTeacherId) return false;
+
+    // Находим урок и проверяем, что это тот же учитель
+    const lessonData = lessons.find(l => 
+      l.idClass === classId && 
+      l.dayOfWeek === (day.getDay() === 0 ? 7 : day.getDay()) &&
+      l.lessonNumber === lessonNumber
+    );
+
+    return lessonData ? lessonData.idTeacher === highlight.highlightedTeacherId : false;
+  };
 
   return (
     <WeekScheduleTable
@@ -29,6 +69,8 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
       }
       entityLabel="Классы"
       entitySubLabel="Класс"
+      onLessonClick={handleLessonClick}
+      isLessonHighlighted={isLessonHighlighted}
     />
   );
 };

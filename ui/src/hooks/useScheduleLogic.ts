@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
 import type { Lesson } from '../types/schedule';
-
-export interface LessonData {
-  primary?: string; // Основная строка (предмет для классов, класс для учителей)
-  secondary?: string[]; // Массив дополнительных строк (учитель и кабинет для классов, предмет и кабинет для учителей)
-}
+import type { LessonData } from '../components/schedule/base/lesson-cell';
 
 export const useScheduleLogic = (lessons: Lesson[]) => {
   const getLessonForClass = useMemo(() => {

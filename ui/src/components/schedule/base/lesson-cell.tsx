@@ -11,11 +11,15 @@ interface LessonCellProps {
   lesson?: LessonData;
   lessonNumber: number;
   className?: string;
+  onClick?: () => void;
+  isHighlighted?: boolean;
 }
 
 export const LessonCell: React.FC<LessonCellProps> = ({
   lesson,
   className,
+  onClick,
+  isHighlighted = false,
 }) => {
   const hasLesson = Boolean(lesson);
 
@@ -25,6 +29,15 @@ export const LessonCell: React.FC<LessonCellProps> = ({
         backgroundColor: tokens.colors.gray[50],
         borderColor: tokens.colors.gray[200],
         color: tokens.colors.gray[500],
+      };
+    }
+
+    if (isHighlighted) {
+      return {
+        backgroundColor: tokens.colors.accent[100],
+        borderColor: tokens.colors.accent[400],
+        color: tokens.colors.accent[900],
+        boxShadow: `0 0 0 2px ${tokens.colors.accent[200]}`,
       };
     }
 
@@ -41,6 +54,7 @@ export const LessonCell: React.FC<LessonCellProps> = ({
     <div
       className={cn(
         "h-16 sm:h-18 md:h-20 w-full border rounded text-xs flex flex-col items-center justify-center transition-colors p-1",
+        hasLesson && onClick && "cursor-pointer hover:opacity-80",
         className
       )}
       style={{
@@ -50,6 +64,7 @@ export const LessonCell: React.FC<LessonCellProps> = ({
         borderRadius: tokens.borderRadius.base,
         minHeight: "4rem",
       }}
+      onClick={hasLesson ? onClick : undefined}
     >
       {hasLesson ? (
         <>

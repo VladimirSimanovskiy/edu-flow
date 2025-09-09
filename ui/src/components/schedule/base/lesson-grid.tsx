@@ -6,12 +6,16 @@ interface LessonGridProps {
   lessonNumbers: number[];
   getLesson: (lessonNumber: number) => LessonData | undefined;
   className?: string;
+  onLessonClick?: (lessonNumber: number, lesson: LessonData) => void;
+  isLessonHighlighted?: (lessonNumber: number, lesson: LessonData) => boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
   lessonNumbers,
   getLesson,
   className,
+  onLessonClick,
+  isLessonHighlighted,
 }) => {
   return (
     <div 
@@ -22,12 +26,15 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     >
       {lessonNumbers.map(lessonNumber => {
         const lesson = getLesson(lessonNumber);
+        const isHighlighted = lesson && isLessonHighlighted ? isLessonHighlighted(lessonNumber, lesson) : false;
         
         return (
           <LessonCell
             key={lessonNumber}
             lesson={lesson}
             lessonNumber={lessonNumber}
+            onClick={lesson && onLessonClick ? () => onLessonClick(lessonNumber, lesson) : undefined}
+            isHighlighted={isHighlighted}
           />
         );
       })}

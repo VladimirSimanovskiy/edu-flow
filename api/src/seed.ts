@@ -74,7 +74,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Users created');
 
   // Create subjects
   const subjects = await Promise.all([
@@ -134,7 +133,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Subjects created');
 
   // Create classrooms
   const classrooms = await Promise.all([
@@ -170,7 +168,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Classrooms created');
 
   // Create teachers
   const teachers = await Promise.all([
@@ -242,7 +239,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Teachers created');
 
   // Create teacher-subject relationships
   await Promise.all([
@@ -278,7 +274,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Teacher-subject relationships created');
 
   // Create classes
   const classes = await Promise.all([
@@ -312,7 +307,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Classes created');
 
   // Create lesson schedule (6 lessons per day)
   const lessonSchedules = await Promise.all([
@@ -360,7 +354,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Lesson schedules created');
 
   // Create schedule version
   const scheduleVersion = await prisma.scheduleVersion.upsert({
@@ -374,7 +367,6 @@ async function main() {
     },
   });
 
-  console.log('✅ Schedule version created');
 
   // Create lessons for each class (6 lessons per day, 5 days per week)
   const lessons = [];
@@ -405,7 +397,6 @@ async function main() {
     }
   }
 
-  console.log(`✅ Created ${lessons.length} lessons`);
 
   // Create some students
   const students = await Promise.all([
@@ -459,7 +450,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Students created');
 
   // Create student class history
   await Promise.all([
@@ -493,7 +483,6 @@ async function main() {
     }),
   ]);
 
-  console.log('✅ Student class history created');
 
   console.log('🎉 Database seeding completed successfully!');
   console.log(`📊 Summary:`);

@@ -43,8 +43,6 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
 
   // Обработчик клика по уроку в расписании классов
   const handleLessonClick = (classId: number, lessonNumber: number, _lesson: LessonData) => {
-    console.log('Class lesson clicked:', { classId, lessonNumber, dayOfWeek });
-    
     // Находим урок и извлекаем ID учителя
     const lessonData = lessons.find(l => 
       l.idClass === classId && 
@@ -53,22 +51,17 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
     );
 
     if (!lessonData) {
-      console.log('No lesson data found');
       return;
     }
 
     const teacherId = lessonData.idTeacher;
     const currentHighlightedTeacherId = highlight.highlightedTeacherId;
 
-    console.log('Lesson data:', { teacherId, currentHighlightedTeacherId });
-
     // Если кликнули по тому же учителю - снимаем подсветку
     if (currentHighlightedTeacherId === teacherId) {
-      console.log('Clearing highlight');
       clearHighlight();
     } else {
       // Иначе подсвечиваем нового учителя
-      console.log('Setting highlight for teacher:', teacherId);
       setHighlightedTeacher(teacherId, date);
     }
   };

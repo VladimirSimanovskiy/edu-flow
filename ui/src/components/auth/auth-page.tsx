@@ -8,8 +8,8 @@ export const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
 
   const handleAuthSuccess = () => {
-    // Redirect will be handled by ProtectedRoute
-    // No need to redirect manually
+    // Force page reload to update authentication state
+    window.location.reload();
   };
 
   return (

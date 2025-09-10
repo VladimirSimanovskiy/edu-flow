@@ -13,20 +13,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submitted with:', { email, password });
-    
     if (!email || !password) {
-      console.log('Missing email or password');
       return;
     }
 
     try {
-      console.log('Attempting login...');
       await login({ email, password });
-      console.log('Login successful');
       onSuccess?.();
     } catch (error) {
-      console.error('Login error:', error);
+      // Error is handled by the hook
     }
   };
 

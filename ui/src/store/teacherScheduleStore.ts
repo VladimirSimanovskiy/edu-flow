@@ -15,7 +15,6 @@ interface TeacherScheduleState {
 export const useTeacherScheduleStore = create<TeacherScheduleState>((set) => ({
   highlight: {},
   setHighlightedClass: (classId, date) => {
-    console.log('Setting highlighted class:', { classId, date });
     set(() => ({
       highlight: {
         highlightedClassId: classId,
@@ -24,7 +23,6 @@ export const useTeacherScheduleStore = create<TeacherScheduleState>((set) => ({
     }));
   },
   clearHighlight: () => {
-    console.log('Clearing teacher highlight');
     set(() => ({
       highlight: {}
     }));

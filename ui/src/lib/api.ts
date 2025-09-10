@@ -38,8 +38,6 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    console.log('API Client: Making request to:', url);
-    console.log('API Client: Request options:', options);
     
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -55,8 +53,8 @@ class ApiClient {
       headers,
     });
 
-    // If token expired, try to refresh
-    if (response.status === 401 && this.refreshToken && endpoint !== '/auth/refresh') {
+    // If token expired or invalid, try to refresh
+    if ((response.status === 401 || response.status === 403) && this.refreshToken && endpoint !== '/auth/refresh') {
       try {
         await this.refreshAccessToken();
         // Retry the original request with new token
@@ -76,7 +74,10 @@ class ApiClient {
 
     if (!response.ok) {
       const error: ApiError = await response.json();
-      throw new Error(error.error.message || 'An error occurred');
+      const errorMessage = error.error.message || 'An error occurred';
+      const errorWithStatus = new Error(errorMessage);
+      (errorWithStatus as any).status = response.status;
+      throw errorWithStatus;
     }
 
     return response.json();
@@ -106,15 +107,10 @@ class ApiClient {
 
   // Auth methods
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    console.log('API Client: Attempting login with:', credentials);
-    console.log('API Client: Base URL:', this.baseURL);
-    
     const response = await this.request<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
-    
-    console.log('API Client: Login response:', response);
     
     this.accessToken = response.accessToken;
     this.refreshToken = response.refreshToken;

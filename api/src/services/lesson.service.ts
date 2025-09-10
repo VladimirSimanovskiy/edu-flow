@@ -5,9 +5,10 @@ import type {
   LessonFilters, 
   CreateLessonRequest, 
   UpdateLessonRequest,
-  LessonWithDetails,
   PaginatedResult 
 } from '@shared/types';
+import type { LessonWithIncludes } from '../types/lesson';
+import type { LessonWithDetails } from '@shared/types';
 
 export class LessonService extends BaseService<Lesson> {
   constructor(private lessonRepository: LessonRepository) {
@@ -154,12 +155,24 @@ export class LessonService extends BaseService<Lesson> {
     }
   }
 
-  private transformToLessonWithDetails(lesson: Lesson): LessonWithDetails {
+  private transformToLessonWithDetails(lesson: LessonWithIncludes): LessonWithDetails {
     const startTime = lesson.lessonSchedule.timeBegin.toTimeString().slice(0, 5);
     const endTime = lesson.lessonSchedule.timeEnd.toTimeString().slice(0, 5);
 
     return {
-      ...lesson,
+      // Base lesson fields
+      id: lesson.id,
+      dayOfWeek: lesson.dayOfWeek,
+      createdAt: lesson.createdAt,
+      updatedAt: lesson.updatedAt,
+      idTeacher: lesson.idTeacher,
+      idClass: lesson.idClass,
+      idSubject: lesson.idSubject,
+      idClassroom: lesson.idClassroom,
+      idLessonSchedule: lesson.idLessonSchedule,
+      idScheduleVersion: lesson.idScheduleVersion,
+      
+      // Computed fields
       subjectName: lesson.subject.name,
       teacherName: `${lesson.teacher.lastName} ${lesson.teacher.firstName}`,
       className: `${lesson.class.grade}${lesson.class.letter}`,

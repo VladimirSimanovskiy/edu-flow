@@ -1,8 +1,9 @@
 //******** AUTO GENERATED FILE, DO NOT EDIT.  *********
 
+//******** AUTO GENERATED FILE, DO NOT EDIT.  *********
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -44,6 +45,7 @@ enum UserRole {
   STUDENT
 }
 
+
 model Lesson {
   id        Int @id @default(autoincrement())
   dayOfWeek Int
@@ -71,9 +73,6 @@ model Lesson {
   scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
 
   @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion])
-  @@unique([idTeacher, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_teacher_time_slot")
-  @@unique([idClass, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_class_time_slot")
-  @@unique([idClassroom, dayOfWeek, idLessonSchedule, idScheduleVersion], name: "unique_classroom_time_slot")
 }
 
 model LessonSchedule {
@@ -87,6 +86,7 @@ model LessonSchedule {
     // Relations
     lessons Lesson[]
 }
+
 
 model ScheduleVersion {
   id          Int       @id @default(autoincrement())
@@ -171,6 +171,7 @@ model Teacher {
     classLeaderships  Class[]    @relation("TeacherClassLeadership")
 }
 
+
 model TeacherSubject {
   id        Int      @id @default(autoincrement())
   idTeacher Int
@@ -188,7 +189,7 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  role      UserRole @default(TEACHER)
+  role      UserRole @default(STUDENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

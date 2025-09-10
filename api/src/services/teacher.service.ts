@@ -5,9 +5,10 @@ import type {
   TeacherFilters, 
   CreateTeacherRequest, 
   UpdateTeacherRequest,
-  TeacherWithDetails,
   PaginatedResult 
 } from '@shared/types';
+import type { TeacherWithIncludes } from '../types/teacher';
+import type { TeacherWithDetails } from '@shared/types';
 
 export class TeacherService extends BaseService<Teacher> {
   constructor(private teacherRepository: TeacherRepository) {
@@ -156,12 +157,25 @@ export class TeacherService extends BaseService<Teacher> {
     });
   }
 
-  private transformToTeacherWithDetails(teacher: Teacher): TeacherWithDetails {
+  private transformToTeacherWithDetails(teacher: TeacherWithIncludes): TeacherWithDetails {
     const fullName = `${teacher.lastName} ${teacher.firstName}${teacher.middleName ? ` ${teacher.middleName}` : ''}`;
     const subjectNames = teacher.subjects.map(ts => ts.subject.name);
 
     return {
-      ...teacher,
+      // Base teacher fields
+      id: teacher.id,
+      firstName: teacher.firstName,
+      lastName: teacher.lastName,
+      middleName: teacher.middleName,
+      email: teacher.email,
+      phone: teacher.phone,
+      isActive: teacher.isActive,
+      createdAt: teacher.createdAt,
+      updatedAt: teacher.updatedAt,
+      idAssignedClassroom: teacher.idAssignedClassroom,
+      idUser: teacher.idUser,
+      
+      // Computed fields
       fullName,
       subjectNames,
       assignedClassroomNumber: teacher.assignedClassroom?.number

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { createError } from '../middleware/errorHandler';
 // import { /* authenticateToken */, requireRole } from '../middleware/auth';
-import { PrismaClient } from '../../../db/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
 const router: Router = Router();

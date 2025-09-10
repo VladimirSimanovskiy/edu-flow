@@ -1,9 +1,10 @@
 import { PrismaClient, Teacher } from '@prisma/client';
 import { BaseRepository, RepositoryFilters, PaginatedResult } from './base.repository';
 import type { TeacherFilters } from '@shared/types';
+import type { TeacherWithIncludes } from '../types/teacher';
 
 export class TeacherRepository extends BaseRepository<Teacher> {
-  async findById(id: number): Promise<Teacher | null> {
+  async findById(id: number): Promise<TeacherWithIncludes | null> {
     return this.prisma.teacher.findUnique({
       where: { id },
       include: {
@@ -27,7 +28,7 @@ export class TeacherRepository extends BaseRepository<Teacher> {
     });
   }
 
-  async create(data: Partial<Teacher>): Promise<Teacher> {
+  async create(data: Partial<Teacher>): Promise<TeacherWithIncludes> {
     return this.prisma.teacher.create({
       data: data as any,
       include: {
@@ -38,12 +39,20 @@ export class TeacherRepository extends BaseRepository<Teacher> {
           }
         },
         assignedClassroom: true,
-        classLeaderships: true
+        classLeaderships: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true
+          }
+        }
       }
     });
   }
 
-  async update(id: number, data: Partial<Teacher>): Promise<Teacher> {
+  async update(id: number, data: Partial<Teacher>): Promise<TeacherWithIncludes> {
     return this.prisma.teacher.update({
       where: { id },
       data: data as any,
@@ -55,7 +64,15 @@ export class TeacherRepository extends BaseRepository<Teacher> {
           }
         },
         assignedClassroom: true,
-        classLeaderships: true
+        classLeaderships: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true
+          }
+        }
       }
     });
   }
@@ -66,7 +83,7 @@ export class TeacherRepository extends BaseRepository<Teacher> {
     });
   }
 
-  async findMany(filters?: TeacherFilters & RepositoryFilters): Promise<Teacher[]> {
+  async findMany(filters?: TeacherFilters & RepositoryFilters): Promise<TeacherWithIncludes[]> {
     const where: any = {};
 
     if (filters?.isActive !== undefined) {
@@ -93,7 +110,15 @@ export class TeacherRepository extends BaseRepository<Teacher> {
           }
         },
         assignedClassroom: true,
-        classLeaderships: true
+        classLeaderships: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true
+          }
+        }
       },
       orderBy: [
         { lastName: 'asc' },
@@ -102,7 +127,7 @@ export class TeacherRepository extends BaseRepository<Teacher> {
     });
   }
 
-  async findPaginated(filters?: TeacherFilters & RepositoryFilters): Promise<PaginatedResult<Teacher>> {
+  async findPaginated(filters?: TeacherFilters & RepositoryFilters): Promise<PaginatedResult<TeacherWithIncludes>> {
     const page = filters?.page || 1;
     const limit = filters?.limit || 10;
     const skip = (page - 1) * limit;
@@ -134,7 +159,15 @@ export class TeacherRepository extends BaseRepository<Teacher> {
             }
           },
           assignedClassroom: true,
-          classLeaderships: true
+          classLeaderships: true,
+          lessons: {
+            include: {
+              class: true,
+              subject: true,
+              classroom: true,
+              lessonSchedule: true
+            }
+          }
         },
         orderBy: [
           { lastName: 'asc' },
@@ -161,7 +194,7 @@ export class TeacherRepository extends BaseRepository<Teacher> {
     };
   }
 
-  async findBySubject(subjectId: number): Promise<Teacher[]> {
+  async findBySubject(subjectId: number): Promise<TeacherWithIncludes[]> {
     return this.prisma.teacher.findMany({
       where: {
         subjects: {
@@ -178,7 +211,16 @@ export class TeacherRepository extends BaseRepository<Teacher> {
             subject: true
           }
         },
-        assignedClassroom: true
+        assignedClassroom: true,
+        classLeaderships: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true
+          }
+        }
       },
       orderBy: [
         { lastName: 'asc' },
@@ -187,7 +229,7 @@ export class TeacherRepository extends BaseRepository<Teacher> {
     });
   }
 
-  async findActive(): Promise<Teacher[]> {
+  async findActive(): Promise<TeacherWithIncludes[]> {
     return this.prisma.teacher.findMany({
       where: { isActive: true },
       include: {
@@ -198,7 +240,15 @@ export class TeacherRepository extends BaseRepository<Teacher> {
           }
         },
         assignedClassroom: true,
-        classLeaderships: true
+        classLeaderships: true,
+        lessons: {
+          include: {
+            class: true,
+            subject: true,
+            classroom: true,
+            lessonSchedule: true
+          }
+        }
       },
       orderBy: [
         { lastName: 'asc' },

@@ -1,6 +1,7 @@
 import { PrismaClient, Lesson } from '@prisma/client';
 import { BaseRepository, RepositoryFilters, PaginatedResult } from './base.repository';
 import type { LessonFilters } from '@shared/types';
+import type { LessonWithIncludes } from '../types/lesson';
 
 export class LessonRepository extends BaseRepository<Lesson> {
   async findById(id: number): Promise<Lesson | null> {
@@ -79,7 +80,7 @@ export class LessonRepository extends BaseRepository<Lesson> {
     });
   }
 
-  async findMany(filters?: LessonFilters & RepositoryFilters): Promise<Lesson[]> {
+  async findMany(filters?: LessonFilters & RepositoryFilters): Promise<LessonWithIncludes[]> {
     const where: any = {};
 
     if (filters?.idTeacher) {
@@ -125,7 +126,7 @@ export class LessonRepository extends BaseRepository<Lesson> {
     return lessons;
   }
 
-  async findPaginated(filters?: LessonFilters & RepositoryFilters): Promise<PaginatedResult<Lesson>> {
+  async findPaginated(filters?: LessonFilters & RepositoryFilters): Promise<PaginatedResult<LessonWithIncludes>> {
     const page = filters?.page || 1;
     const limit = filters?.limit || 10;
     const skip = (page - 1) * limit;
@@ -192,7 +193,7 @@ export class LessonRepository extends BaseRepository<Lesson> {
     };
   }
 
-  async findByTeacherAndDate(teacherId: number, date: Date): Promise<Lesson[]> {
+  async findByTeacherAndDate(teacherId: number, date: Date): Promise<LessonWithIncludes[]> {
     const dayOfWeek = date.getDay();
     
     return this.prisma.lesson.findMany({
@@ -225,7 +226,7 @@ export class LessonRepository extends BaseRepository<Lesson> {
     });
   }
 
-  async findByClassAndDate(classId: number, date: Date): Promise<Lesson[]> {
+  async findByClassAndDate(classId: number, date: Date): Promise<LessonWithIncludes[]> {
     const dayOfWeek = date.getDay();
     
     return this.prisma.lesson.findMany({

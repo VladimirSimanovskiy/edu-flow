@@ -11,12 +11,11 @@
     "lint": "pnpm --filter api lint && pnpm --filter ui lint",
     "lint:fix": "pnpm --filter api lint:fix && pnpm --filter ui lint:fix",
     "type-check": "pnpm --filter api type-check && pnpm --filter ui type-check",
-    "clean": "pnpm --filter api clean && pnpm --filter ui clean && pnpm --filter db clean",
-    "db:generate": "pnpm --filter db db:generate",
-    "db:migrate": "pnpm --filter db db:migrate",
-    "db:seed": "pnpm --filter db db:seed",
-    "db:studio": "pnpm --filter db db:studio",
-    "db:reset": "pnpm --filter db db:reset"
+    "clean": "pnpm --filter api clean && pnpm --filter ui clean",
+    "db:generate": "pnpm --filter api db:generate",
+    "db:migrate": "pnpm --filter api db:migrate",
+    "db:seed": "pnpm --filter api db:seed",
+    "db:studio": "pnpm --filter api db:studio"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

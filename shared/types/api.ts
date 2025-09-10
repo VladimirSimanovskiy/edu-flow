@@ -154,7 +154,20 @@ export interface PaginatedResult<T> {
 }
 
 // Extended types with computed fields for API responses
-export interface LessonWithDetails extends Lesson {
+export interface LessonWithDetails {
+  // Base lesson fields
+  id: number;
+  dayOfWeek: number;
+  createdAt: Date;
+  updatedAt: Date;
+  idTeacher: number;
+  idClass: number;
+  idSubject: number;
+  idClassroom: number;
+  idLessonSchedule: number;
+  idScheduleVersion: number;
+  
+  // Computed fields
   subjectName: string;
   teacherName: string;
   className: string;
@@ -164,7 +177,21 @@ export interface LessonWithDetails extends Lesson {
   lessonNumber: number;
 }
 
-export interface TeacherWithDetails extends Teacher {
+export interface TeacherWithDetails {
+  // Base teacher fields
+  id: number;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  email: string | null;
+  phone: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  idAssignedClassroom: number | null;
+  idUser: number | null;
+  
+  // Computed fields
   fullName: string;
   subjectNames: string[];
   assignedClassroomNumber?: number;

@@ -49,23 +49,5 @@ export interface TeacherWithIncludes {
   }[];
 }
 
-// Type for API responses
-export interface TeacherWithDetails {
-  // Base teacher fields
-  id: number;
-  firstName: string;
-  lastName: string;
-  middleName: string | null;
-  email: string | null;
-  phone: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  idAssignedClassroom: number | null;
-  idUser: number | null;
-  
-  // Computed fields
-  fullName: string;
-  subjectNames: string[];
-  assignedClassroomNumber?: number;
-}
+// Re-export shared types to avoid duplication
+export type { TeacherWithDetails } from '@shared/types';

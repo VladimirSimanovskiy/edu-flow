@@ -11,11 +11,11 @@ export interface ApiError {
   error: {
     message: string;
     code: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 }
 
-// Request types
+// Request types using proper composition
 export interface LoginRequest {
   email: string;
   password: string;
@@ -24,114 +24,77 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT';
+  role: UserRole;
 }
 
-export interface CreateLessonRequest {
-  dayOfWeek: number;
-  idTeacher: number;
-  idClass: number;
-  idSubject: number;
-  idClassroom: number;
-  idLessonSchedule: number;
-  idScheduleVersion: number;
-}
+// Create request types - only the fields needed for creation
+export type CreateLessonRequest = Pick<Lesson, 
+  'dayOfWeek' | 'idTeacher' | 'idClass' | 'idSubject' | 
+  'idClassroom' | 'idLessonSchedule' | 'idScheduleVersion'
+>;
 
-export interface UpdateLessonRequest extends Partial<CreateLessonRequest> {
-  id: number;
-}
+// Update request types - make all fields optional except id
+export type UpdateLessonRequest = WithId<Partial<CreateLessonRequest>>;
 
-export interface CreateScheduleVersionRequest {
-  dateBegin: string;
-  dateEnd?: string;
-  description?: string;
-}
+// Schedule version request types
+export type CreateScheduleVersionRequest = Pick<ScheduleVersion, 'dateBegin'> & 
+  Partial<Pick<ScheduleVersion, 'dateEnd' | 'description'>>;
 
-export interface UpdateScheduleVersionRequest extends Partial<CreateScheduleVersionRequest> {
-  id: number;
-}
+export type UpdateScheduleVersionRequest = WithId<Partial<CreateScheduleVersionRequest>>;
 
-export interface CreateTeacherRequest {
-  firstName: string;
-  lastName: string;
-  middleName?: string;
-  email?: string;
-  phone?: string;
-  idUser?: number;
-  idAssignedClassroom?: number;
-}
+// Teacher request types
+export type CreateTeacherRequest = Pick<Teacher, 'firstName' | 'lastName'> & 
+  Optional<Teacher, 'middleName' | 'email' | 'phone' | 'idUser' | 'idAssignedClassroom'>;
 
-export interface UpdateTeacherRequest extends Partial<CreateTeacherRequest> {
-  id: number;
-}
+export type UpdateTeacherRequest = WithId<Partial<CreateTeacherRequest>>;
 
-export interface CreateClassRequest {
-  grade: number;
-  letter: string;
-  idClassLeaderTeacher?: number;
-}
+// Class request types
+export type CreateClassRequest = Pick<Class, 'grade' | 'letter'> & 
+  Optional<Class, 'idClassLeaderTeacher'>;
 
-export interface UpdateClassRequest extends Partial<CreateClassRequest> {
-  id: number;
-}
+export type UpdateClassRequest = WithId<Partial<CreateClassRequest>>;
 
-export interface CreateSubjectRequest {
-  name: string;
-  code: string;
-  description?: string;
-}
+// Subject request types
+export type CreateSubjectRequest = Pick<Subject, 'name' | 'code'> & 
+  Optional<Subject, 'description'>;
 
-export interface UpdateSubjectRequest extends Partial<CreateSubjectRequest> {
-  id: number;
-}
+export type UpdateSubjectRequest = WithId<Partial<CreateSubjectRequest>>;
 
-export interface CreateClassroomRequest {
-  number: number;
-  floor: number;
-}
+// Classroom request types
+export type CreateClassroomRequest = Pick<Classroom, 'number' | 'floor'>;
 
-export interface UpdateClassroomRequest extends Partial<CreateClassroomRequest> {
-  id: number;
-}
+export type UpdateClassroomRequest = WithId<Partial<CreateClassroomRequest>>;
 
-// Filter types
-export interface LessonFilters {
-  idTeacher?: number;
-  idClass?: number;
-  idSubject?: number;
-  dayOfWeek?: number;
-  idScheduleVersion?: number;
+// Filter types using proper composition
+export type LessonFilters = Partial<Pick<Lesson, 
+  'idTeacher' | 'idClass' | 'idSubject' | 'dayOfWeek' | 'idScheduleVersion'
+>> & {
   startDate?: string;
   endDate?: string;
   date?: string;
-}
+};
 
-export interface TeacherFilters {
-  isActive?: boolean;
-  idAssignedClassroom?: number;
+export type TeacherFilters = Partial<Pick<Teacher, 
+  'isActive' | 'idAssignedClassroom'
+>> & {
   search?: string; // Search by name or email
-}
+};
 
-export interface ClassFilters {
-  grade?: number;
-  idClassLeaderTeacher?: number;
+export type ClassFilters = Partial<Pick<Class, 
+  'grade' | 'idClassLeaderTeacher'
+>> & {
   search?: string; // Search by grade or letter
-}
+};
 
-export interface SubjectFilters {
+export type SubjectFilters = {
   search?: string; // Search by name or code
-}
+};
 
-export interface ClassroomFilters {
-  floor?: number;
-  number?: number;
-}
+export type ClassroomFilters = Partial<Pick<Classroom, 'floor' | 'number'>>;
 
-export interface ScheduleVersionFilters {
-  dateBegin?: string;
-  dateEnd?: string;
-  description?: string;
-}
+export type ScheduleVersionFilters = Partial<Pick<ScheduleVersion, 
+  'dateBegin' | 'dateEnd' | 'description'
+>>;
 
 // Pagination types
 export interface PaginationOptions {
@@ -154,8 +117,18 @@ export interface PaginatedResult<T> {
 }
 
 // Extended types with computed fields for API responses
-export interface LessonWithDetails {
-  // Base lesson fields
+// Using proper type composition instead of duplication
+export type LessonWithDetails = LessonWithComputedFields;
+export type TeacherWithDetails = TeacherWithComputedFields;
+export type ClassWithDetails = ClassWithComputedFields;
+
+// Utility type to replace lessons field with enhanced type
+export type ScheduleVersionWithLessons = Omit<ScheduleVersion, 'lessons'> & {
+  lessons: LessonWithDetails[];
+};
+
+// Base lesson type without relations (for create/update operations)
+export interface LessonBase {
   id: number;
   dayOfWeek: number;
   createdAt: Date;
@@ -166,8 +139,52 @@ export interface LessonWithDetails {
   idClassroom: number;
   idLessonSchedule: number;
   idScheduleVersion: number;
-  
-  // Computed fields
+}
+
+// Type aliases for consistency
+export type LessonWithUI = LessonWithDetails;
+export type TeacherWithUI = TeacherWithDetails;
+export type ClassWithUI = ClassWithDetails;
+
+// Constants and enums
+export const DAYS_OF_WEEK = [
+  'Воскресенье',
+  'Понедельник', 
+  'Вторник',
+  'Среда',
+  'Четверг',
+  'Пятница',
+  'Суббота'
+] as const;
+
+export const LESSON_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type LessonNumber = typeof LESSON_NUMBERS[number];
+export type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
+
+// ============================================================================
+// UTILITY TYPES FOR PROPER TYPE COMPOSITION
+// ============================================================================
+
+// Generic utility types
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type ReplaceField<T, K extends keyof T, V> = Omit<T, K> & Record<K, V>;
+export type WithComputedFields<T, C> = T & C;
+
+// Specific utility types for our domain
+export type WithTimestamps<T> = T & {
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type WithId<T> = T & {
+  id: number;
+};
+
+// Enhanced entity types using proper composition
+export type LessonWithComputedFields = WithComputedFields<Lesson, {
   subjectName: string;
   teacherName: string;
   className: string;
@@ -175,34 +192,16 @@ export interface LessonWithDetails {
   startTime: string;
   endTime: string;
   lessonNumber: number;
-}
+}>;
 
-export interface TeacherWithDetails {
-  // Base teacher fields
-  id: number;
-  firstName: string;
-  lastName: string;
-  middleName: string | null;
-  email: string | null;
-  phone: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  idAssignedClassroom: number | null;
-  idUser: number | null;
-  
-  // Computed fields
+export type TeacherWithComputedFields = WithComputedFields<Teacher, {
   fullName: string;
   subjectNames: string[];
   assignedClassroomNumber?: number;
-}
+}>;
 
-export interface ClassWithDetails extends Class {
+export type ClassWithComputedFields = WithComputedFields<Class, {
   name: string;
   classLeaderName?: string;
   studentCount: number;
-}
-
-export interface ScheduleVersionWithLessons extends ScheduleVersion {
-  lessons: LessonWithDetails[];
-}
+}>;

@@ -6,7 +6,9 @@ import type {
   LessonFilters,
   ApiResponse,
   LessonWithDetails,
-  PaginatedResult 
+  PaginatedResult,
+  Lesson,
+  LessonBase
 } from '@shared/types';
 
 export class LessonController {
@@ -76,8 +78,8 @@ export class LessonController {
         return;
       }
 
-      const response: ApiResponse<any> = {
-        data: lesson,
+      const response: ApiResponse<Lesson> = {
+        data: lesson as Lesson,
         success: true,
         message: 'Lesson retrieved successfully'
       };
@@ -98,7 +100,7 @@ export class LessonController {
       const lessonData: CreateLessonRequest = req.body;
       const lesson = await this.lessonService.createLesson(lessonData);
       
-      const response: ApiResponse<any> = {
+      const response: ApiResponse<LessonBase> = {
         data: lesson,
         success: true,
         message: 'Lesson created successfully'
@@ -122,7 +124,7 @@ export class LessonController {
       
       const lesson = await this.lessonService.updateLesson(id, updateData);
       
-      const response: ApiResponse<any> = {
+      const response: ApiResponse<LessonBase> = {
         data: lesson,
         success: true,
         message: 'Lesson updated successfully'

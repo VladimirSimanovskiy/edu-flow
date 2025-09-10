@@ -1,27 +1,10 @@
-import type { Lesson, Teacher, Class, LessonSchedule, ScheduleVersion } from './database';
+import type { Lesson, Teacher, Class, LessonSchedule, ScheduleVersion, User } from './database';
+import type { LessonWithDetails, TeacherWithDetails, ClassWithDetails } from './api';
 
-// UI-specific types and computed fields
-export interface LessonWithUI extends Lesson {
-  subjectName: string;
-  teacherName: string;
-  className: string;
-  classroomNumber: number;
-  startTime: string;
-  endTime: string;
-  lessonNumber: number;
-}
-
-export interface TeacherWithUI extends Teacher {
-  fullName: string;
-  subjectNames: string[];
-  assignedClassroomNumber?: number;
-}
-
-export interface ClassWithUI extends Class {
-  name: string;
-  classLeaderName?: string;
-  studentCount: number;
-}
+// Type aliases for UI
+export type LessonWithUI = LessonWithDetails;
+export type TeacherWithUI = TeacherWithDetails;
+export type ClassWithUI = ClassWithDetails;
 
 export interface ScheduleCell {
   lessonNumber: number;
@@ -53,9 +36,8 @@ export interface LessonScheduleWithTimes extends LessonSchedule {
   endTime: string;
 }
 
-export interface ScheduleVersionWithLessons extends ScheduleVersion {
-  lessons: LessonWithUI[];
-}
+// Re-export from api.ts to maintain consistency
+export type { ScheduleVersionWithLessons } from './api';
 
 // Store types
 export interface ScheduleState {
@@ -150,18 +132,6 @@ export interface UseAuthReturn {
   error: string | null;
 }
 
-// Constants
-export const DAYS_OF_WEEK = [
-  'Воскресенье',
-  'Понедельник', 
-  'Вторник',
-  'Среда',
-  'Четверг',
-  'Пятница',
-  'Суббота'
-] as const;
-
-export const LESSON_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-
-export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-export type LessonNumber = typeof LESSON_NUMBERS[number];
+// Re-export constants from api.ts to avoid duplication
+export type { DayOfWeek, LessonNumber } from './api';
+export { DAYS_OF_WEEK, LESSON_NUMBERS } from './api';

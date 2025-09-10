@@ -1,4 +1,4 @@
-// Types for lesson with relations
+// Types for lesson with relations (internal API use)
 export interface LessonWithIncludes {
   id: number;
   dayOfWeek: number;
@@ -33,26 +33,5 @@ export interface LessonWithIncludes {
   };
 }
 
-// Type for API responses
-export interface LessonWithDetails {
-  // Base lesson fields
-  id: number;
-  dayOfWeek: number;
-  createdAt: Date;
-  updatedAt: Date;
-  idTeacher: number;
-  idClass: number;
-  idSubject: number;
-  idClassroom: number;
-  idLessonSchedule: number;
-  idScheduleVersion: number;
-  
-  // Computed fields
-  subjectName: string;
-  teacherName: string;
-  className: string;
-  classroomNumber: number;
-  startTime: string;
-  endTime: string;
-  lessonNumber: number;
-}
+// Re-export shared types to avoid duplication
+export type { LessonWithDetails } from '@shared/types';

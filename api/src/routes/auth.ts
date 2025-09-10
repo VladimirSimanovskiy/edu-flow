@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createError } from '../middleware/errorHandler';
 import { AuthRequest, authenticateToken, requireRole } from '../middleware/auth';
+import { loginRateLimiter, registerRateLimiter } from '../middleware/rateLimiter';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
@@ -10,7 +11,7 @@ const router: Router = Router();
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || "postgresql://postgres:Password1@localhost:5432/edu_flow?schema=public"
+      url: process.env.DATABASE_URL
     }
   }
 });
@@ -28,7 +29,7 @@ const registerSchema = z.object({
 });
 
 // Login
-router.post('/login', async (req, res, next) => {
+router.post('/login', loginRateLimiter, async (req, res, next) => {
   try {
     // Validate input
     const validationResult = loginSchema.safeParse(req.body);
@@ -55,8 +56,9 @@ router.post('/login', async (req, res, next) => {
 
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      return next(createError('JWT secret not configured', 500));
+      return next(createError('Server configuration error', 500));
     }
+
 
     // Generate access token (short-lived)
     const accessToken = jwt.sign(
@@ -65,7 +67,7 @@ router.post('/login', async (req, res, next) => {
       { expiresIn: '15m' }
     );
 
-    // Generate refresh token (long-lived)
+    // Generate refresh token (long-lived) 
     const refreshToken = jwt.sign(
       { id: user.id, type: 'refresh' },
       secret,
@@ -88,7 +90,7 @@ router.post('/login', async (req, res, next) => {
 });
 
 // Register (только для админов)
-router.post('/register', authenticateToken, requireRole(['ADMIN']), async (req: AuthRequest, res, next) => {
+router.post('/register', registerRateLimiter, authenticateToken, requireRole(['ADMIN']), async (req: AuthRequest, res, next) => {
   try {
     // Validate input
     const validationResult = registerSchema.safeParse(req.body);
@@ -107,7 +109,8 @@ router.post('/register', authenticateToken, requireRole(['ADMIN']), async (req: 
       return next(createError('User already exists', 409));
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const bcryptRounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
+    const hashedPassword = await bcrypt.hash(password, bcryptRounds);
     
     const newUser = await prisma.user.create({
       data: {
@@ -140,7 +143,7 @@ router.post('/refresh', async (req, res, next) => {
 
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      return next(createError('JWT secret not configured', 500));
+      return next(createError('Server configuration error', 500));
     }
 
     jwt.verify(refreshToken, secret, async (err: any, decoded: any) => {

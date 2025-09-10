@@ -8,7 +8,7 @@ const router: Router = Router();
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || "postgresql://postgres:Password1@localhost:5432/edu_flow?schema=public"
+      url: process.env.DATABASE_URL
     }
   }
 });

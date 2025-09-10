@@ -24,7 +24,7 @@ export const authenticateToken = (
 
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    return next(createError('JWT secret not configured', 500));
+    return next(createError('Server configuration error', 500));
   }
 
   jwt.verify(token, secret, (err, user) => {

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createError } from '../middleware/errorHandler';
+import { AuthRequest, authenticateToken, requireRole } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
@@ -57,14 +58,23 @@ router.post('/login', async (req, res, next) => {
       return next(createError('JWT secret not configured', 500));
     }
 
-    const token = jwt.sign(
+    // Generate access token (short-lived)
+    const accessToken = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       secret,
-      { expiresIn: '24h' }
+      { expiresIn: '15m' }
+    );
+
+    // Generate refresh token (long-lived)
+    const refreshToken = jwt.sign(
+      { id: user.id, type: 'refresh' },
+      secret,
+      { expiresIn: '7d' }
     );
 
     res.json({
-      token,
+      accessToken,
+      refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -78,7 +88,7 @@ router.post('/login', async (req, res, next) => {
 });
 
 // Register (только для админов)
-router.post('/register', async (req, res, next) => {
+router.post('/register', authenticateToken, requireRole(['ADMIN']), async (req: AuthRequest, res, next) => {
   try {
     // Validate input
     const validationResult = registerSchema.safeParse(req.body);
@@ -119,17 +129,93 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
+// Refresh token
+router.post('/refresh', async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return next(createError('Refresh token required', 400));
+    }
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return next(createError('JWT secret not configured', 500));
+    }
+
+    jwt.verify(refreshToken, secret, async (err: any, decoded: any) => {
+      if (err || decoded.type !== 'refresh') {
+        return next(createError('Invalid refresh token', 403));
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: parseInt(decoded.id) },
+        include: { teacher: true },
+      });
+
+      if (!user) {
+        return next(createError('User not found', 404));
+      }
+
+      // Generate new access token
+      const newAccessToken = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        secret,
+        { expiresIn: '15m' }
+      );
+
+      res.json({
+        accessToken: newAccessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          teacher: user.teacher,
+        },
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Logout
+router.post('/logout', (req, res) => {
+  // В реальном приложении здесь можно добавить blacklist для токенов
+  res.json({ message: 'Logged out successfully' });
+});
+
 // Get current user
-router.get('/me', async (req, res, next) => {
-  // Временно возвращаем тестового пользователя без авторизации
-  res.json({
-    user: {
-      id: 1,
-      email: 'admin@school.com',
-      role: 'ADMIN',
-      teacher: null,
-    },
-  });
+router.get('/me', authenticateToken, async (req: AuthRequest, res, next) => {
+  try {
+    if (!req.user) {
+      return next(createError('User not found', 404));
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      include: { 
+        teacher: true,
+        student: true 
+      },
+    });
+
+    if (!user) {
+      return next(createError('User not found', 404));
+    }
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        teacher: user.teacher,
+        student: user.student,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export { router as authRoutes };

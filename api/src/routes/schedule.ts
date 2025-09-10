@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createError } from '../middleware/errorHandler';
-// import { /* authenticateToken */, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
@@ -36,7 +36,7 @@ const lessonFiltersSchema = z.object({
 });
 
 // Get all teachers
-router.get('/teachers',  async (req, res, next) => {
+router.get('/teachers', authenticateToken, async (req, res, next) => {
   try {
     const teachers = await prisma.teacher.findMany({
       include: {
@@ -68,7 +68,7 @@ router.get('/teachers',  async (req, res, next) => {
 });
 
 // Get all classes
-router.get('/classes', async (req, res, next) => {
+router.get('/classes', authenticateToken, async (req, res, next) => {
   try {
     const classes = await prisma.class.findMany({
       include: {
@@ -104,7 +104,7 @@ router.get('/classes', async (req, res, next) => {
 });
 
 // Get all subjects
-router.get('/subjects', async (req, res, next) => {
+router.get('/subjects', authenticateToken, async (req, res, next) => {
   try {
     const subjects = await prisma.subject.findMany({
       include: {
@@ -143,7 +143,7 @@ router.get('/subjects', async (req, res, next) => {
 });
 
 // Get all classrooms
-router.get('/classrooms', async (req, res, next) => {
+router.get('/classrooms', authenticateToken, async (req, res, next) => {
   try {
     const classrooms = await prisma.classroom.findMany({
       include: {
@@ -178,7 +178,7 @@ router.get('/classrooms', async (req, res, next) => {
 });
 
 // Get lessons with filters
-router.get('/lessons', async (req, res, next) => {
+router.get('/lessons', authenticateToken, async (req, res, next) => {
   try {
     const validationResult = lessonFiltersSchema.safeParse(req.query);
     if (!validationResult.success) {
@@ -244,7 +244,7 @@ router.get('/lessons', async (req, res, next) => {
 });
 
 // Get lessons for a specific day
-router.get('/lessons/day/:date', async (req, res, next) => {
+router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
     const { idTeacher, idClass } = req.query;
@@ -309,7 +309,7 @@ router.get('/lessons/day/:date', async (req, res, next) => {
 });
 
 // Get lessons for a specific week
-router.get('/lessons/week/:date', async (req, res, next) => {
+router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
     const { idTeacher, idClass } = req.query;
@@ -376,7 +376,7 @@ router.get('/lessons/week/:date', async (req, res, next) => {
 });
 
 // Create a new lesson
-router.post('/lessons', async (req, res, next) => {
+router.post('/lessons', authenticateToken, requireRole(['ADMIN']), async (req, res, next) => {
   try {
     const validationResult = lessonSchema.safeParse(req.body);
     if (!validationResult.success) {
@@ -408,7 +408,7 @@ router.post('/lessons', async (req, res, next) => {
 });
 
 // Update a lesson
-router.put('/lessons/:id', async (req, res, next) => {
+router.put('/lessons/:id', authenticateToken, requireRole(['ADMIN']), async (req, res, next) => {
   try {
     const { id } = req.params;
     const validationResult = lessonSchema.partial().safeParse(req.body);
@@ -451,7 +451,7 @@ router.put('/lessons/:id', async (req, res, next) => {
 });
 
 // Delete a lesson
-router.delete('/lessons/:id', async (req, res, next) => {
+router.delete('/lessons/:id', authenticateToken, requireRole(['ADMIN']), async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -474,7 +474,7 @@ router.delete('/lessons/:id', async (req, res, next) => {
 });
 
 // Get lesson schedules
-router.get('/lesson-schedules', async (req, res, next) => {
+router.get('/lesson-schedules', authenticateToken, async (req, res, next) => {
   try {
     const lessonSchedules = await prisma.lessonSchedule.findMany({
       include: {
@@ -504,7 +504,7 @@ router.get('/lesson-schedules', async (req, res, next) => {
 });
 
 // Get schedule versions
-router.get('/schedule-versions', async (req, res, next) => {
+router.get('/schedule-versions', authenticateToken, async (req, res, next) => {
   try {
     const scheduleVersions = await prisma.scheduleVersion.findMany({
       include: {
@@ -534,7 +534,7 @@ router.get('/schedule-versions', async (req, res, next) => {
 });
 
 // Get current schedule version
-router.get('/schedule-versions/current', async (req, res, next) => {
+router.get('/schedule-versions/current', authenticateToken, async (req, res, next) => {
   try {
     const today = new Date();
     const currentVersion = await prisma.scheduleVersion.findFirst({

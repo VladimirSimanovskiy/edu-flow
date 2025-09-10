@@ -7,6 +7,7 @@ import { TeacherSchedule } from './pages/teacher-schedule';
 import { ClassSchedule } from './pages/class-schedule';
 import { Button } from './components/ui/button';
 import { ErrorBoundary } from './components/ui/error-boundary';
+import { ProtectedRoute, UserMenu } from './components/auth';
 import { useAuth } from './hooks/useAuth';
 
 const queryClient = new QueryClient({
@@ -23,44 +24,40 @@ const queryClient = new QueryClient({
 });
 
 const Navigation: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="text-lg sm:text-xl font-bold text-gray-900 truncate">
-            Школьное расписание
+            EduFlow
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/teachers">
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-                Учителя
-              </Button>
-              <Button variant="ghost" size="sm" className="sm:hidden">
-                У
-              </Button>
-            </Link>
-            <Link to="/classes">
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-                Классы
-              </Button>
-              <Button variant="ghost" size="sm" className="sm:hidden">
-                К
-              </Button>
-            </Link>
+            {user && (
+              <>
+                <Link to="/teachers">
+                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                    Учителя
+                  </Button>
+                  <Button variant="ghost" size="sm" className="sm:hidden">
+                    У
+                  </Button>
+                </Link>
+                <Link to="/classes">
+                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                    Классы
+                  </Button>
+                  <Button variant="ghost" size="sm" className="sm:hidden">
+                    К
+                  </Button>
+                </Link>
+              </>
+            )}
             
             {user ? (
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
-                  {user.email}
-                </span>
-                <Button variant="outline" size="sm" onClick={logout}>
-                  <span className="hidden sm:inline">Выйти</span>
-                  <span className="sm:hidden">В</span>
-                </Button>
-              </div>
+              <UserMenu />
             ) : (
               <Button variant="outline" size="sm">
                 <span className="hidden sm:inline">Войти</span>
@@ -84,9 +81,21 @@ function App() {
             
             <main>
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/teachers" element={<TeacherSchedule />} />
-                <Route path="/classes" element={<ClassSchedule />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                <Route path="/teachers" element={
+                  <ProtectedRoute>
+                    <TeacherSchedule />
+                  </ProtectedRoute>
+                } />
+                <Route path="/classes" element={
+                  <ProtectedRoute>
+                    <ClassSchedule />
+                  </ProtectedRoute>
+                } />
               </Routes>
             </main>
           </div>

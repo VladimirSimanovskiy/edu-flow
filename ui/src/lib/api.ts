@@ -11,21 +11,26 @@ import type {
 import type { 
   LoginRequest, 
   RegisterRequest, 
+  LoginResponse,
+  RefreshTokenResponse,
+  AuthUser,
   CreateLessonRequest, 
   UpdateLessonRequest, 
   LessonFilters,
   ApiError 
-} from '../types/api';
+} from '../../../shared/types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class ApiClient {
   private baseURL: string;
-  private token: string | null = null;
+  private accessToken: string | null = null;
+  private refreshToken: string | null = null;
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
-    this.token = localStorage.getItem('auth_token');
+    this.accessToken = localStorage.getItem('access_token');
+    this.refreshToken = localStorage.getItem('refresh_token');
   }
 
   private async request<T>(
@@ -38,14 +43,33 @@ class ApiClient {
       ...options.headers,
     };
 
-    if (this.token) {
-      (headers as Record<string, string>).Authorization = `Bearer ${this.token}`;
+    if (this.accessToken) {
+      (headers as Record<string, string>).Authorization = `Bearer ${this.accessToken}`;
     }
 
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       ...options,
       headers,
     });
+
+    // If token expired, try to refresh
+    if (response.status === 401 && this.refreshToken && endpoint !== '/auth/refresh') {
+      try {
+        await this.refreshAccessToken();
+        // Retry the original request with new token
+        if (this.accessToken) {
+          (headers as Record<string, string>).Authorization = `Bearer ${this.accessToken}`;
+        }
+        response = await fetch(url, {
+          ...options,
+          headers,
+        });
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        this.logout();
+        throw new Error('Session expired. Please login again.');
+      }
+    }
 
     if (!response.ok) {
       const error: ApiError = await response.json();
@@ -55,15 +79,39 @@ class ApiClient {
     return response.json();
   }
 
+  private async refreshAccessToken(): Promise<void> {
+    if (!this.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(`${this.baseURL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken: this.refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh token');
+    }
+
+    const data: RefreshTokenResponse = await response.json();
+    this.accessToken = data.accessToken;
+    localStorage.setItem('access_token', data.accessToken);
+  }
+
   // Auth methods
-  async login(credentials: LoginRequest): Promise<{ token: string; user: User }> {
-    const response = await this.request<{ token: string; user: User }>('/auth/login', {
+  async login(credentials: LoginRequest): Promise<LoginResponse> {
+    const response = await this.request<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
     
-    this.token = response.token;
-    localStorage.setItem('auth_token', response.token);
+    this.accessToken = response.accessToken;
+    this.refreshToken = response.refreshToken;
+    localStorage.setItem('access_token', response.accessToken);
+    localStorage.setItem('refresh_token', response.refreshToken);
     
     return response;
   }
@@ -75,13 +123,21 @@ class ApiClient {
     });
   }
 
-  async getCurrentUser(): Promise<{ user: User }> {
-    return this.request<{ user: User }>('/auth/me');
+  async getCurrentUser(): Promise<{ user: AuthUser }> {
+    return this.request<{ user: AuthUser }>('/auth/me');
   }
 
-  logout(): void {
-    this.token = null;
-    localStorage.removeItem('auth_token');
+  async logout(): Promise<void> {
+    try {
+      await this.request('/auth/logout', { method: 'POST' });
+    } catch (error) {
+      // Ignore logout errors
+    } finally {
+      this.accessToken = null;
+      this.refreshToken = null;
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    }
   }
 
   // Teachers methods

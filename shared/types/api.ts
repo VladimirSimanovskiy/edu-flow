@@ -27,6 +27,30 @@ export interface RegisterRequest {
   role: UserRole;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+// Response types for authentication
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  user: User;
+}
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: UserRole;
+  teacher?: Teacher;
+  student?: Student;
+}
+
 // Create request types - only the fields needed for creation
 export type CreateLessonRequest = Pick<Lesson, 
   'dayOfWeek' | 'idTeacher' | 'idClass' | 'idSubject' | 

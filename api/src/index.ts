@@ -5,13 +5,31 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { scheduleRoutes } from './routes/schedule';
 import { authRoutes } from './routes/auth';
+import { createLessonRoutes } from './routes/lessons';
+import { createTeacherRoutes } from './routes/teachers';
 import { errorHandler } from './middleware/errorHandler';
+import { prisma } from './config';
+import { LessonRepository, TeacherRepository } from './repositories';
+import { LessonService, TeacherService } from './services';
+import { LessonController, TeacherController } from './controllers';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize repositories
+const lessonRepository = new LessonRepository(prisma);
+const teacherRepository = new TeacherRepository(prisma);
+
+// Initialize services
+const lessonService = new LessonService(lessonRepository);
+const teacherService = new TeacherService(teacherRepository);
+
+// Initialize controllers
+const lessonController = new LessonController(lessonService);
+const teacherController = new TeacherController(teacherService);
 
 // Middleware
 app.use(helmet());
@@ -30,6 +48,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/lessons', createLessonRoutes(lessonController));
+app.use('/api/teachers', createTeacherRoutes(teacherController));
 
 // Health check
 app.get('/api/health', (req, res) => {

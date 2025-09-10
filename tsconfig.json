@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["shared/*"],
+      "@shared/types": ["shared/types"],
+      "@api/*": ["api/src/*"],
+      "@ui/*": ["ui/src/*"],
+      "@db/*": ["db/src/*"]
+    }
+  },
+  "references": [
+    { "path": "./api" },
+    { "path": "./ui" },
+    { "path": "./db" }
+  ]
+}

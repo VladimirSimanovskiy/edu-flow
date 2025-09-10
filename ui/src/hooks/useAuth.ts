@@ -16,8 +16,9 @@ export const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginRequest) => apiClient.login(credentials),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
+    onSuccess: (data) => {
+      // Обновляем кэш с данными пользователя
+      queryClient.setQueryData(['auth', 'me'], { user: data.user });
     },
   });
 
@@ -28,19 +29,30 @@ export const useAuth = () => {
   const logoutMutation = useMutation({
     mutationFn: () => apiClient.logout(),
     onSuccess: () => {
+      console.log('Logout successful');
+      // Очищаем кэш и localStorage
       queryClient.clear();
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      // Принудительно обновляем кэш пользователя
+      queryClient.setQueryData(['auth', 'me'], null);
+      // Принудительно обновляем страницу
+      window.location.reload();
+    },
+    onError: (error) => {
+      console.error('Logout error:', error);
     },
   });
 
-  const logout = () => {
-    logoutMutation.mutate();
+  const logout = async () => {
+    await logoutMutation.mutateAsync();
   };
 
   return {
     user,
     isLoadingUser,
-    login: loginMutation.mutate,
-    register: registerMutation.mutate,
+    login: loginMutation.mutateAsync,
+    register: registerMutation.mutateAsync,
     logout,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,

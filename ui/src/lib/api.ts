@@ -38,6 +38,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log('API Client: Making request to:', url);
+    console.log('API Client: Request options:', options);
+    
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -103,10 +106,15 @@ class ApiClient {
 
   // Auth methods
   async login(credentials: LoginRequest): Promise<LoginResponse> {
+    console.log('API Client: Attempting login with:', credentials);
+    console.log('API Client: Base URL:', this.baseURL);
+    
     const response = await this.request<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
+    
+    console.log('API Client: Login response:', response);
     
     this.accessToken = response.accessToken;
     this.refreshToken = response.refreshToken;

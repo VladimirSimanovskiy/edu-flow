@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Button } from '../ui/button';
-import { Card } from '../ui/card';
-import { ErrorMessage } from '../ui/error-message';
-import { LoadingSpinner } from '../ui/loading-spinner';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -17,20 +13,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submitted with:', { email, password });
+    
     if (!email || !password) {
+      console.log('Missing email or password');
       return;
     }
 
     try {
+      console.log('Attempting login...');
       await login({ email, password });
+      console.log('Login successful');
       onSuccess?.();
     } catch (error) {
-      // Error is handled by the hook
+      console.error('Login error:', error);
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto p-6">
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="space-y-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Вход в систему</h2>
@@ -39,7 +40,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -51,8 +52,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="Введите ваш email"
+              autoComplete="username"
               required
-              disabled={isLoggingIn}
             />
           </div>
 
@@ -67,47 +68,26 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="Введите ваш пароль"
+              autoComplete="current-password"
               required
-              disabled={isLoggingIn}
             />
           </div>
 
           {loginError && (
-            <ErrorMessage message={loginError.message} />
+            <div className="text-red-600 text-sm">
+              {loginError.message}
+            </div>
           )}
 
-          <Button
+          <button
             type="submit"
-            className="w-full"
+            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
             disabled={isLoggingIn || !email || !password}
           >
-            {isLoggingIn ? (
-              <>
-                <LoadingSpinner size="sm" className="mr-2" />
-                Вход...
-              </>
-            ) : (
-              'Войти'
-            )}
-          </Button>
+            {isLoggingIn ? 'Вход...' : 'Войти'}
+          </button>
         </form>
-
-        <div className="text-center">
-          <p className="text-sm text-gray-600">
-            Нет аккаунта?{' '}
-            <button
-              type="button"
-              className="font-medium text-blue-600 hover:text-blue-500"
-              onClick={() => {
-                // TODO: Switch to register form
-                console.log('Switch to register');
-              }}
-            >
-              Зарегистрироваться
-            </button>
-          </p>
-        </div>
       </div>
-    </Card>
+    </div>
   );
 };

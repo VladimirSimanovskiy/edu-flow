@@ -11,9 +11,13 @@ export const UserMenu: React.FC = () => {
     return null;
   }
 
-  const handleLogout = () => {
-    logout();
-    setIsOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const getRoleDisplayName = (role: string) => {

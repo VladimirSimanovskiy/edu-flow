@@ -184,7 +184,12 @@ export type WithId<T> = T & {
 };
 
 // Enhanced entity types using proper composition
-export type LessonWithComputedFields = WithComputedFields<Lesson, {
+// For API responses - only base fields + computed fields (no relations)
+export type LessonWithComputedFields = Pick<Lesson, 
+  'id' | 'dayOfWeek' | 'createdAt' | 'updatedAt' | 
+  'idTeacher' | 'idClass' | 'idSubject' | 'idClassroom' | 
+  'idLessonSchedule' | 'idScheduleVersion'
+> & {
   subjectName: string;
   teacherName: string;
   className: string;
@@ -192,16 +197,26 @@ export type LessonWithComputedFields = WithComputedFields<Lesson, {
   startTime: string;
   endTime: string;
   lessonNumber: number;
-}>;
+};
 
-export type TeacherWithComputedFields = WithComputedFields<Teacher, {
+export type TeacherWithComputedFields = Pick<Teacher,
+  'id' | 'firstName' | 'lastName' | 'isActive' | 'createdAt' | 'updatedAt'
+> & {
+  middleName: string | null;
+  email: string | null;
+  phone: string | null;
+  idAssignedClassroom: number | null;
+  idUser: number | null;
   fullName: string;
   subjectNames: string[];
   assignedClassroomNumber?: number;
-}>;
+};
 
-export type ClassWithComputedFields = WithComputedFields<Class, {
+export type ClassWithComputedFields = Pick<Class,
+  'id' | 'grade' | 'letter' | 'createdAt' | 'updatedAt'
+> & {
+  idClassLeaderTeacher: number | null;
   name: string;
   classLeaderName?: string;
   studentCount: number;
-}>;
+};

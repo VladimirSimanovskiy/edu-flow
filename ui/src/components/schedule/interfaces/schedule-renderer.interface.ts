@@ -20,7 +20,7 @@ export interface ScheduleConfig {
   getRenderer(viewType: ViewType): ScheduleRenderer;
 }
 
-export interface ScheduleConfigRegistry {
+export interface IScheduleConfigRegistry {
   register(config: ScheduleConfig): void;
   get(type: string): ScheduleConfig | undefined;
   getAll(): ScheduleConfig[];

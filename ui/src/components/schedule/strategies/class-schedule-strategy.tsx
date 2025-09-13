@@ -1,8 +1,3 @@
-/**
- * Стратегия рендеринга расписания классов
- * Применяет принципы Open/Closed и Dependency Inversion
- */
-
 import React from 'react';
 import { ClassScheduleTable } from '../class-schedule-table';
 import { ClassDaySchedule } from '../class-day-schedule';

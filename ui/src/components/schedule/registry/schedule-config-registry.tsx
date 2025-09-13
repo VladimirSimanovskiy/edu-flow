@@ -1,12 +1,6 @@
-/**
- * Реестр конфигураций расписания
- * Применяет принципы Open/Closed и Dependency Inversion
- * Позволяет регистрировать новые типы расписания без изменения существующего кода
- */
+import type { ScheduleConfig, IScheduleConfigRegistry } from '../interfaces/schedule-renderer.interface';
 
-import type { ScheduleConfig, ScheduleConfigRegistry } from '../interfaces/schedule-renderer.interface';
-
-class ScheduleConfigRegistryImpl implements ScheduleConfigRegistry {
+class ScheduleConfigRegistry implements IScheduleConfigRegistry {
   private configs = new Map<string, ScheduleConfig>();
 
   register(config: ScheduleConfig): void {
@@ -22,8 +16,7 @@ class ScheduleConfigRegistryImpl implements ScheduleConfigRegistry {
   }
 }
 
-// Создаем единственный экземпляр реестра
-export const scheduleConfigRegistry = new ScheduleConfigRegistryImpl();
+export const scheduleConfigRegistry = new ScheduleConfigRegistry();
 
 // Регистрируем стандартные конфигурации
 import { TeacherScheduleConfig } from '../configs/teacher-schedule-config';

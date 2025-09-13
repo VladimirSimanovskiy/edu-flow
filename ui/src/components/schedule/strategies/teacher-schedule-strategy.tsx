@@ -1,8 +1,3 @@
-/**
- * Стратегия рендеринга расписания учителей
- * Применяет принципы Open/Closed и Dependency Inversion
- */
-
 import React from 'react';
 import { TeacherScheduleTable } from '../teacher-schedule-table';
 import { TeacherDaySchedule } from '../teacher-day-schedule';

@@ -32,7 +32,6 @@ export const teacherToScheduleEntity = (teacher: Teacher): ScheduleEntity => ({
   subtitle: teacher.subjectNames.join(', '),
 });
 
-// Функции для получения уроков
 export const getLessonForClass = (lessons: any[], classId: number, day: Date, lessonNumber: number): LessonData | undefined => {
   const dbDayOfWeek = day.getDay() === 0 ? 7 : day.getDay();
   

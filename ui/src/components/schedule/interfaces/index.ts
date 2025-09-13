@@ -2,5 +2,5 @@ export type {
   ScheduleRenderer,
   ScheduleRendererProps,
   ScheduleConfig,
-  ScheduleConfigRegistry
+  IScheduleConfigRegistry as ScheduleConfigRegistry
 } from './schedule-renderer.interface';

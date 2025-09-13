@@ -1,18 +1,44 @@
 import React from 'react';
 import { cn } from '../../../utils/cn';
+import { useDragScroll } from '../../../hooks';
 
 interface ScheduleTableProps {
   children: React.ReactNode;
   className?: string;
+  /**
+   * Включить drag n scroll функциональность
+   * @default true
+   */
+  enableDragScroll?: boolean;
 }
 
 export const ScheduleTable: React.FC<ScheduleTableProps> = ({
   children,
   className,
+  enableDragScroll = true,
 }) => {
+  const dragScroll = useDragScroll({
+    sensitivity: 1.2,
+  });
+
+  const containerProps = enableDragScroll ? {
+    ref: dragScroll.scrollRef,
+    className: cn(
+      'overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100',
+      enableDragScroll && dragScroll.className,
+      className
+    ),
+    ...dragScroll.eventHandlers,
+  } : {
+    className: cn(
+      'overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100',
+      className
+    ),
+  };
+
   return (
-    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-      <table className={cn('w-full', className)}>
+    <div {...containerProps}>
+      <table className="w-full">
         {children}
       </table>
     </div>

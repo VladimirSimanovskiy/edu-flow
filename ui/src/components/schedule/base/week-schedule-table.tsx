@@ -27,9 +27,9 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   className?: string;
   getLessonForEntity: (entityId: number, day: Date, lessonNumber: number) => LessonData | undefined;
   entityLabel: string;
-  entitySubLabel: string;
   onLessonClick?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => void;
   isLessonHighlighted?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
+  enableDragScroll?: boolean;
 }
 
 export const WeekScheduleTable = <T extends ScheduleEntity>({
@@ -38,9 +38,9 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   className,
   getLessonForEntity,
   entityLabel,
-  entitySubLabel,
   onLessonClick,
   isLessonHighlighted,
+  enableDragScroll = true,
 }: WeekScheduleTableProps<T>) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
@@ -54,9 +54,9 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
       loading={lessonNumbersLoading}
       loadingText="Загрузка расписания уроков..."
     >
-      <ScheduleTable>
+      <ScheduleTable enableDragScroll={enableDragScroll}>
         <ScheduleTableHeader>
-          {/* Основной заголовок */}
+          {/* Основной заголовок с днями недели и номерами уроков */}
           <ScheduleTableRow className="bg-gray-50">
             <ScheduleTableCell 
               header 
@@ -72,9 +72,9 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
               <ScheduleTableCell 
                 key={day.toISOString()} 
                 header 
-                className="text-center p-1 sm:p-2 border-r last:border-r-0"
+                className="text-center p-0.5 sm:p-1 border-r last:border-r-0"
               >
-                <div>
+                <div className="mb-1">
                   <div className="font-semibold text-xs sm:text-sm">
                     {format(day, 'EEE', { locale: ru })}
                   </div>
@@ -82,26 +82,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                     {format(day, 'd MMM', { locale: ru })}
                   </div>
                 </div>
-              </ScheduleTableCell>
-            ))}
-          </ScheduleTableRow>
-          
-          {/* Подзаголовок с номерами уроков */}
-          <ScheduleTableRow className="bg-gray-50">
-            <ScheduleTableCell 
-              header 
-              width="w-20 sm:w-32 md:w-48" 
-              className="border-r sticky left-0 bg-gray-50 z-20"
-            >
-              <span className="hidden sm:inline">{entitySubLabel}</span>
-              <span className="sm:hidden text-xs">№</span>
-            </ScheduleTableCell>
-            {days.map((day) => (
-              <ScheduleTableCell 
-                key={`sub-${day.toISOString()}`} 
-                header 
-                className="text-center p-0.5 sm:p-1 border-r last:border-r-0"
-              >
                 <LessonHeader lessonNumbers={lessonNumbers} />
               </ScheduleTableCell>
             ))}

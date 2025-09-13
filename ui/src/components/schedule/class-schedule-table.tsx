@@ -10,6 +10,11 @@ interface ClassScheduleTableProps {
   lessons: Lesson[];
   weekStart: Date;
   className?: string;
+  /**
+   * Включить drag n scroll функциональность
+   * @default true
+   */
+  enableDragScroll?: boolean;
 }
 
 export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
@@ -17,6 +22,7 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
   lessons,
   weekStart,
   className,
+  enableDragScroll = true,
 }) => {
   const { highlight, setHighlightedTeacher, clearHighlight } = useClassScheduleStore();
   const scheduleEntities = classes.map(classToScheduleEntity);
@@ -68,9 +74,9 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
         getLessonForClass(lessons, classId, day, lessonNumber)
       }
       entityLabel="Классы"
-      entitySubLabel="Класс"
       onLessonClick={handleLessonClick}
       isLessonHighlighted={isLessonHighlighted}
+      enableDragScroll={enableDragScroll}
     />
   );
 };

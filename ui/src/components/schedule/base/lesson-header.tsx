@@ -12,7 +12,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
 }) => {
   return (
     <div 
-      className={cn('grid gap-1', className)}
+      className={cn('grid gap-0.5', className)}
       style={{ 
         gridTemplateColumns: `repeat(${lessonNumbers?.length ?? 0}, 1fr)` 
       }}
@@ -20,7 +20,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
       {lessonNumbers?.map(num => (
         <div 
           key={num} 
-          className="text-center font-semibold text-sm text-gray-600"
+          className="text-center font-semibold text-xs text-gray-600 py-0.5"
         >
           {num}
         </div>

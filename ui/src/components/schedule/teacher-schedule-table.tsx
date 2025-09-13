@@ -23,7 +23,6 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
 
   // Обработчик клика по уроку в расписании учителей
   const handleLessonClick = (teacherId: number, day: Date, lessonNumber: number, lesson: LessonData) => {
-    // Извлекаем ID класса из урока (primary содержит название класса)
     const className = lesson.primary;
     
     if (!className) return;

@@ -10,7 +10,7 @@ import type { LessonData } from './base/lesson-cell';
 // Функция для сокращения ФИО в формат "Иванов А.Д."
 const shortenTeacherName = (fullName: string): string => {
   const parts = fullName.trim().split(' ');
-  if (parts.length < 3) return fullName; // Если не полное ФИО, возвращаем как есть
+  if (parts.length < 3) return fullName;
   
   // Порядок в fullName: Имя Фамилия Отчество
   const firstName = parts[0];

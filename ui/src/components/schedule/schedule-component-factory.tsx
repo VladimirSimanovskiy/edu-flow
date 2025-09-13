@@ -1,45 +1,20 @@
-import React from 'react';
-import { TeacherScheduleTable } from './teacher-schedule-table';
-import { ClassScheduleTable } from './class-schedule-table';
-import { TeacherDaySchedule } from './teacher-day-schedule';
-import { ClassDaySchedule } from './class-day-schedule';
-import type { 
-  ScheduleType, 
-  ViewType, 
-  TeacherDayScheduleProps,
-  TeacherWeekScheduleProps,
-  ClassDayScheduleProps,
-  ClassWeekScheduleProps
-} from '../../types/scheduleConfig';
-import type { Teacher, Class, Lesson } from '../../types/schedule';
+/**
+ * Фабрика компонентов расписания с применением принципов SOLID
+ * Использует реестр конфигураций и стратегии рендеринга
+ */
 
-// Конфигурация компонентов расписания
-const SCHEDULE_CONFIGS: Record<ScheduleType, {
-  type: ScheduleType;
-  title: string;
-  description: string;
-  dayComponent: React.ComponentType<any>;
-  weekComponent: React.ComponentType<any>;
-}> = {
-  teachers: {
-    type: 'teachers' as const,
-    title: 'Расписание учителей',
-    description: 'Просмотр расписания преподавателей',
-    dayComponent: TeacherDaySchedule,
-    weekComponent: TeacherScheduleTable,
-  },
-  classes: {
-    type: 'classes' as const,
-    title: 'Расписание классов',
-    description: 'Просмотр расписания учебных классов',
-    dayComponent: ClassDaySchedule,
-    weekComponent: ClassScheduleTable,
-  },
-} as const;
+import React from 'react';
+import type { ScheduleType, ViewType } from '../../types/scheduleConfig';
+import type { Teacher, Class, Lesson } from '../../types/schedule';
+import { scheduleConfigRegistry } from './registry/schedule-config-registry';
 
 // Фабрика для получения конфигурации расписания
-export const getScheduleConfig = (type: ScheduleType): typeof SCHEDULE_CONFIGS[ScheduleType] => {
-  return SCHEDULE_CONFIGS[type];
+export const getScheduleConfig = (type: ScheduleType) => {
+  const config = scheduleConfigRegistry.get(type);
+  if (!config) {
+    throw new Error(`Schedule configuration for type "${type}" not found`);
+  }
+  return config;
 };
 
 // Фабрика для рендеринга компонента расписания
@@ -55,24 +30,8 @@ export const renderScheduleComponent = (
   }
 ): React.ReactElement => {
   const config = getScheduleConfig(type);
-  
-  if (type === 'teachers') {
-    if (viewType === 'day') {
-      const Component = config.dayComponent as React.ComponentType<TeacherDayScheduleProps>;
-      return <Component teachers={props.teachers || []} lessons={props.lessons} date={props.date} />;
-    } else {
-      const Component = config.weekComponent as React.ComponentType<TeacherWeekScheduleProps>;
-      return <Component teachers={props.teachers || []} lessons={props.lessons} weekStart={props.weekStart!} />;
-    }
-  } else {
-    if (viewType === 'day') {
-      const Component = config.dayComponent as React.ComponentType<ClassDayScheduleProps>;
-      return <Component classes={props.classes || []} lessons={props.lessons} date={props.date} />;
-    } else {
-      const Component = config.weekComponent as React.ComponentType<ClassWeekScheduleProps>;
-      return <Component classes={props.classes || []} lessons={props.lessons} weekStart={props.weekStart!} />;
-    }
-  }
+  const renderer = config.getRenderer(viewType);
+  return renderer.render(props);
 };
 
 // Хук для получения конфигурации расписания

@@ -49,7 +49,7 @@ export const getLessonForClass = (lessons: any[], classId: number, day: Date, le
   if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
 
   return {
-    primary: lesson.subjectName, // Для классов primary - это предмет
+    primary: lesson.subjectName,
     secondary
   };
 };
@@ -70,7 +70,7 @@ export const getLessonForTeacher = (lessons: any[], teacherId: number, day: Date
   if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
 
   return {
-    primary: lesson.className, // Для учителей primary - это класс
+    primary: lesson.className,
     secondary
   };
 };

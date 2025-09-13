@@ -1,4 +1,3 @@
-// Базовые компоненты для расписания
 export { ScheduleContainer } from './schedule-container';
 export { 
   ScheduleTable,

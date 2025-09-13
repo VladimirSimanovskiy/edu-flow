@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, BookOpen } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 
@@ -17,40 +17,21 @@ export const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Teacher Schedule Card */}
+        <div className="max-w-2xl mx-auto">
+          {/* Schedule Card */}
           <Card className="hover:shadow-xl transition-shadow">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-blue-600" />
+                <Calendar className="w-8 h-8 text-blue-600" />
               </div>
-              <CardTitle>Расписание учителей</CardTitle>
+              <CardTitle>Школьное расписание</CardTitle>
               <CardDescription>
-                Просмотр расписания преподавателей по дням и неделям
+                Просмотр расписания учителей и классов по дням и неделям. 
+                Переключайтесь между режимами прямо в интерфейсе.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link to="/teachers">
-                <Button className="w-full">
-                  Открыть расписание
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Class Schedule Card */}
-          <Card className="hover:shadow-xl transition-shadow">
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle>Расписание классов</CardTitle>
-              <CardDescription>
-                Просмотр расписания учебных классов по дням и неделям
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/classes">
+              <Link to="/schedule">
                 <Button className="w-full">
                   Открыть расписание
                 </Button>

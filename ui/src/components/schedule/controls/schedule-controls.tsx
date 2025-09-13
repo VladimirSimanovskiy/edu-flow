@@ -6,12 +6,15 @@
 import React from 'react';
 import { Card, CardContent } from '../../ui/card';
 import { ScheduleToolbar } from '../schedule-toolbar';
+import type { ScheduleType } from '../../../types/scheduleConfig';
 
 interface ScheduleControlsProps {
   value: Date;
   onChange: (date: Date) => void;
   viewType: 'day' | 'week';
   onViewTypeChange: (viewType: 'day' | 'week') => void;
+  scheduleType?: ScheduleType;
+  onScheduleTypeChange?: (type: ScheduleType) => void;
   className?: string;
   disabled?: boolean;
   minDate?: Date;
@@ -24,6 +27,8 @@ export const ScheduleControls: React.FC<ScheduleControlsProps> = ({
   onChange,
   viewType,
   onViewTypeChange,
+  scheduleType,
+  onScheduleTypeChange,
   disabled = false,
   minDate,
   maxDate,
@@ -38,6 +43,8 @@ export const ScheduleControls: React.FC<ScheduleControlsProps> = ({
             onChange={onChange}
             viewType={viewType}
             onViewTypeChange={onViewTypeChange}
+            scheduleType={scheduleType}
+            onScheduleTypeChange={onScheduleTypeChange}
             disabled={disabled}
             minDate={minDate}
             maxDate={maxDate}

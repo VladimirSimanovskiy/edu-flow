@@ -9,9 +9,10 @@ import type { ScheduleType } from '../../types/scheduleConfig';
 
 interface ScheduleViewProps {
   type: ScheduleType;
+  onScheduleTypeChange?: (type: ScheduleType) => void;
 }
 
-const ScheduleViewContent: React.FC<{ type: ScheduleType }> = ({ type }) => {
+const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?: (type: ScheduleType) => void }> = ({ type, onScheduleTypeChange }) => {
   const { currentView, setDate, setViewType } = useScheduleStore();
   const scheduleConfig = useScheduleConfig(type);
   const { teachers, classes, lessons, isLoading, error } = useScheduleData();
@@ -39,6 +40,8 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType }> = ({ type }) => {
         onChange={handleDateChange}
         viewType={currentView.type}
         onViewTypeChange={handleViewTypeChange}
+        scheduleType={type}
+        onScheduleTypeChange={onScheduleTypeChange}
       />
 
       {/* Schedule Content */}
@@ -59,7 +62,7 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType }> = ({ type }) => {
   );
 };
 
-export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
+export const ScheduleView: React.FC<ScheduleViewProps> = ({ type, onScheduleTypeChange }) => {
   const { currentView } = useScheduleStore();
 
   return (
@@ -67,7 +70,7 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
       date={currentView.date}
       viewType={currentView.type}
     >
-      <ScheduleViewContent type={type} />
+      <ScheduleViewContent type={type} onScheduleTypeChange={onScheduleTypeChange} />
     </ScheduleDataProvider>
   );
 };

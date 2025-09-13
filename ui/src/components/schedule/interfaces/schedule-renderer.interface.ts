@@ -1,5 +1,5 @@
 import type { Teacher, Class, Lesson } from '../../../types/schedule';
-import type { ViewType } from '../../../types/scheduleConfig';
+import type { ViewType, ScheduleTypeMetadata } from '../../../types/scheduleConfig';
 
 export interface ScheduleRendererProps {
   teachers?: Teacher[];
@@ -17,6 +17,7 @@ export interface ScheduleConfig {
   type: string;
   title: string;
   description: string;
+  metadata: ScheduleTypeMetadata;
   getRenderer(viewType: ViewType): ScheduleRenderer;
 }
 
@@ -24,4 +25,6 @@ export interface IScheduleConfigRegistry {
   register(config: ScheduleConfig): void;
   get(type: string): ScheduleConfig | undefined;
   getAll(): ScheduleConfig[];
+  getMetadata(type: string): ScheduleTypeMetadata | undefined;
+  getAllMetadata(): ScheduleTypeMetadata[];
 }

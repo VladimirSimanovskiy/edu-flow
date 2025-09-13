@@ -1,4 +1,5 @@
 import type { ScheduleConfig, IScheduleConfigRegistry } from '../interfaces/schedule-renderer.interface';
+import type { ScheduleTypeMetadata } from '../../../types/scheduleConfig';
 
 class ScheduleConfigRegistry implements IScheduleConfigRegistry {
   private configs = new Map<string, ScheduleConfig>();
@@ -13,6 +14,15 @@ class ScheduleConfigRegistry implements IScheduleConfigRegistry {
 
   getAll(): ScheduleConfig[] {
     return Array.from(this.configs.values());
+  }
+
+  getMetadata(type: string): ScheduleTypeMetadata | undefined {
+    const config = this.get(type);
+    return config?.metadata;
+  }
+
+  getAllMetadata(): ScheduleTypeMetadata[] {
+    return this.getAll().map(config => config.metadata);
   }
 }
 

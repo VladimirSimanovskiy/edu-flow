@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Home } from './pages/home';
-import { TeacherSchedule } from './pages/teacher-schedule';
-import { ClassSchedule } from './pages/class-schedule';
+import { Schedule } from './pages/schedule';
 import { Button } from './components/ui/button';
 import { ErrorBoundary } from './components/ui/error-boundary';
 import { ProtectedRoute, UserMenu } from './components/auth';
@@ -36,24 +35,14 @@ const Navigation: React.FC = () => {
           
           <div className="flex items-center gap-2 sm:gap-4">
             {user && (
-              <>
-                <Link to="/teachers">
-                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-                    Учителя
-                  </Button>
-                  <Button variant="ghost" size="sm" className="sm:hidden">
-                    У
-                  </Button>
-                </Link>
-                <Link to="/classes">
-                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
-                    Классы
-                  </Button>
-                  <Button variant="ghost" size="sm" className="sm:hidden">
-                    К
-                  </Button>
-                </Link>
-              </>
+              <Link to="/schedule">
+                <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                  Расписание
+                </Button>
+                <Button variant="ghost" size="sm" className="sm:hidden">
+                  Р
+                </Button>
+              </Link>
             )}
             
             {user ? (
@@ -86,14 +75,9 @@ function App() {
                     <Home />
                   </ProtectedRoute>
                 } />
-                <Route path="/teachers" element={
+                <Route path="/schedule" element={
                   <ProtectedRoute>
-                    <TeacherSchedule />
-                  </ProtectedRoute>
-                } />
-                <Route path="/classes" element={
-                  <ProtectedRoute>
-                    <ClassSchedule />
+                    <Schedule />
                   </ProtectedRoute>
                 } />
               </Routes>

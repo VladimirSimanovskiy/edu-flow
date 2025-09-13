@@ -1,9 +1,19 @@
 import type { ComponentType } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import type { Teacher, Class, Lesson } from './schedule';
 
 // Типы для конфигурации расписания
-export type ScheduleType = 'teachers' | 'classes';
+export type ScheduleType = 'teachers' | 'classes' | 'rooms';
 export type ViewType = 'day' | 'week';
+
+// Метаданные для типа расписания
+export interface ScheduleTypeMetadata {
+  id: ScheduleType;
+  label: string;
+  shortLabel: string;
+  icon: LucideIcon;
+  color: string;
+}
 
 // Базовые интерфейсы для компонентов расписания
 export interface BaseScheduleComponentProps {

@@ -3,7 +3,7 @@
  * Применяет принцип Single Responsibility - только выбор даты
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '../../../utils/cn';
@@ -42,6 +42,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   locale = 'ru'
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [displayedMonth, setDisplayedMonth] = useState(value);
+  
+  // Синхронизируем отображаемый месяц с выбранной датой
+  useEffect(() => {
+    setDisplayedMonth(value);
+  }, [value]);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
@@ -88,7 +94,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   };
 
   const handleQuickAction = (action: ReturnType<typeof getQuickActions>[0]) => {
-    onChange(action.getDate());
+    const newDate = action.getDate();
+    onChange(newDate);
+    // Обновляем отображаемый месяц на месяц новой даты
+    setDisplayedMonth(newDate);
   };
 
   const displayDate = formatDateForDisplay(value, viewType, locale);
@@ -135,6 +144,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 selected={{ from: weekStart, to: weekEnd }}
                 onSelect={handleWeekRangeSelect}
                 initialFocus
+                month={displayedMonth}
+                onMonthChange={setDisplayedMonth}
                 locale={locale === 'ru' ? ru : undefined}
                 disabled={isDateDisabled}
                 modifiersClassNames={{
@@ -149,6 +160,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 selected={value}
                 onSelect={handleDateSelect}
                 initialFocus
+                month={displayedMonth}
+                onMonthChange={setDisplayedMonth}
                 locale={locale === 'ru' ? ru : undefined}
                 disabled={isDateDisabled}
               />

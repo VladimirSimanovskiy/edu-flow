@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -20,6 +20,12 @@ export const WeekPicker: React.FC<DateControlProps> = ({
   locale = 'ru'
 }) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [displayedMonth, setDisplayedMonth] = useState(value);
+  
+  // Синхронизируем отображаемый месяц с выбранной датой
+  useEffect(() => {
+    setDisplayedMonth(value);
+  }, [value]);
   
   const handlePrevious = () => {
     const newDate = navigateDate(value, 'prev', viewType);
@@ -32,7 +38,10 @@ export const WeekPicker: React.FC<DateControlProps> = ({
   };
 
   const handleQuickAction = (action: ReturnType<typeof getQuickActions>[0]) => {
-    onChange(action.getDate());
+    const newDate = action.getDate();
+    onChange(newDate);
+    // Обновляем отображаемый месяц на месяц новой даты
+    setDisplayedMonth(newDate);
   };
 
   const displayDate = formatDateForDisplay(value, viewType, locale);
@@ -122,6 +131,8 @@ export const WeekPicker: React.FC<DateControlProps> = ({
                   }
                 }}
                 initialFocus
+                month={displayedMonth}
+                onMonthChange={setDisplayedMonth}
                 locale={locale === 'ru' ? ru : undefined}
                 disabled={(date) => {
                   if (minDate && date < minDate) return true;

@@ -6,6 +6,8 @@ import { ScheduleDataProvider, useScheduleData } from './data/schedule-data-prov
 import { ScheduleLayout } from './layout/schedule-layout';
 import { ScheduleControls } from './controls/schedule-controls';
 import { ScheduleLoadingOverlay } from './schedule-loading-overlay';
+import { ScheduleLoadingProgress } from './schedule-loading-progress';
+import { useScheduleLoadingProgress } from './hooks/useScheduleLoadingProgress';
 import { ScheduleLoadingUtils } from '../../types/scheduleLoading';
 import type { ScheduleType } from '../../types/scheduleConfig';
 
@@ -18,6 +20,9 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
   const { currentView, setDate, setViewType } = useScheduleStore();
   const scheduleConfig = useScheduleConfig(type);
   const { teachers, classes, lessons, loadingState } = useScheduleData();
+  
+  // Используем новый хук для прогресс-бара
+  const { progressState } = useScheduleLoadingProgress(loadingState);
 
   const handleDateChange = (date: Date) => {
     setDate(date);
@@ -33,7 +38,6 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
     <ScheduleLayout
       title={scheduleConfig.title}
       description={scheduleConfig.description}
-      isLoading={ScheduleLoadingUtils.shouldShowMainLoader(loadingState)}
       error={ScheduleLoadingUtils.hasError(loadingState) ? loadingState.error : null}
     >
       {/* Controls */}
@@ -49,6 +53,12 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
 
       {/* Schedule Content */}
       <div className="relative">
+        {/* Progress Bar - теперь внутри контейнера с таблицей */}
+        <ScheduleLoadingProgress 
+          state={progressState}
+          position="top"
+        />
+        
         {renderScheduleComponent(
           type,
           currentView.type,
@@ -61,9 +71,9 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
           }
         )}
         
-        {/* Loading overlay for data refreshing */}
+        {/* Loading overlay for data refreshing - теперь только для критических обновлений */}
         <ScheduleLoadingOverlay 
-          isVisible={ScheduleLoadingUtils.shouldShowUpdateOverlay(loadingState)}
+          isVisible={ScheduleLoadingUtils.shouldShowUpdateOverlay(loadingState) && !progressState.isLoading}
           message="Обновление данных..."
         />
       </div>

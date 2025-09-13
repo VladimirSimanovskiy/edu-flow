@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../../utils/cn';
-import { tokens } from '../../../design-system/tokens';
 
 interface ScheduleTableProps {
   children: React.ReactNode;
@@ -30,10 +29,7 @@ export const ScheduleTableHeader: React.FC<ScheduleTableHeaderProps> = ({
   className,
 }) => {
   return (
-    <thead 
-      className={cn('border-b', className)}
-      style={{ borderColor: tokens.colors.gray[200] }}
-    >
+    <thead className={cn('border-b border-gray-200', className)}>
       {children}
     </thead>
   );
@@ -59,12 +55,14 @@ interface ScheduleTableRowProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
+  style?: React.CSSProperties;
 }
 
 export const ScheduleTableRow: React.FC<ScheduleTableRowProps> = ({
   children,
   className,
   hover = true,
+  style,
 }) => {
   return (
     <tr 
@@ -74,10 +72,7 @@ export const ScheduleTableRow: React.FC<ScheduleTableRowProps> = ({
         className
       )}
       style={{ 
-        borderColor: tokens.colors.gray[200],
-        ...(hover && { 
-          transition: `background-color ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}` 
-        })
+        ...style
       }}
     >
       {children}
@@ -111,11 +106,6 @@ export const ScheduleTableCell: React.FC<ScheduleTableCellProps> = ({
       )}
       style={{
         width,
-        ...(header && {
-          fontSize: tokens.typography.fontSize.sm,
-          fontWeight: tokens.typography.fontWeight.medium,
-          color: tokens.colors.gray[600]
-        }),
         ...style
       }}
     >

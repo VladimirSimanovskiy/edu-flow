@@ -24,7 +24,9 @@ export const ScheduleLoadingOverlay: React.FC<ScheduleLoadingOverlayProps> = ({
     >
       <div className="flex flex-col items-center gap-3">
         <LoadingSpinner size="lg" />
-        <p className="text-sm text-gray-600 font-medium">{message}</p>
+        <p className="text-sm text-gray-600 font-medium">
+          {message}
+        </p>
       </div>
     </div>
   );

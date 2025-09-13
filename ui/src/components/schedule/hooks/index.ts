@@ -28,3 +28,6 @@ export { useSchedulePrefetch, useAutoPrefetch } from './useSchedulePrefetch';
 
 // Lesson numbers
 export { useLessonNumbers } from './useLessonNumbers';
+
+// Loading progress
+export { useScheduleLoadingProgress } from './useScheduleLoadingProgress';

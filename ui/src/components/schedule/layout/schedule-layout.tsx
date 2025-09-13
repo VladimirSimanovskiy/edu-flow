@@ -1,40 +1,35 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
-import { LoadingSpinner } from '../../ui/loading-spinner';
 import { ErrorMessage } from '../../ui/error-message';
-import { tokens } from '../../../design-system/tokens';
 
 interface ScheduleLayoutProps {
   title: string;
   description: string;
   children: React.ReactNode;
-  isLoading?: boolean;
   error?: Error | null;
-  loadingText?: string;
 }
 
 export const ScheduleLayout: React.FC<ScheduleLayoutProps> = ({
   title,
   description,
   children,
-  isLoading = false,
-  error = null,
-  loadingText = 'Загрузка расписания...'
+  error = null
 }) => {
-  if (isLoading) {
-    return (
-      <div style={{ padding: tokens.spacing[8] }}>
-        <LoadingSpinner 
-          size="lg" 
-          text={loadingText} 
-        />
-      </div>
-    );
-  }
+  // Убираем спиннер для основной загрузки, так как теперь используется прогресс-бар
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-8">
+  //       <LoadingSpinner 
+  //         size="lg" 
+  //         text={loadingText}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
-      <div style={{ padding: tokens.spacing[6] }}>
+      <div className="p-6">
         <Card className="border shadow-none">
           <CardHeader>
             <CardTitle>{title}</CardTitle>

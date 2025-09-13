@@ -89,7 +89,11 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
       <ScheduleTable>
         <ScheduleTableHeader>
           <ScheduleTableRow className="bg-gray-50">
-            <ScheduleTableCell header width="w-24 sm:w-32 md:w-48" className="border-r sticky left-0 bg-gray-50 z-20">
+            <ScheduleTableCell 
+              header 
+              width="w-24 sm:w-32 md:w-48" 
+              className="border-r sticky left-0 bg-gray-50 z-20"
+            >
               <span className="hidden sm:inline">Классы</span>
               <span className="sm:hidden">Кл.</span>
             </ScheduleTableCell>

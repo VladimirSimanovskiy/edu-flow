@@ -82,9 +82,6 @@ export const WeekPicker: React.FC<DateControlProps> = ({
             
             {/* Week Calendar using range mode */}
             <div className="p-3">
-              <div className="text-xs text-muted-foreground mb-2 text-center">
-                Кликните на любой день для выбора недели
-              </div>
               <Calendar
                 mode="range"
                 selected={{ from: weekStart, to: weekEnd }}

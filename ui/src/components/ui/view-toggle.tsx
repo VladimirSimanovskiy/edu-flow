@@ -33,8 +33,8 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
           className={cn(
             'px-3 py-1.5 text-sm font-medium rounded-md transition-all border-0 h-8',
             viewType === option.value
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'bg-transparent hover:bg-accent hover:text-accent-foreground'
+              ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-600'
+              : 'bg-transparent hover:bg-primary-50 hover:text-primary-700 active:bg-primary-100'
           )}
         >
           <span className="hidden sm:inline">{option.label}</span>

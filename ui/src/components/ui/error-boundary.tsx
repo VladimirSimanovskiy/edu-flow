@@ -1,7 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { ErrorMessage } from './error-message';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
-import { tokens } from '../../design-system/tokens';
 
 interface Props {
   children: ReactNode;
@@ -43,10 +42,10 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div style={{ padding: tokens.spacing[6] }}>
+        <div className="p-6">
           <Card>
             <CardHeader>
-              <CardTitle style={{ color: tokens.colors.error[600] }}>
+              <CardTitle className="text-error-600">
                 Что-то пошло не так
               </CardTitle>
             </CardHeader>
@@ -58,33 +57,11 @@ export class ErrorBoundary extends Component<Props, State> {
               />
               
               {process.env.NODE_ENV === 'development' && this.state.error && (
-                <details 
-                  style={{ 
-                    marginTop: tokens.spacing[4],
-                    padding: tokens.spacing[3],
-                    backgroundColor: tokens.colors.gray[50],
-                    borderRadius: tokens.borderRadius.md,
-                    border: `1px solid ${tokens.colors.gray[200]}`
-                  }}
-                >
-                  <summary 
-                    style={{ 
-                      cursor: 'pointer',
-                      fontWeight: tokens.typography.fontWeight.medium,
-                      color: tokens.colors.gray[700]
-                    }}
-                  >
+                <details className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <summary className="cursor-pointer font-medium text-gray-700">
                     Детали ошибки (только в режиме разработки)
                   </summary>
-                  <pre 
-                    style={{ 
-                      marginTop: tokens.spacing[2],
-                      fontSize: tokens.typography.fontSize.xs,
-                      color: tokens.colors.gray[600],
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word'
-                    }}
-                  >
+                  <pre className="mt-2 text-xs text-gray-600 whitespace-pre-wrap break-words">
                     {this.state.error.stack}
                   </pre>
                 </details>

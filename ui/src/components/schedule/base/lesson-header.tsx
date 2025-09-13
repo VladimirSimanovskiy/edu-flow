@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../../utils/cn';
-import { tokens } from '../../../design-system/tokens';
 
 interface LessonHeaderProps {
   lessonNumbers: number[];
@@ -21,12 +20,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
       {lessonNumbers?.map(num => (
         <div 
           key={num} 
-          className="text-center font-semibold"
-          style={{
-            fontSize: tokens.typography.fontSize.sm,
-            fontWeight: tokens.typography.fontWeight.semibold,
-            color: tokens.colors.gray[600]
-          }}
+          className="text-center font-semibold text-sm text-gray-600"
         >
           {num}
         </div>

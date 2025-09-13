@@ -1,6 +1,5 @@
 import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { tokens } from '../../../design-system/tokens';
 import { useLessonNumbers } from '../hooks';
 import { ScheduleContainer } from './schedule-container';
 import { 
@@ -59,7 +58,11 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
         <ScheduleTableHeader>
           {/* Основной заголовок */}
           <ScheduleTableRow className="bg-gray-50">
-            <ScheduleTableCell header width="w-20 sm:w-32 md:w-48" className="border-r sticky left-0 bg-gray-50 z-20">
+            <ScheduleTableCell 
+              header 
+              width="w-20 sm:w-32 md:w-48" 
+              className="border-r sticky left-0 bg-gray-50 z-20"
+            >
               <span className="hidden sm:inline">{entityLabel}</span>
               <span className="sm:hidden text-xs">
                 {entityLabel === 'Классы' ? 'Кл.' : 'Уч.'}
@@ -72,19 +75,10 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                 className="text-center p-1 sm:p-2 border-r last:border-r-0"
               >
                 <div>
-                  <div 
-                    className="font-semibold text-xs sm:text-sm"
-                    style={{ fontWeight: tokens.typography.fontWeight.semibold }}
-                  >
+                  <div className="font-semibold text-xs sm:text-sm">
                     {format(day, 'EEE', { locale: ru })}
                   </div>
-                  <div 
-                    className="text-xs hidden sm:block"
-                    style={{ 
-                      fontSize: tokens.typography.fontSize.xs,
-                      color: tokens.colors.gray[500]
-                    }}
-                  >
+                  <div className="text-xs hidden sm:block text-gray-500">
                     {format(day, 'd MMM', { locale: ru })}
                   </div>
                 </div>
@@ -94,7 +88,11 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
           
           {/* Подзаголовок с номерами уроков */}
           <ScheduleTableRow className="bg-gray-50">
-            <ScheduleTableCell header width="w-20 sm:w-32 md:w-48" className="border-r sticky left-0 bg-gray-50 z-20">
+            <ScheduleTableCell 
+              header 
+              width="w-20 sm:w-32 md:w-48" 
+              className="border-r sticky left-0 bg-gray-50 z-20"
+            >
               <span className="hidden sm:inline">{entitySubLabel}</span>
               <span className="sm:hidden text-xs">№</span>
             </ScheduleTableCell>
@@ -114,23 +112,11 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
           {entities.map((entity) => (
             <ScheduleTableRow key={entity.id}>
               <ScheduleTableCell className="border-r sticky left-0 bg-white z-10">
-                <div 
-                  className="font-medium text-xs sm:text-sm"
-                  style={{ 
-                    fontWeight: tokens.typography.fontWeight.medium,
-                    color: tokens.colors.gray[900]
-                  }}
-                >
+                <div className="font-medium text-xs sm:text-sm text-gray-900">
                   {entity.name}
                 </div>
                 {entity.subtitle && (
-                  <div 
-                    className="text-xs hidden sm:block"
-                    style={{ 
-                      fontSize: tokens.typography.fontSize.xs,
-                      color: tokens.colors.gray[500]
-                    }}
-                  >
+                  <div className="text-xs hidden sm:block text-gray-500">
                     {entity.subtitle}
                   </div>
                 )}

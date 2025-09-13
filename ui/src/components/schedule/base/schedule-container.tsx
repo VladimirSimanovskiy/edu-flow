@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../../utils/cn';
-import { tokens } from '../../../design-system/tokens';
 
 interface ScheduleContainerProps {
   children: React.ReactNode;
@@ -26,13 +25,7 @@ export const ScheduleContainer: React.FC<ScheduleContainerProps> = ({
         className
       )}>
         <div className="flex items-center justify-center">
-          <div 
-            className="text-gray-500"
-            style={{ 
-              fontSize: tokens.typography.fontSize.sm,
-              color: tokens.colors.gray[500]
-            }}
-          >
+          <div className="text-sm text-gray-500">
             {loadingText}
           </div>
         </div>
@@ -46,30 +39,14 @@ export const ScheduleContainer: React.FC<ScheduleContainerProps> = ({
       className
     )}>
       {(title || subtitle) && (
-        <div 
-          className="p-4 border-b"
-          style={{ borderColor: tokens.colors.gray[200] }}
-        >
+        <div className="p-4 border-b border-gray-200">
           {title && (
-            <h3 
-              className="text-lg font-semibold"
-              style={{ 
-                fontSize: tokens.typography.fontSize.lg,
-                fontWeight: tokens.typography.fontWeight.semibold,
-                color: tokens.colors.gray[900]
-              }}
-            >
+            <h3 className="text-lg font-semibold text-gray-900">
               {title}
             </h3>
           )}
           {subtitle && (
-            <p 
-              className="text-sm text-gray-600 mt-1"
-              style={{ 
-                fontSize: tokens.typography.fontSize.sm,
-                color: tokens.colors.gray[600]
-              }}
-            >
+            <p className="text-sm text-gray-600 mt-1">
               {subtitle}
             </p>
           )}

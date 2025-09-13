@@ -129,11 +129,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           
           {/* Calendar */}
           <div className="p-3">
-            {viewType === 'week' && (
-              <div className="text-xs text-muted-foreground mb-2 text-center">
-                Кликните на любой день для выбора недели
-              </div>
-            )}
             {viewType === 'week' ? (
               <Calendar
                 mode="range"

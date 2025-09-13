@@ -5,13 +5,11 @@
       "@shared/*": ["shared/*"],
       "@shared/types": ["shared/types"],
       "@api/*": ["api/src/*"],
-      "@ui/*": ["ui/src/*"],
-      "@db/*": ["db/src/*"]
+      "@ui/*": ["ui/src/*"]
     }
   },
   "references": [
     { "path": "./api" },
-    { "path": "./ui" },
-    { "path": "./db" }
+    { "path": "./ui" }
   ]
 }

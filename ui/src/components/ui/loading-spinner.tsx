@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
-import { tokens } from '../../design-system/tokens';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -13,48 +12,27 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className,
   text,
 }) => {
-  const getSizeStyles = () => {
+  const getSizeClasses = () => {
     switch (size) {
       case 'sm':
-        return {
-          width: '1rem',
-          height: '1rem',
-          borderWidth: '2px'
-        };
+        return 'w-4 h-4 border-2';
       case 'lg':
-        return {
-          width: '3rem',
-          height: '3rem',
-          borderWidth: '4px'
-        };
+        return 'w-12 h-12 border-4';
       default:
-        return {
-          width: '2rem',
-          height: '2rem',
-          borderWidth: '3px'
-        };
+        return 'w-8 h-8 border-3';
     }
   };
-
-  const sizeStyles = getSizeStyles();
 
   return (
     <div className={cn('flex flex-col items-center justify-center p-8', className)}>
       <div
-        className="animate-spin rounded-full border-solid border-gray-300 border-t-blue-600"
-        style={{
-          ...sizeStyles,
-          animation: `spin ${tokens.animation.duration.slow} linear infinite`
-        }}
+        className={cn(
+          'animate-spin rounded-full border-solid border-muted border-t-primary',
+          getSizeClasses()
+        )}
       />
       {text && (
-        <p 
-          className="mt-4 text-gray-600"
-          style={{
-            fontSize: tokens.typography.fontSize.sm,
-            color: tokens.colors.gray[600]
-          }}
-        >
+        <p className="mt-4 text-sm text-muted-foreground">
           {text}
         </p>
       )}

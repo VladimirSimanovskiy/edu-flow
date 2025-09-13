@@ -14,7 +14,13 @@ import type {
 import type { Teacher, Class, Lesson } from '../../types/schedule';
 
 // Конфигурация компонентов расписания
-const SCHEDULE_CONFIGS = {
+const SCHEDULE_CONFIGS: Record<ScheduleType, {
+  type: ScheduleType;
+  title: string;
+  description: string;
+  dayComponent: React.ComponentType<any>;
+  weekComponent: React.ComponentType<any>;
+}> = {
   teachers: {
     type: 'teachers' as const,
     title: 'Расписание учителей',
@@ -32,7 +38,7 @@ const SCHEDULE_CONFIGS = {
 } as const;
 
 // Фабрика для получения конфигурации расписания
-export const getScheduleConfig = (type: ScheduleType) => {
+export const getScheduleConfig = (type: ScheduleType): typeof SCHEDULE_CONFIGS[ScheduleType] => {
   return SCHEDULE_CONFIGS[type];
 };
 

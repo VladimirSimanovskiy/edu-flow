@@ -1,103 +1,36 @@
-import React from 'react';
-import { cn } from '../../utils/cn';
-import { tokens } from '../../design-system/tokens';
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-interface BadgeProps {
-  children: React.ReactNode;
-  variant?: 'default' | 'secondary' | 'success' | 'warning' | 'error' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+import { cn } from "../../utils/cn"
+
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
 }
 
-export const Badge: React.FC<BadgeProps> = ({
-  children,
-  variant = 'default',
-  size = 'md',
-  className,
-}) => {
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'secondary':
-        return {
-          backgroundColor: tokens.colors.gray[100],
-          color: tokens.colors.gray[800],
-          borderColor: tokens.colors.gray[200]
-        };
-      case 'success':
-        return {
-          backgroundColor: tokens.colors.success[100],
-          color: tokens.colors.success[800],
-          borderColor: tokens.colors.success[200]
-        };
-      case 'warning':
-        return {
-          backgroundColor: tokens.colors.warning[100],
-          color: tokens.colors.warning[800],
-          borderColor: tokens.colors.warning[200]
-        };
-      case 'error':
-        return {
-          backgroundColor: tokens.colors.error[100],
-          color: tokens.colors.error[800],
-          borderColor: tokens.colors.error[200]
-        };
-      case 'outline':
-        return {
-          backgroundColor: 'transparent',
-          color: tokens.colors.gray[700],
-          borderColor: tokens.colors.gray[300]
-        };
-      default:
-        return {
-          backgroundColor: tokens.colors.primary[100],
-          color: tokens.colors.primary[800],
-          borderColor: tokens.colors.primary[200]
-        };
-    }
-  };
-
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'sm':
-        return {
-          padding: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
-          fontSize: tokens.typography.fontSize.xs,
-          borderRadius: tokens.borderRadius.sm
-        };
-      case 'lg':
-        return {
-          padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
-          fontSize: tokens.typography.fontSize.sm,
-          borderRadius: tokens.borderRadius.md
-        };
-      default:
-        return {
-          padding: `${tokens.spacing[1]} ${tokens.spacing[3]}`,
-          fontSize: tokens.typography.fontSize.xs,
-          borderRadius: tokens.borderRadius.base
-        };
-    }
-  };
-
-  const variantStyles = getVariantStyles();
-  const sizeStyles = getSizeStyles();
-
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center font-medium border',
-        className
-      )}
-      style={{
-        ...variantStyles,
-        ...sizeStyles,
-        fontWeight: tokens.typography.fontWeight.medium,
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
-      }}
-    >
-      {children}
-    </span>
-  );
-};
+export { Badge, badgeVariants }

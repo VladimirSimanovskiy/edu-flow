@@ -1,26 +1,34 @@
-import React from 'react';
-import { startOfWeek } from 'date-fns';
-import { useScheduleStore } from '../../store/scheduleStore';
-import { useScheduleConfig, renderScheduleComponent } from './schedule-component-factory';
-import { ScheduleDataProvider, useScheduleData } from './data/schedule-data-provider';
-import { ScheduleLayout } from './layout/schedule-layout';
-import { ScheduleControls } from './controls/schedule-controls';
-import { ScheduleLoadingOverlay } from './schedule-loading-overlay';
-import { ScheduleLoadingProgress } from './schedule-loading-progress';
-import { useScheduleLoadingProgress } from './hooks/useScheduleLoadingProgress';
-import { ScheduleLoadingUtils } from '../../types/scheduleLoading';
-import type { ScheduleType } from '../../types/scheduleConfig';
+import React from "react";
+import { startOfWeek } from "date-fns";
+import { useScheduleStore } from "../../store/scheduleStore";
+import {
+  useScheduleConfig,
+  renderScheduleComponent,
+} from "./schedule-component-factory";
+import {
+  ScheduleDataProvider,
+  useScheduleData,
+} from "./data/schedule-data-provider";
+import { ScheduleLayout } from "./layout/schedule-layout";
+import { ScheduleControls } from "./controls/schedule-controls";
+import { ScheduleLoadingProgress } from "./schedule-loading-progress";
+import { useScheduleLoadingProgress } from "./hooks/useScheduleLoadingProgress";
+import { ScheduleLoadingUtils } from "../../types/scheduleLoading";
+import type { ScheduleType } from "../../types/scheduleConfig";
 
 interface ScheduleViewProps {
   type: ScheduleType;
   onScheduleTypeChange?: (type: ScheduleType) => void;
 }
 
-const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?: (type: ScheduleType) => void }> = ({ type, onScheduleTypeChange }) => {
+const ScheduleViewContent: React.FC<{
+  type: ScheduleType;
+  onScheduleTypeChange?: (type: ScheduleType) => void;
+}> = ({ type, onScheduleTypeChange }) => {
   const { currentView, setDate, setViewType } = useScheduleStore();
   const scheduleConfig = useScheduleConfig(type);
   const { teachers, classes, lessons, loadingState } = useScheduleData();
-  
+
   // Используем новый хук для прогресс-бара
   const { progressState } = useScheduleLoadingProgress(loadingState);
 
@@ -28,7 +36,7 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
     setDate(date);
   };
 
-  const handleViewTypeChange = (viewType: 'day' | 'week') => {
+  const handleViewTypeChange = (viewType: "day" | "week") => {
     setViewType(viewType);
   };
 
@@ -38,7 +46,9 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
     <ScheduleLayout
       title={scheduleConfig.title}
       description={scheduleConfig.description}
-      error={ScheduleLoadingUtils.hasError(loadingState) ? loadingState.error : null}
+      error={
+        ScheduleLoadingUtils.hasError(loadingState) ? loadingState.error : null
+      }
     >
       {/* Controls */}
       <ScheduleControls
@@ -54,42 +64,32 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
       {/* Schedule Content */}
       <div className="relative">
         {/* Progress Bar - теперь внутри контейнера с таблицей */}
-        <ScheduleLoadingProgress 
-          state={progressState}
-          position="top"
-        />
-        
-        {renderScheduleComponent(
-          type,
-          currentView.type,
-          {
-            teachers,
-            classes,
-            lessons,
-            date: currentView.date,
-            weekStart: currentView.type === 'week' ? weekStart : undefined,
-          }
-        )}
-        
-        {/* Loading overlay for data refreshing - теперь только для критических обновлений */}
-        <ScheduleLoadingOverlay 
-          isVisible={ScheduleLoadingUtils.shouldShowUpdateOverlay(loadingState) && !progressState.isLoading}
-          message="Обновление данных..."
-        />
+        <ScheduleLoadingProgress state={progressState} position="top" />
+
+        {renderScheduleComponent(type, currentView.type, {
+          teachers,
+          classes,
+          lessons,
+          date: currentView.date,
+          weekStart: currentView.type === "week" ? weekStart : undefined,
+        })}
       </div>
     </ScheduleLayout>
   );
 };
 
-export const ScheduleView: React.FC<ScheduleViewProps> = ({ type, onScheduleTypeChange }) => {
+export const ScheduleView: React.FC<ScheduleViewProps> = ({
+  type,
+  onScheduleTypeChange,
+}) => {
   const { currentView } = useScheduleStore();
 
   return (
-    <ScheduleDataProvider
-      date={currentView.date}
-      viewType={currentView.type}
-    >
-      <ScheduleViewContent type={type} onScheduleTypeChange={onScheduleTypeChange} />
+    <ScheduleDataProvider date={currentView.date} viewType={currentView.type}>
+      <ScheduleViewContent
+        type={type}
+        onScheduleTypeChange={onScheduleTypeChange}
+      />
     </ScheduleDataProvider>
   );
 };

@@ -2,8 +2,7 @@ import React from 'react';
 import { startOfWeek } from 'date-fns';
 import { useScheduleStore } from '../../store/scheduleStore';
 import { useTeachers, useClasses, useLessonsForWeek, useLessonsForDay } from '../../hooks/useSchedule';
-import { DatePicker } from '../ui/date-picker';
-import { ViewToggle } from '../ui/view-toggle';
+import { ScheduleToolbar } from './schedule-toolbar';
 import { LoadingSpinner } from '../ui/loading-spinner';
 import { ErrorMessage } from '../ui/error-message';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
@@ -119,15 +118,11 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type }) => {
       <Card className="border shadow-none">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <ViewToggle
-              viewType={currentView.type}
-              onChange={handleViewTypeChange}
-            />
-            
-            <DatePicker
+            <ScheduleToolbar
               value={currentView.date}
               onChange={handleDateChange}
               viewType={currentView.type}
+              onViewTypeChange={handleViewTypeChange}
             />
           </div>
         </CardContent>

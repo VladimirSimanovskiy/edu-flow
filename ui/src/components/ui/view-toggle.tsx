@@ -21,7 +21,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
   ];
 
   return (
-    <div className={cn('inline-flex rounded-lg border p-0.5 sm:p-1 bg-background', className)}>
+    <div className={cn('inline-flex rounded-lg border p-0.5 bg-background', className)}>
       {options.map((option) => (
         <Toggle
           key={option.value}
@@ -31,7 +31,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
           variant="outline"
           size="sm"
           className={cn(
-            'px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all border-0',
+            'px-3 py-1.5 text-sm font-medium rounded-md transition-all border-0 h-8',
             viewType === option.value
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'bg-transparent hover:bg-accent hover:text-accent-foreground'

@@ -72,7 +72,7 @@ export const DatePicker: React.FC<DateControlProps> = ({
         disabled={disabled}
         className="h-8 w-8"
       >
-        <ChevronLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+        <ChevronLeftIcon className="h-4 w-4" />
       </Button>
 
       {/* Date display with shadcn popover */}
@@ -81,13 +81,13 @@ export const DatePicker: React.FC<DateControlProps> = ({
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal min-w-[120px] px-2 sm:px-4",
+              "justify-start text-left font-normal min-w-[140px] px-3 h-8",
               !value && "text-muted-foreground"
             )}
             disabled={disabled}
           >
-            <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-xs sm:text-sm">{displayDate}</span>
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <span className="text-sm">{displayDate}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="center">
@@ -128,7 +128,7 @@ export const DatePicker: React.FC<DateControlProps> = ({
         disabled={disabled}
         className="h-8 w-8"
       >
-        <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+        <ChevronRightIcon className="h-4 w-4" />
       </Button>
     </div>
   );

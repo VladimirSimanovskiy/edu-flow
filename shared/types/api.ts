@@ -1,4 +1,4 @@
-import type { Lesson, Teacher, Class, Subject, Classroom, ScheduleVersion, User } from './database';
+import type { Lesson, Teacher, Class, Subject, Classroom, ScheduleVersion, User, Student } from './database';
 
 // API Response types
 export interface ApiResponse<T> {

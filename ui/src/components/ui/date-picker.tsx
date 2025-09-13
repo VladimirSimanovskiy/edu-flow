@@ -1,153 +1,135 @@
-import React from 'react';
-import { format } from 'date-fns';
+import React, { useState } from 'react';
 import { ru } from 'date-fns/locale';
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { tokens } from '../../design-system/tokens';
+import { Button } from './button';
+import { Calendar } from './calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { QuickDateActions } from './quick-date-actions';
+import { WeekPicker } from './week-picker';
+import { formatDateForDisplay, navigateDate, getQuickActions } from '../../utils/dateControlUtils';
+import type { DateControlProps } from '../../types/dateControl';
 
-interface DatePickerProps {
-  value: Date;
-  onChange: (date: Date) => void;
-  viewType: 'day' | 'week';
-  className?: string;
-  disabled?: boolean;
-}
-
-export const DatePicker: React.FC<DatePickerProps> = ({
+export const DatePicker: React.FC<DateControlProps> = ({
   value,
   onChange,
   viewType,
   className,
   disabled = false,
+  minDate,
+  maxDate,
+  locale = 'ru'
 }) => {
+  // Если это недельный режим, используем WeekPicker
+  if (viewType === 'week') {
+    return (
+      <WeekPicker
+        value={value}
+        onChange={onChange}
+        viewType={viewType}
+        className={className}
+        disabled={disabled}
+        minDate={minDate}
+        maxDate={maxDate}
+        locale={locale}
+      />
+    );
+  }
+
+  // Для дневного режима используем обычный DatePicker
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  
   const handlePrevious = () => {
-    const newDate = new Date(value);
-    if (viewType === 'day') {
-      newDate.setDate(newDate.getDate() - 1);
-    } else {
-      newDate.setDate(newDate.getDate() - 7);
-    }
+    const newDate = navigateDate(value, 'prev', viewType);
     onChange(newDate);
   };
 
   const handleNext = () => {
-    const newDate = new Date(value);
-    if (viewType === 'day') {
-      newDate.setDate(newDate.getDate() + 1);
-    } else {
-      newDate.setDate(newDate.getDate() + 7);
-    }
+    const newDate = navigateDate(value, 'next', viewType);
     onChange(newDate);
   };
 
-  const handleToday = () => {
-    onChange(new Date());
-  };
-
-  const formatDisplayDate = () => {
-    if (viewType === 'day') {
-      return format(value, 'd MMMM yyyy', { locale: ru });
-    } else {
-      const weekStart = new Date(value);
-      const dayOfWeek = weekStart.getDay();
-      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      weekStart.setDate(weekStart.getDate() + diff);
-      
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      
-      return `${format(weekStart, 'd MMM', { locale: ru })} - ${format(weekEnd, 'd MMM yyyy', { locale: ru })}`;
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      onChange(date);
+      setIsCalendarOpen(false);
     }
   };
 
+  const handleQuickAction = (action: ReturnType<typeof getQuickActions>[0]) => {
+    onChange(action.getDate());
+  };
+
+  const displayDate = formatDateForDisplay(value, viewType, locale);
+
   return (
     <div className={cn('flex items-center gap-1 sm:gap-2', className)}>
-      <button
+      {/* Previous button */}
+      <Button
+        variant="outline"
+        size="icon"
         onClick={handlePrevious}
         disabled={disabled}
-        className={cn(
-          'p-1.5 sm:p-2 rounded-md border transition-colors',
-          disabled 
-            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-        )}
-        style={{
-          borderRadius: tokens.borderRadius.md,
-          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
-        }}
+        className="h-8 w-8"
       >
-        <svg 
-          className="w-3 h-3 sm:w-4 sm:h-4" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M15 19l-7-7 7-7" 
-          />
-        </svg>
-      </button>
+        <ChevronLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+      </Button>
 
-      <button
-        onClick={handleToday}
-        disabled={disabled}
-        className={cn(
-          'px-2 sm:px-4 py-1.5 sm:py-2 rounded-md border transition-colors text-xs sm:text-sm',
-          disabled 
-            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-        )}
-        style={{
-          fontWeight: tokens.typography.fontWeight.medium,
-          borderRadius: tokens.borderRadius.md,
-          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
-        }}
-      >
-        <span className="hidden sm:inline">Сегодня</span>
-        <span className="sm:hidden">Сег</span>
-      </button>
+      {/* Date display with shadcn popover */}
+      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn(
+              "justify-start text-left font-normal min-w-[120px] px-2 sm:px-4",
+              !value && "text-muted-foreground"
+            )}
+            disabled={disabled}
+          >
+            <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">{displayDate}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="center">
+          <div className="flex flex-col">
+            {/* Quick actions */}
+            <div className="p-3 border-b">
+              <QuickDateActions
+                viewType={viewType}
+                onActionSelect={handleQuickAction}
+                disabled={disabled}
+              />
+            </div>
+            
+            {/* Calendar */}
+            <div className="p-3">
+              <Calendar
+                mode="single"
+                selected={value}
+                onSelect={handleDateSelect}
+                initialFocus
+                locale={locale === 'ru' ? ru : undefined}
+                disabled={(date) => {
+                  if (minDate && date < minDate) return true;
+                  if (maxDate && date > maxDate) return true;
+                  return false;
+                }}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <div 
-        className="px-2 sm:px-4 py-1.5 sm:py-2 text-center font-medium text-xs sm:text-sm"
-        style={{
-          fontWeight: tokens.typography.fontWeight.medium,
-          color: tokens.colors.gray[900],
-          minWidth: '120px'
-        }}
-      >
-        {formatDisplayDate()}
-      </div>
-
-      <button
+      {/* Next button */}
+      <Button
+        variant="outline"
+        size="icon"
         onClick={handleNext}
         disabled={disabled}
-        className={cn(
-          'p-1.5 sm:p-2 rounded-md border transition-colors',
-          disabled 
-            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-        )}
-        style={{
-          borderRadius: tokens.borderRadius.md,
-          transition: `all ${tokens.animation.duration.fast} ${tokens.animation.easing.ease}`
-        }}
+        className="h-8 w-8"
       >
-        <svg 
-          className="w-3 h-3 sm:w-4 sm:h-4" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M9 5l7 7-7 7" 
-          />
-        </svg>
-      </button>
+        <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+      </Button>
     </div>
   );
 };

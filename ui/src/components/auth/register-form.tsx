@@ -118,7 +118,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onCancel 
           </div>
 
           {registerError && (
-            <ErrorMessage message={registerError.message} />
+            <ErrorMessage error={registerError.message} />
           )}
 
           <div className="flex space-x-3">

@@ -51,7 +51,7 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
       </div>
 
       {/* Right Zone - Date Navigation */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         <DateNavigation
           value={value}
           viewType={viewType}

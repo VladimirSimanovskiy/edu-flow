@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
-import type { Lesson } from '../types/schedule';
-import type { LessonData } from '../components/schedule/base/lesson-cell';
+import type { Lesson } from '../../../types/schedule';
+
+// Локальный тип для данных урока
+export interface LessonData {
+  primary?: string;
+  secondary?: string[];
+}
 
 export const useScheduleLogic = (lessons: Lesson[]) => {
   const getLessonForClass = useMemo(() => {
@@ -18,7 +23,7 @@ export const useScheduleLogic = (lessons: Lesson[]) => {
       if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
 
       return {
-        primary: lesson.subjectName, // Для классов primary - это предмет
+        primary: lesson.subjectName,
         secondary
       };
     };
@@ -39,7 +44,7 @@ export const useScheduleLogic = (lessons: Lesson[]) => {
       if (lesson.classroomNumber) secondary.push(`каб. ${lesson.classroomNumber}`);
 
       return {
-        primary: lesson.className, // Для учителей primary - это класс
+        primary: lesson.className,
         secondary
       };
     };

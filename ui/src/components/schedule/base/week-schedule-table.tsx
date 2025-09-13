@@ -1,7 +1,7 @@
 import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { tokens } from '../../../design-system/tokens';
-import { useLessonNumbers } from '../../../hooks/useLessonNumbers';
+import { useLessonNumbers } from '../hooks';
 import { ScheduleContainer } from './schedule-container';
 import { 
   ScheduleTable,

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatDateForApi } from '../utils/dateFormat';
+import { formatDateForApi } from '../../../utils/dateFormat';
 
 /**
  * Хук для работы с датами в расписании

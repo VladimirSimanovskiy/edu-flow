@@ -5,6 +5,8 @@ import { useScheduleConfig, renderScheduleComponent } from './schedule-component
 import { ScheduleDataProvider, useScheduleData } from './data/schedule-data-provider';
 import { ScheduleLayout } from './layout/schedule-layout';
 import { ScheduleControls } from './controls/schedule-controls';
+import { ScheduleLoadingOverlay } from './schedule-loading-overlay';
+import { ScheduleLoadingUtils } from '../../types/scheduleLoading';
 import type { ScheduleType } from '../../types/scheduleConfig';
 
 interface ScheduleViewProps {
@@ -15,7 +17,7 @@ interface ScheduleViewProps {
 const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?: (type: ScheduleType) => void }> = ({ type, onScheduleTypeChange }) => {
   const { currentView, setDate, setViewType } = useScheduleStore();
   const scheduleConfig = useScheduleConfig(type);
-  const { teachers, classes, lessons, isLoading, error } = useScheduleData();
+  const { teachers, classes, lessons, loadingState } = useScheduleData();
 
   const handleDateChange = (date: Date) => {
     setDate(date);
@@ -31,8 +33,8 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
     <ScheduleLayout
       title={scheduleConfig.title}
       description={scheduleConfig.description}
-      isLoading={isLoading}
-      error={error}
+      isLoading={ScheduleLoadingUtils.shouldShowMainLoader(loadingState)}
+      error={ScheduleLoadingUtils.hasError(loadingState) ? loadingState.error : null}
     >
       {/* Controls */}
       <ScheduleControls
@@ -42,10 +44,11 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
         onViewTypeChange={handleViewTypeChange}
         scheduleType={type}
         onScheduleTypeChange={onScheduleTypeChange}
+        disabled={!ScheduleLoadingUtils.isInteractive(loadingState)}
       />
 
       {/* Schedule Content */}
-      <div>
+      <div className="relative">
         {renderScheduleComponent(
           type,
           currentView.type,
@@ -57,6 +60,12 @@ const ScheduleViewContent: React.FC<{ type: ScheduleType; onScheduleTypeChange?:
             weekStart: currentView.type === 'week' ? weekStart : undefined,
           }
         )}
+        
+        {/* Loading overlay for data refreshing */}
+        <ScheduleLoadingOverlay 
+          isVisible={ScheduleLoadingUtils.shouldShowUpdateOverlay(loadingState)}
+          message="Обновление данных..."
+        />
       </div>
     </ScheduleLayout>
   );

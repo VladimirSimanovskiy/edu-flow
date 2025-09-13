@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div style={{ padding: tokens.spacing[6] }}>
-          <Card variant="outlined">
+          <Card>
             <CardHeader>
               <CardTitle style={{ color: tokens.colors.error[600] }}>
                 Что-то пошло не так

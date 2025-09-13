@@ -8,6 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { DatePicker } from './date-picker';
 import { navigateDate } from '../../../utils/dateControlUtils';
+import { cn } from '../../../utils/cn';
 
 interface DateNavigationProps {
   /** Текущая дата */
@@ -49,7 +50,7 @@ export const DateNavigation: React.FC<DateNavigationProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={cn('flex items-center gap-2', className)}>
       {/* Previous button */}
       <Button
         variant="outline"

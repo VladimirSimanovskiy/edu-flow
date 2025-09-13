@@ -1,17 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "../lib/api";
+import { apiClient } from "../../../lib/api";
 import type {
   CreateLessonRequest,
   UpdateLessonRequest,
   LessonFilters,
-} from "../types/api";
+} from "../../../types/api";
 import {
   transformTeachers,
   transformClasses,
   transformLessons,
   transformLessonSchedules,
   transformScheduleVersions,
-} from "../utils/dataTransform";
+} from "../../../utils/dataTransform";
 
 // Teachers hooks
 export const useTeachers = () => {
@@ -101,7 +101,8 @@ export const useLessonsForDay = (
       return transformLessons(lessons);
     },
     enabled: !!date && (options?.enabled !== false),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (keep in cache)
   });
 };
 
@@ -117,7 +118,8 @@ export const useLessonsForWeek = (
       return transformLessons(lessons);
     },
     enabled: !!date && (options?.enabled !== false),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (keep in cache)
   });
 };
 

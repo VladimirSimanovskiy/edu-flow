@@ -2,8 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Teacher, Lesson } from '../../types/schedule';
-import { useLessonNumbers } from '../../hooks/useLessonNumbers';
-import { useScheduleLogic } from '../../hooks/useScheduleLogic';
+import { useLessonNumbers, useScheduleLogic } from './hooks';
 import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
 import type { LessonData } from './base/lesson-cell';
 

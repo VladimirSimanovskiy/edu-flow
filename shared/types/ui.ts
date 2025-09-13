@@ -1,10 +1,5 @@
-import type { Lesson, Teacher, Class, LessonSchedule, ScheduleVersion, User } from './database';
-import type { LessonWithDetails, TeacherWithDetails, ClassWithDetails } from './api';
-
-// Type aliases for UI
-export type LessonWithUI = LessonWithDetails;
-export type TeacherWithUI = TeacherWithDetails;
-export type ClassWithUI = ClassWithDetails;
+import type { LessonSchedule, User } from './database';
+import type { LessonWithUI } from './api';
 
 export interface ScheduleCell {
   lessonNumber: number;

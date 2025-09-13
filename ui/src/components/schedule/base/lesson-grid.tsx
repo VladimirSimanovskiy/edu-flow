@@ -21,10 +21,10 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     <div 
       className={cn('grid gap-0.5 sm:gap-1 md:gap-1.5', className)}
       style={{ 
-        gridTemplateColumns: `repeat(${lessonNumbers.length}, minmax(5rem, 1fr))` 
+        gridTemplateColumns: `repeat(${lessonNumbers?.length ?? 0}, minmax(5rem, 1fr))` 
       }}
     >
-      {lessonNumbers.map(lessonNumber => {
+      {lessonNumbers?.map(lessonNumber => {
         const lesson = getLesson(lessonNumber);
         const isHighlighted = lesson && isLessonHighlighted ? isLessonHighlighted(lessonNumber, lesson) : false;
         

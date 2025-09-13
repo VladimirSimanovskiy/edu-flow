@@ -7,11 +7,13 @@ import type {
 } from '../types/database';
 import type { 
   Lesson, 
-  Teacher, 
-  Class,
   LessonScheduleWithTimes,
   ScheduleVersionWithLessons
 } from '../types/schedule';
+import type { 
+  TeacherWithComputedFields, 
+  ClassWithComputedFields 
+} from '@shared/types';
 
 // Helper function to format time from Date or string to string
 const formatTime = (date: Date | string): string => {
@@ -50,22 +52,39 @@ export const transformLesson = (dbLesson: DatabaseLesson): Lesson => {
 };
 
 // Transform database teacher to UI teacher
-export const transformTeacher = (dbTeacher: DatabaseTeacher): Teacher => {
+export const transformTeacher = (dbTeacher: DatabaseTeacher): TeacherWithComputedFields => {
   return {
-    ...dbTeacher,
+    id: dbTeacher.id,
+    firstName: dbTeacher.firstName,
+    lastName: dbTeacher.lastName,
+    isActive: dbTeacher.isActive,
+    createdAt: dbTeacher.createdAt,
+    updatedAt: dbTeacher.updatedAt,
+    middleName: dbTeacher.middleName ?? null,
+    email: dbTeacher.email ?? null,
+    phone: dbTeacher.phone ?? null,
+    idAssignedClassroom: dbTeacher.idAssignedClassroom ?? null,
+    idUser: dbTeacher.idUser ?? null,
     fullName: `${dbTeacher.firstName} ${dbTeacher.lastName}${dbTeacher.middleName ? ` ${dbTeacher.middleName}` : ''}`,
     subjectNames: dbTeacher.subjects.map(ts => ts.subject.name),
+    assignedClassroomNumber: dbTeacher.assignedClassroom?.number,
   };
 };
 
 // Transform database class to UI class
-export const transformClass = (dbClass: DatabaseClass): Class => {
+export const transformClass = (dbClass: DatabaseClass): ClassWithComputedFields => {
   return {
-    ...dbClass,
+    id: dbClass.id,
+    grade: dbClass.grade,
+    letter: dbClass.letter,
+    createdAt: dbClass.createdAt,
+    updatedAt: dbClass.updatedAt,
+    idClassLeaderTeacher: dbClass.idClassLeaderTeacher ?? null,
     name: `${dbClass.grade}${dbClass.letter}`,
     classLeaderName: dbClass.classLeader 
       ? `${dbClass.classLeader.firstName} ${dbClass.classLeader.lastName}`
       : undefined,
+    studentCount: dbClass.studentHistory?.length ?? 0,
   };
 };
 
@@ -91,11 +110,11 @@ export const transformLessons = (dbLessons: DatabaseLesson[]): Lesson[] => {
   return dbLessons.map(transformLesson);
 };
 
-export const transformTeachers = (dbTeachers: DatabaseTeacher[]): Teacher[] => {
+export const transformTeachers = (dbTeachers: DatabaseTeacher[]): TeacherWithComputedFields[] => {
   return dbTeachers.map(transformTeacher);
 };
 
-export const transformClasses = (dbClasses: DatabaseClass[]): Class[] => {
+export const transformClasses = (dbClasses: DatabaseClass[]): ClassWithComputedFields[] => {
   return dbClasses.map(transformClass);
 };
 

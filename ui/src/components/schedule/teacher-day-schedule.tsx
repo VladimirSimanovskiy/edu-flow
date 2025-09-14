@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Teacher, Lesson } from '../../types/schedule';
 import { useLessonNumbers, useScheduleLogic } from './hooks';
+import { useScheduleFiltersContext } from './filters';
 import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
 import type { LessonData } from './base/lesson-cell';
 
@@ -31,6 +32,7 @@ import {
 } from './base/schedule-table';
 import { LessonHeader } from './base/lesson-header';
 import { LessonGrid } from './base/lesson-grid';
+import { ScheduleColumnFilter } from './filters';
 
 interface TeacherDayScheduleProps {
   teachers: Teacher[];
@@ -48,9 +50,21 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
   const { getLessonForTeacher, getDayOfWeek } = useScheduleLogic(lessons);
   const { highlight, setHighlightedClass, clearHighlight } = useTeacherScheduleStore();
+  
+  // Get filters from context
+  const {
+    getTeacherFilterOptions,
+    isTeacherFilterActive,
+    isTeacherVisible,
+  } = useScheduleFiltersContext();
+  
+  const teacherFilterOptions = getTeacherFilterOptions(teachers);
 
   const dayOfWeek = getDayOfWeek(date);
   const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ru });
+
+  // Filter teachers based on filter state
+  const filteredTeachers = teachers.filter(teacher => isTeacherVisible(teacher.id));
 
   const getLesson = (teacherId: number, lessonNumber: number) => {
     return getLessonForTeacher(teacherId, dayOfWeek, lessonNumber);
@@ -110,7 +124,17 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
               width="w-24 sm:w-32 md:w-48" 
               className="border-r sticky left-0 bg-gray-50 z-20"
             >
-              <span className="sm:inline">Учителя</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="sm:inline">Учителя</span>
+                </div>
+                <ScheduleColumnFilter
+                  options={teacherFilterOptions}
+                  isActive={isTeacherFilterActive}
+                  triggerText=""
+                  className="ml-2"
+                />
+              </div>
             </ScheduleTableCell>
             <ScheduleTableCell header className="text-center p-0.5 sm:p-1 md:p-2">
               <LessonHeader lessonNumbers={lessonNumbers} />
@@ -119,7 +143,7 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
         </ScheduleTableHeader>
         
         <ScheduleTableBody>
-          {teachers.map((teacher) => (
+          {filteredTeachers.map((teacher) => (
             <ScheduleTableRow key={teacher.id}>
               <ScheduleTableCell className="border-r sticky left-0 bg-white z-10">
                 <div className="font-medium text-gray-900 text-xs sm:text-sm">

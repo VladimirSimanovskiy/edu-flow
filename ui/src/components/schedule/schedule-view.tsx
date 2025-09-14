@@ -14,6 +14,7 @@ import { ScheduleControls } from "./controls/schedule-controls";
 import { ScheduleLoadingProgress } from "./schedule-loading-progress";
 import { useScheduleLoadingProgress } from "./hooks/useScheduleLoadingProgress";
 import { ScheduleLoadingUtils } from "../../types/scheduleLoading";
+import { ScheduleFiltersProvider } from "./filters";
 import type { ScheduleType } from "../../types/scheduleConfig";
 
 interface ScheduleViewProps {
@@ -86,10 +87,12 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
 
   return (
     <ScheduleDataProvider date={currentView.date} viewType={currentView.type}>
-      <ScheduleViewContent
-        type={type}
-        onScheduleTypeChange={onScheduleTypeChange}
-      />
+      <ScheduleFiltersProvider>
+        <ScheduleViewContent
+          type={type}
+          onScheduleTypeChange={onScheduleTypeChange}
+        />
+      </ScheduleFiltersProvider>
     </ScheduleDataProvider>
   );
 };

@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Class, Lesson } from '../../types/schedule';
 import { useLessonNumbers, useScheduleLogic } from './hooks';
+import { useScheduleFiltersContext } from './filters';
 import { useClassScheduleStore } from '../../store/classScheduleStore';
 import type { LessonData } from './base/lesson-cell';
 import { ScheduleContainer } from './base/schedule-container';
@@ -15,6 +16,7 @@ import {
 } from './base/schedule-table';
 import { LessonHeader } from './base/lesson-header';
 import { LessonGrid } from './base/lesson-grid';
+import { ScheduleColumnFilter } from './filters';
 
 interface ClassDayScheduleProps {
   classes: Class[];
@@ -32,9 +34,21 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
   const { getLessonForClass, getDayOfWeek } = useScheduleLogic(lessons);
   const { highlight, setHighlightedTeacher, clearHighlight } = useClassScheduleStore();
+  
+  // Get filters from context
+  const {
+    getClassFilterOptions,
+    isClassFilterActive,
+    isClassVisible,
+  } = useScheduleFiltersContext();
+  
+  const classFilterOptions = getClassFilterOptions(classes);
 
   const dayOfWeek = getDayOfWeek(date);
   const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ru });
+
+  // Filter classes based on filter state
+  const filteredClasses = classes.filter(classItem => isClassVisible(classItem.id));
 
   const getLesson = (classId: number, lessonNumber: number) => {
     return getLessonForClass(classId, dayOfWeek, lessonNumber);
@@ -94,8 +108,18 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
               width="w-24 sm:w-32 md:w-48" 
               className="border-r sticky left-0 bg-gray-50 z-20"
             >
-              <span className="hidden sm:inline">Классы</span>
-              <span className="sm:hidden">Кл.</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="hidden sm:inline">Классы</span>
+                  <span className="sm:hidden">Кл.</span>
+                </div>
+                <ScheduleColumnFilter
+                  options={classFilterOptions}
+                  isActive={isClassFilterActive}
+                  triggerText=""
+                  className="ml-2"
+                />
+              </div>
             </ScheduleTableCell>
             <ScheduleTableCell header className="text-center p-0.5 sm:p-1 md:p-2">
               <LessonHeader lessonNumbers={lessonNumbers} />
@@ -104,7 +128,7 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
         </ScheduleTableHeader>
         
         <ScheduleTableBody>
-          {classes.map((classItem) => (
+          {filteredClasses.map((classItem) => (
             <ScheduleTableRow key={classItem.id}>
               <ScheduleTableCell className="border-r sticky left-0 bg-white z-10">
                 <div className="font-medium text-gray-900 text-xs sm:text-sm">

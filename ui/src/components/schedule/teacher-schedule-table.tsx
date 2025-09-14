@@ -3,6 +3,7 @@ import type { Teacher, Lesson } from '../../types/schedule';
 import { WeekScheduleTable } from './base/week-schedule-table';
 import { teacherToScheduleEntity, getLessonForTeacher } from './adapters/schedule-adapters';
 import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
+import { useScheduleFiltersContext } from './filters';
 import type { LessonData } from './base/lesson-cell';
 
 interface TeacherScheduleTableProps {
@@ -25,7 +26,21 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
   enableDragScroll = true,
 }) => {
   const { highlight, setHighlightedClass, clearHighlight } = useTeacherScheduleStore();
+  
+  // Get filters from context
+  const {
+    getTeacherFilterOptions,
+    isTeacherFilterActive,
+    isTeacherVisible,
+  } = useScheduleFiltersContext();
+  
+  const teacherFilterOptions = getTeacherFilterOptions(teachers);
+
   const scheduleEntities = teachers.map(teacherToScheduleEntity);
+  
+  // Filter teachers based on filter state
+  const filteredTeachers = teachers.filter(teacher => isTeacherVisible(teacher.id));
+  const filteredScheduleEntities = filteredTeachers.map(teacherToScheduleEntity);
 
   // Обработчик клика по уроку в расписании учителей
   const handleLessonClick = (teacherId: number, day: Date, lessonNumber: number, lesson: LessonData) => {
@@ -81,6 +96,9 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
       onLessonClick={handleLessonClick}
       isLessonHighlighted={isLessonHighlighted}
       enableDragScroll={enableDragScroll}
+      filterOptions={teacherFilterOptions}
+      isFilterActive={isTeacherFilterActive}
+      filteredEntities={filteredScheduleEntities}
     />
   );
 };

@@ -31,3 +31,6 @@ export { useLessonNumbers } from './useLessonNumbers';
 
 // Loading progress
 export { useScheduleLoadingProgress } from './useScheduleLoadingProgress';
+
+// Filters
+export { useScheduleFilters } from './useScheduleFilters';

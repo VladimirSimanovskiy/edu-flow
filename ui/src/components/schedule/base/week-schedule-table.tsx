@@ -11,8 +11,10 @@ import {
 } from './schedule-table';
 import { LessonHeader } from './lesson-header';
 import { LessonGrid } from './lesson-grid';
+import { ScheduleColumnFilter } from '../filters';
 import type { Lesson } from '../../../types/schedule';
 import type { LessonData } from './lesson-cell';
+import type { ValuesFilterOptions } from '../../../types/valuesFilter';
 
 export interface ScheduleEntity {
   id: number;
@@ -30,6 +32,9 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   onLessonClick?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => void;
   isLessonHighlighted?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
   enableDragScroll?: boolean;
+  filterOptions?: ValuesFilterOptions<number>;
+  isFilterActive?: boolean;
+  filteredEntities?: T[];
 }
 
 export const WeekScheduleTable = <T extends ScheduleEntity>({
@@ -41,11 +46,17 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   onLessonClick,
   isLessonHighlighted,
   enableDragScroll = true,
+  filterOptions,
+  isFilterActive = false,
+  filteredEntities,
 }: WeekScheduleTableProps<T>) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
 
   const weekTitle = `Неделя ${format(weekStart, 'd MMM', { locale: ru })} - ${format(addDays(weekStart, 6), 'd MMM yyyy', { locale: ru })}`;
+
+  // Use filtered entities if provided, otherwise use all entities
+  const displayEntities = filteredEntities || entities;
 
   return (
     <ScheduleContainer
@@ -63,10 +74,22 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
               width="w-20 sm:w-32 md:w-48" 
               className="border-r sticky left-0 bg-gray-50 z-20"
             >
-              <span className="hidden sm:inline">{entityLabel}</span>
-              <span className="sm:hidden text-xs">
-                {entityLabel === 'Классы' ? 'Кл.' : 'Уч.'}
-              </span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="hidden sm:inline">{entityLabel}</span>
+                  <span className="sm:hidden text-xs">
+                    {entityLabel === 'Классы' ? 'Кл.' : 'Уч.'}
+                  </span>
+                </div>
+                {filterOptions && (
+                  <ScheduleColumnFilter
+                    options={filterOptions}
+                    isActive={isFilterActive}
+                    triggerText=""
+                    className="ml-2"
+                  />
+                )}
+              </div>
             </ScheduleTableCell>
             {days.map((day) => (
               <ScheduleTableCell 
@@ -89,7 +112,7 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
         </ScheduleTableHeader>
         
         <ScheduleTableBody>
-          {entities.map((entity) => (
+          {displayEntities.map((entity) => (
             <ScheduleTableRow key={entity.id}>
               <ScheduleTableCell className="border-r sticky left-0 bg-white z-10">
                 <div className="font-medium text-xs sm:text-sm text-gray-900">

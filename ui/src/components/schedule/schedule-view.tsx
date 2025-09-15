@@ -86,13 +86,13 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
   const { currentView } = useScheduleStore();
 
   return (
-    <ScheduleDataProvider date={currentView.date} viewType={currentView.type}>
-      <ScheduleFiltersProvider>
+    <ScheduleFiltersProvider>
+      <ScheduleDataProvider date={currentView.date} viewType={currentView.type}>
         <ScheduleViewContent
           type={type}
           onScheduleTypeChange={onScheduleTypeChange}
         />
-      </ScheduleFiltersProvider>
-    </ScheduleDataProvider>
+      </ScheduleDataProvider>
+    </ScheduleFiltersProvider>
   );
 };

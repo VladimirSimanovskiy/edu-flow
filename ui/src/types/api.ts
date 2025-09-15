@@ -7,6 +7,7 @@ export type {
   CreateLessonRequest,
   UpdateLessonRequest,
   LessonFilters,
+  LessonValuesFilters,
   PaginationOptions,
   PaginatedResult
 } from '@shared/types';

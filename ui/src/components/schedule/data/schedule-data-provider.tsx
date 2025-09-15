@@ -4,6 +4,7 @@ import { useTeachers, useClasses, useLessonsForWeek, useLessonsForDay, useSchedu
 import { ScheduleLoadingService, StateProviderFactory } from '../../../services/scheduleLoadingService';
 import type { Teacher, Class, Lesson } from '../../../types/schedule';
 import type { ScheduleLoadingState } from '../../../types/scheduleLoading';
+import { useScheduleFiltersContext } from '../filters/context/ScheduleFiltersContext';
 
 interface ScheduleDataContextValue {
   teachers: Teacher[];
@@ -27,8 +28,12 @@ export const ScheduleDataProvider: React.FC<ScheduleDataProviderProps> = ({
 }) => {
   const { apiDateString } = useScheduleDate(date);
   
-  // Автоматическая предзагрузка соседних периодов
-  useAutoPrefetch(date, viewType);
+  // Получаем фильтры из контекста
+  const { toApiFilters } = useScheduleFiltersContext();
+  const apiFilters = toApiFilters();
+  
+  // Автоматическая предзагрузка соседних периодов с фильтрами
+  useAutoPrefetch(date, viewType, apiFilters);
 
   // Загружаем данные из API
   const { 
@@ -45,7 +50,7 @@ export const ScheduleDataProvider: React.FC<ScheduleDataProviderProps> = ({
     error: classesError 
   } = useClasses();
   
-  // Загружаем уроки в зависимости от типа представления
+  // Загружаем уроки в зависимости от типа представления с фильтрами
   const { 
     data: dayLessons, 
     isLoading: dayLessonsLoading, 
@@ -53,7 +58,7 @@ export const ScheduleDataProvider: React.FC<ScheduleDataProviderProps> = ({
     error: dayLessonsError 
   } = useLessonsForDay(
     apiDateString,
-    undefined,
+    apiFilters,
     { enabled: viewType === 'day' }
   );
   
@@ -64,7 +69,7 @@ export const ScheduleDataProvider: React.FC<ScheduleDataProviderProps> = ({
     error: weekLessonsError 
   } = useLessonsForWeek(
     apiDateString,
-    undefined,
+    apiFilters,
     { enabled: viewType === 'week' }
   );
   

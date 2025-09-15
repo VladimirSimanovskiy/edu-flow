@@ -35,6 +35,156 @@ const lessonFiltersSchema = z.object({
   date: z.string().datetime().optional(),
 });
 
+// Extended filters schema for values filter integration
+const lessonValuesFiltersSchema = z.object({
+  // Single value filters (existing)
+  idTeacher: z.number().int().positive().optional(),
+  idClass: z.number().int().positive().optional(),
+  idSubject: z.number().int().positive().optional(),
+  dayOfWeek: z.number().min(0).max(6).optional(),
+  idScheduleVersion: z.number().int().positive().optional(),
+  date: z.string().datetime().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  
+  // Multiple values filters (new)
+  teachers: z.object({
+    inList: z.boolean(),
+    items: z.array(z.number().int().positive()),
+  }).optional(),
+  classes: z.object({
+    inList: z.boolean(),
+    items: z.array(z.number().int().positive()),
+  }).optional(),
+  subjects: z.object({
+    inList: z.boolean(),
+    items: z.array(z.number().int().positive()),
+  }).optional(),
+});
+
+// Helper function to parse query parameters for extended filters
+const parseExtendedFilters = (query: any) => {
+  const filters: any = {};
+
+  // Parse simple filters
+  if (query.idTeacher) filters.idTeacher = parseInt(query.idTeacher);
+  if (query.idClass) filters.idClass = parseInt(query.idClass);
+  if (query.idSubject) filters.idSubject = parseInt(query.idSubject);
+  if (query.dayOfWeek !== undefined) filters.dayOfWeek = parseInt(query.dayOfWeek);
+  if (query.idScheduleVersion) filters.idScheduleVersion = parseInt(query.idScheduleVersion);
+  if (query.date) filters.date = query.date;
+  if (query.startDate) filters.startDate = query.startDate;
+  if (query.endDate) filters.endDate = query.endDate;
+
+  // Parse complex filters (teachers, classes, subjects)
+  if (query['teachers.inList'] !== undefined) {
+    filters.teachers = {
+      inList: query['teachers.inList'] === 'true',
+      items: []
+    };
+    
+    // Parse teachers.items array - handle both single values and arrays
+    const teachersItems = query['teachers.items'];
+    if (teachersItems) {
+      const itemsArray = Array.isArray(teachersItems) ? teachersItems : [teachersItems];
+      itemsArray.forEach((item: any) => {
+        const value = parseInt(item);
+        if (!isNaN(value)) {
+          filters.teachers.items.push(value);
+        }
+      });
+    }
+  }
+
+  if (query['classes.inList'] !== undefined) {
+    filters.classes = {
+      inList: query['classes.inList'] === 'true',
+      items: []
+    };
+    
+    // Parse classes.items array - handle both single values and arrays
+    const classesItems = query['classes.items'];
+    if (classesItems) {
+      const itemsArray = Array.isArray(classesItems) ? classesItems : [classesItems];
+      itemsArray.forEach((item: any) => {
+        const value = parseInt(item);
+        if (!isNaN(value)) {
+          filters.classes.items.push(value);
+        }
+      });
+    }
+  }
+
+  if (query['subjects.inList'] !== undefined) {
+    filters.subjects = {
+      inList: query['subjects.inList'] === 'true',
+      items: []
+    };
+    
+    // Parse subjects.items array - handle both single values and arrays
+    const subjectsItems = query['subjects.items'];
+    if (subjectsItems) {
+      const itemsArray = Array.isArray(subjectsItems) ? subjectsItems : [subjectsItems];
+      itemsArray.forEach((item: any) => {
+        const value = parseInt(item);
+        if (!isNaN(value)) {
+          filters.subjects.items.push(value);
+        }
+      });
+    }
+  }
+
+  // Debug logging
+  console.log('Parsed filters:', JSON.stringify(filters, null, 2));
+  
+  return filters;
+};
+
+// Helper function to build WHERE conditions from extended filters
+const buildWhereConditions = (filters: any) => {
+  const where: any = {};
+
+  // Single value filters (existing)
+  if (filters.idTeacher) where.idTeacher = filters.idTeacher;
+  if (filters.idClass) where.idClass = filters.idClass;
+  if (filters.idSubject) where.idSubject = filters.idSubject;
+  if (filters.dayOfWeek !== undefined) where.dayOfWeek = filters.dayOfWeek;
+  if (filters.idScheduleVersion) where.idScheduleVersion = filters.idScheduleVersion;
+
+  // Multiple values filters (new)
+  if (filters.teachers) {
+    const { inList, items } = filters.teachers;
+    if (items && items.length > 0) {
+      where.idTeacher = inList 
+        ? { in: items }  // include only these teachers
+        : { notIn: items }; // exclude these teachers
+    }
+  }
+
+  if (filters.classes) {
+    const { inList, items } = filters.classes;
+    if (items && items.length > 0) {
+      where.idClass = inList 
+        ? { in: items }  // include only these classes
+        : { notIn: items }; // exclude these classes
+    }
+  }
+
+  if (filters.subjects) {
+    const { inList, items } = filters.subjects;
+    if (items && items.length > 0) {
+      where.idSubject = inList 
+        ? { in: items }  // include only these subjects
+        : { notIn: items }; // exclude these subjects
+    }
+  }
+
+  // Debug logging
+  console.log('Generated WHERE conditions:', JSON.stringify(where, null, 2));
+  
+  return where;
+};
+
 // Get all teachers
 router.get('/teachers', authenticateToken, async (req, res, next) => {
   try {
@@ -180,30 +330,27 @@ router.get('/classrooms', authenticateToken, async (req, res, next) => {
 // Get lessons with filters
 router.get('/lessons', authenticateToken, async (req, res, next) => {
   try {
-    const validationResult = lessonFiltersSchema.safeParse(req.query);
+    // Parse extended filters from query parameters
+    const filters = parseExtendedFilters(req.query);
+    
+    // Validate the parsed filters
+    const validationResult = lessonValuesFiltersSchema.safeParse(filters);
     if (!validationResult.success) {
       return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
     }
 
-    const filters = validationResult.data;
-    const where: any = {};
-
-    if (filters.idTeacher) where.idTeacher = filters.idTeacher;
-    if (filters.idClass) where.idClass = filters.idClass;
-    if (filters.idSubject) where.idSubject = filters.idSubject;
-    if (filters.dayOfWeek !== undefined) where.dayOfWeek = filters.dayOfWeek;
-    if (filters.idScheduleVersion) where.idScheduleVersion = filters.idScheduleVersion;
+    const where = buildWhereConditions(validationResult.data);
 
     // If date is provided, get lessons from the current schedule version for that date
-    if (filters.date) {
+    if (validationResult.data.date) {
       const currentVersion = await prisma.scheduleVersion.findFirst({
         where: {
           AND: [
-            { dateBegin: { lte: new Date(filters.date) } },
+            { dateBegin: { lte: new Date(validationResult.data.date) } },
             {
               OR: [
                 { dateEnd: null },
-                { dateEnd: { gte: new Date(filters.date) } },
+                { dateEnd: { gte: new Date(validationResult.data.date) } },
               ],
             },
           ],
@@ -247,14 +394,21 @@ router.get('/lessons', authenticateToken, async (req, res, next) => {
 router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
-    const { idTeacher, idClass } = req.query;
+    
+    // Parse extended filters from query parameters
+    const filters = parseExtendedFilters(req.query);
+    
+    // Validate the parsed filters
+    const validationResult = lessonValuesFiltersSchema.safeParse(filters);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
+    }
 
     // Парсим дату из строки YYYY-MM-DD
     const [year, month, day] = date.split('-').map(Number);
     const targetDate = new Date(year, month - 1, day); // month - 1, так как месяцы в JS начинаются с 0
     // Приводим день недели к стандарту базы данных (понедельник = 1, воскресенье = 7)
     const dayOfWeek = targetDate.getDay() === 0 ? 7 : targetDate.getDay();
-
 
     // Get current schedule version for the date
     const currentVersion = await prisma.scheduleVersion.findFirst({
@@ -276,12 +430,9 @@ router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
       return res.json([]);
     }
 
-    const where: any = { 
-      dayOfWeek,
-      idScheduleVersion: currentVersion.id,
-    };
-    if (idTeacher) where.idTeacher = parseInt(idTeacher as string);
-    if (idClass) where.idClass = parseInt(idClass as string);
+    const where = buildWhereConditions(validationResult.data);
+    where.dayOfWeek = dayOfWeek;
+    where.idScheduleVersion = currentVersion.id;
 
     const lessons = await prisma.lesson.findMany({
       where,
@@ -312,7 +463,15 @@ router.get('/lessons/day/:date', authenticateToken, async (req, res, next) => {
 router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
   try {
     const { date } = req.params;
-    const { idTeacher, idClass } = req.query;
+    
+    // Parse extended filters from query parameters
+    const filters = parseExtendedFilters(req.query);
+    
+    // Validate the parsed filters
+    const validationResult = lessonValuesFiltersSchema.safeParse(filters);
+    if (!validationResult.success) {
+      return next(createError('Validation failed: ' + validationResult.error.errors.map((e: any) => e.message).join(', '), 400));
+    }
 
     // Парсим дату из строки YYYY-MM-DD
     const [year, month, day] = date.split('-').map(Number);
@@ -343,11 +502,8 @@ router.get('/lessons/week/:date', authenticateToken, async (req, res, next) => {
       return res.json([]);
     }
 
-    const where: any = { 
-      idScheduleVersion: currentVersion.id,
-    };
-    if (idTeacher) where.idTeacher = parseInt(idTeacher as string);
-    if (idClass) where.idClass = parseInt(idClass as string);
+    const where = buildWhereConditions(validationResult.data);
+    where.idScheduleVersion = currentVersion.id;
 
     const lessons = await prisma.lesson.findMany({
       where,

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { Teacher, Class } from '../../../types/schedule';
 import type { ValuesFilterOptions } from '../../../types/valuesFilter';
+import type { LessonValuesFilters } from '../../../types/api';
 
 export interface ScheduleFilterState {
   teachers: {
@@ -160,6 +161,28 @@ export const useScheduleFilters = ({
     }
   }, [filters.classes, isClassFilterActive]);
 
+  // Convert filters to API format
+  const toApiFilters = useCallback((): LessonValuesFilters => {
+    const apiFilters: LessonValuesFilters = {};
+    
+    // Only include filters that have items selected
+    if (filters.teachers.items.length > 0) {
+      apiFilters.teachers = {
+        inList: filters.teachers.inList,
+        items: filters.teachers.items,
+      };
+    }
+    
+    if (filters.classes.items.length > 0) {
+      apiFilters.classes = {
+        inList: filters.classes.inList,
+        items: filters.classes.items,
+      };
+    }
+    
+    return apiFilters;
+  }, [filters]);
+
   return {
     filters,
     teacherFilterOptions,
@@ -169,5 +192,6 @@ export const useScheduleFilters = ({
     clearFilters,
     isTeacherVisible,
     isClassVisible,
+    toApiFilters,
   };
 };

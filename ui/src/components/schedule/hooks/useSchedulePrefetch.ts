@@ -4,12 +4,12 @@ import { addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { formatDateForApi } from '../../../utils/dateFormat';
 import { apiClient } from '../../../lib/api';
 import { transformLessons } from '../../../utils/dataTransform';
-import type { LessonFilters } from '../../../types/api';
+import type { LessonFilters, LessonValuesFilters } from '../../../types/api';
 
 export const useSchedulePrefetch = () => {
   const queryClient = useQueryClient();
 
-  const prefetchDay = useCallback(async (date: Date, filters?: Omit<LessonFilters, "dayOfWeek">) => {
+  const prefetchDay = useCallback(async (date: Date, filters?: Omit<LessonFilters | LessonValuesFilters, "dayOfWeek">) => {
     const dateString = formatDateForApi(date);
     const queryKey = ["lessons", "day", dateString, filters];
     const staleTime = 5 * 60 * 1000; // 5 minutes
@@ -30,7 +30,7 @@ export const useSchedulePrefetch = () => {
     });
   }, [queryClient]);
 
-  const prefetchWeek = useCallback(async (date: Date, filters?: Omit<LessonFilters, "date">) => {
+  const prefetchWeek = useCallback(async (date: Date, filters?: Omit<LessonFilters | LessonValuesFilters, "date">) => {
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const dateString = formatDateForApi(weekStart);
     const queryKey = ["lessons", "week", dateString, filters];
@@ -51,7 +51,7 @@ export const useSchedulePrefetch = () => {
     });
   }, [queryClient]);
 
-  const prefetchAdjacentPeriods = useCallback((currentDate: Date, viewType: 'day' | 'week', filters?: LessonFilters) => {
+  const prefetchAdjacentPeriods = useCallback((currentDate: Date, viewType: 'day' | 'week', filters?: LessonFilters | LessonValuesFilters) => {
     if (viewType === 'day') {
       prefetchDay(subDays(currentDate, 1), filters);
       prefetchDay(addDays(currentDate, 1), filters);
@@ -68,7 +68,7 @@ export const useSchedulePrefetch = () => {
   };
 };
 
-export const useAutoPrefetch = (date: Date, viewType: 'day' | 'week', filters?: LessonFilters) => {
+export const useAutoPrefetch = (date: Date, viewType: 'day' | 'week', filters?: LessonFilters | LessonValuesFilters) => {
   const { prefetchAdjacentPeriods } = useSchedulePrefetch();
 
   useLayoutEffect(() => {

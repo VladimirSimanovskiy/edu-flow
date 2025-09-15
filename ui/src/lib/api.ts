@@ -17,6 +17,7 @@ import type {
   CreateLessonRequest, 
   UpdateLessonRequest, 
   LessonFilters,
+  LessonValuesFilters,
   ApiError 
 } from '../../../shared/types/api';
 
@@ -173,12 +174,22 @@ class ApiClient {
   }
 
   // Lessons methods
-  async getLessons(filters?: LessonFilters): Promise<Lesson[]> {
+  async getLessons(filters?: LessonFilters | LessonValuesFilters): Promise<Lesson[]> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
+          // Handle complex filter objects (teachers, classes, subjects)
+          if (typeof value === 'object' && value !== null && 'inList' in value && 'items' in value) {
+            params.append(`${key}.inList`, value.inList.toString());
+            if (value.items && value.items.length > 0) {
+              value.items.forEach((item: any) => {
+                params.append(`${key}.items`, item.toString());
+              });
+            }
+          } else {
+            params.append(key, value.toString());
+          }
         }
       });
     }
@@ -189,12 +200,22 @@ class ApiClient {
     return this.request<Lesson[]>(endpoint);
   }
 
-  async getLessonsForDay(date: string, filters?: Omit<LessonFilters, 'dayOfWeek'>): Promise<Lesson[]> {
+  async getLessonsForDay(date: string, filters?: Omit<LessonFilters | LessonValuesFilters, 'dayOfWeek'>): Promise<Lesson[]> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
+          // Handle complex filter objects (teachers, classes, subjects)
+          if (typeof value === 'object' && value !== null && 'inList' in value && 'items' in value) {
+            params.append(`${key}.inList`, value.inList.toString());
+            if (value.items && value.items.length > 0) {
+              value.items.forEach((item: any) => {
+                params.append(`${key}.items`, item.toString());
+              });
+            }
+          } else {
+            params.append(key, value.toString());
+          }
         }
       });
     }
@@ -205,12 +226,22 @@ class ApiClient {
     return this.request<Lesson[]>(endpoint);
   }
 
-  async getLessonsForWeek(date: string, filters?: Omit<LessonFilters, 'date'>): Promise<Lesson[]> {
+  async getLessonsForWeek(date: string, filters?: Omit<LessonFilters | LessonValuesFilters, 'date'>): Promise<Lesson[]> {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
+          // Handle complex filter objects (teachers, classes, subjects)
+          if (typeof value === 'object' && value !== null && 'inList' in value && 'items' in value) {
+            params.append(`${key}.inList`, value.inList.toString());
+            if (value.items && value.items.length > 0) {
+              value.items.forEach((item: any) => {
+                params.append(`${key}.items`, item.toString());
+              });
+            }
+          } else {
+            params.append(key, value.toString());
+          }
         }
       });
     }

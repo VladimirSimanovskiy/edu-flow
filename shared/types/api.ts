@@ -98,6 +98,33 @@ export type LessonFilters = Partial<Pick<Lesson,
   date?: string;
 };
 
+// Extended filters for values filter integration
+export interface LessonValuesFilters {
+  // Single value filters (existing)
+  idTeacher?: number;
+  idClass?: number;
+  idSubject?: number;
+  dayOfWeek?: number;
+  idScheduleVersion?: number;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+  
+  // Multiple values filters (new)
+  teachers?: {
+    inList: boolean; // true = include only these teachers, false = exclude these teachers
+    items: number[]; // array of teacher IDs
+  };
+  classes?: {
+    inList: boolean; // true = include only these classes, false = exclude these classes
+    items: number[]; // array of class IDs
+  };
+  subjects?: {
+    inList: boolean; // true = include only these subjects, false = exclude these subjects
+    items: number[]; // array of subject IDs
+  };
+}
+
 export type TeacherFilters = Partial<Pick<Teacher, 
   'isActive' | 'idAssignedClassroom'
 >> & {

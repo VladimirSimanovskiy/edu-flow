@@ -4,6 +4,7 @@ import type {
   CreateLessonRequest,
   UpdateLessonRequest,
   LessonFilters,
+  LessonValuesFilters,
 } from "../../../types/api";
 import {
   transformTeachers,
@@ -78,7 +79,7 @@ export const useClassrooms = () => {
 };
 
 // Lessons hooks
-export const useLessons = (filters?: LessonFilters) => {
+export const useLessons = (filters?: LessonFilters | LessonValuesFilters) => {
   return useQuery({
     queryKey: ["lessons", filters],
     queryFn: async () => {
@@ -91,7 +92,7 @@ export const useLessons = (filters?: LessonFilters) => {
 
 export const useLessonsForDay = (
   date: string,
-  filters?: Omit<LessonFilters, "dayOfWeek">,
+  filters?: Omit<LessonFilters | LessonValuesFilters, "dayOfWeek">,
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
@@ -108,7 +109,7 @@ export const useLessonsForDay = (
 
 export const useLessonsForWeek = (
   date: string,
-  filters?: Omit<LessonFilters, "date">,
+  filters?: Omit<LessonFilters | LessonValuesFilters, "date">,
   options?: { enabled?: boolean }
 ) => {
   return useQuery({

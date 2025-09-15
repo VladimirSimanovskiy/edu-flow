@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import type { Teacher, Class } from '@shared/types';
+import type { LessonValuesFilters } from '@shared/types';
 
 // Types for filter state
 export interface FilterState {
@@ -31,6 +32,9 @@ export interface ScheduleFiltersContextValue {
   // Filter options for components
   getTeacherFilterOptions: (teachers: Teacher[]) => any;
   getClassFilterOptions: (classes: Class[]) => any;
+  
+  // API integration
+  toApiFilters: () => LessonValuesFilters;
 }
 
 const ScheduleFiltersContext = createContext<ScheduleFiltersContextValue | null>(null);
@@ -172,6 +176,28 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
     loadingText: "Загрузка классов...",
   }), [filters.classes, updateClassFilter]);
 
+  // Convert filters to API format
+  const toApiFilters = useCallback((): LessonValuesFilters => {
+    const apiFilters: LessonValuesFilters = {};
+    
+    // Only include filters that have items selected
+    if (filters.teachers.items.length > 0) {
+      apiFilters.teachers = {
+        inList: filters.teachers.inList,
+        items: filters.teachers.items,
+      };
+    }
+    
+    if (filters.classes.items.length > 0) {
+      apiFilters.classes = {
+        inList: filters.classes.inList,
+        items: filters.classes.items,
+      };
+    }
+    
+    return apiFilters;
+  }, [filters]);
+
   const contextValue: ScheduleFiltersContextValue = useMemo(() => ({
     filters,
     updateTeacherFilter,
@@ -183,6 +209,7 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
     isClassVisible,
     getTeacherFilterOptions,
     getClassFilterOptions,
+    toApiFilters,
   }), [
     filters,
     updateTeacherFilter,
@@ -194,6 +221,7 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
     isClassVisible,
     getTeacherFilterOptions,
     getClassFilterOptions,
+    toApiFilters,
   ]);
 
   return (

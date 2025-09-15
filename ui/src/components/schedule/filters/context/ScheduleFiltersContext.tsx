@@ -1,14 +1,21 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import type { Teacher, Class } from '@shared/types';
 import type { LessonValuesFilters } from '@shared/types';
+import { ScheduleFilterService } from '../../../../services/filters';
 
 // Types for filter state
 export interface FilterState {
   teachers: {
+    id: string;
+    type: 'values';
+    isActive: boolean;
     inList: boolean;
     items: number[];
   };
   classes: {
+    id: string;
+    type: 'values';
+    isActive: boolean;
     inList: boolean;
     items: number[];
   };
@@ -39,11 +46,6 @@ export interface ScheduleFiltersContextValue {
 
 const ScheduleFiltersContext = createContext<ScheduleFiltersContextValue | null>(null);
 
-// Initial state
-const initialFilterState: FilterState = {
-  teachers: { inList: false, items: [] },
-  classes: { inList: false, items: [] },
-};
 
 interface ScheduleFiltersProviderProps {
   children: React.ReactNode;
@@ -54,149 +56,75 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
   children,
   onFiltersChange,
 }) => {
-  const [filters, setFilters] = React.useState<FilterState>(initialFilterState);
+  const filterService = useMemo(() => new ScheduleFilterService(), []);
+  const [filters, setFilters] = React.useState<FilterState>(() => filterService.createInitialState());
 
   // Update teacher filter
   const updateTeacherFilter = useCallback((inList: boolean, items: number[]) => {
     setFilters(prev => {
-      const newFilters = { ...prev, teachers: { inList, items } };
+      const newFilters = filterService.updateFilter(prev, 'teachers', { inList, items });
       onFiltersChange?.(newFilters);
       return newFilters;
     });
-  }, [onFiltersChange]);
+  }, [onFiltersChange, filterService]);
 
   // Update class filter
   const updateClassFilter = useCallback((inList: boolean, items: number[]) => {
     setFilters(prev => {
-      const newFilters = { ...prev, classes: { inList, items } };
+      const newFilters = filterService.updateFilter(prev, 'classes', { inList, items });
       onFiltersChange?.(newFilters);
       return newFilters;
     });
-  }, [onFiltersChange]);
+  }, [onFiltersChange, filterService]);
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
-    setFilters(initialFilterState);
-    onFiltersChange?.(initialFilterState);
-  }, [onFiltersChange]);
+    const clearedFilters = filterService.clearAllFilters(filters);
+    setFilters(clearedFilters);
+    onFiltersChange?.(clearedFilters);
+  }, [onFiltersChange, filterService, filters]);
 
   // Check if filters are active
   const isTeacherFilterActive = useMemo(() => {
-    return filters.teachers.inList ? 
-      filters.teachers.items.length > 0 : 
-      true; // Always active when inList = false
-  }, [filters.teachers]);
+    return filterService.isFilterActive(filters, 'teachers');
+  }, [filters, filterService]);
 
   const isClassFilterActive = useMemo(() => {
-    return filters.classes.inList ? 
-      filters.classes.items.length > 0 : 
-      true; // Always active when inList = false
-  }, [filters.classes]);
+    return filterService.isFilterActive(filters, 'classes');
+  }, [filters, filterService]);
 
   // Visibility functions
   const isTeacherVisible = useCallback((teacherId: number) => {
-    if (!isTeacherFilterActive) return true;
-    
-    if (filters.teachers.inList) {
-      return filters.teachers.items.includes(teacherId);
-    } else {
-      return !filters.teachers.items.includes(teacherId);
-    }
-  }, [filters.teachers, isTeacherFilterActive]);
+    return filterService.isItemVisible(filters.teachers, teacherId);
+  }, [filters.teachers, filterService]);
 
   const isClassVisible = useCallback((classId: number) => {
-    if (!isClassFilterActive) return true;
-    
-    if (filters.classes.inList) {
-      return filters.classes.items.includes(classId);
-    } else {
-      return !filters.classes.items.includes(classId);
-    }
-  }, [filters.classes, isClassFilterActive]);
+    return filterService.isItemVisible(filters.classes, classId);
+  }, [filters.classes, filterService]);
 
   // Generate filter options for components
-  const getTeacherFilterOptions = useCallback((teachers: Teacher[]) => ({
-    onFilterChanged: updateTeacherFilter,
-    valueView: (teacherId: number) => {
-      const teacher = teachers.find(t => t.id === teacherId);
-      return teacher ? `${teacher.firstName} ${teacher.lastName}` : `Teacher ${teacherId}`;
-    },
-    fetchData: async (page: number, searchQuery = '') => {
-      const filteredTeachers = teachers.filter(teacher => {
-        const fullName = `${teacher.firstName} ${teacher.lastName}`.toLowerCase();
-        return fullName.includes(searchQuery.toLowerCase());
-      });
+  const getTeacherFilterOptions = useCallback((teachers: Teacher[]) => {
+    return filterService.getFilterOptions(
+      filters.teachers,
+      teachers,
+      (teacher) => `${teacher.firstName} ${teacher.lastName}`,
+      updateTeacherFilter
+    );
+  }, [filters.teachers, updateTeacherFilter, filterService]);
 
-      const pageSize = 20;
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const pageTeachers = filteredTeachers.slice(startIndex, endIndex);
-
-      return {
-        values: pageTeachers.map(t => t.id),
-        fullLoaded: endIndex >= filteredTeachers.length,
-      };
-    },
-    initState: {
-      inList: filters.teachers.inList,
-      itemsList: filters.teachers.items,
-    },
-    searchPlaceholder: "Поиск учителей...",
-    selectAllText: "Все учителя",
-    loadingText: "Загрузка учителей...",
-  }), [filters.teachers, updateTeacherFilter]);
-
-  const getClassFilterOptions = useCallback((classes: Class[]) => ({
-    onFilterChanged: updateClassFilter,
-    valueView: (classId: number) => {
-      const classItem = classes.find(c => c.id === classId);
-      return classItem ? `${classItem.grade}${classItem.letter}` : `Class ${classId}`;
-    },
-    fetchData: async (page: number, searchQuery = '') => {
-      const filteredClasses = classes.filter(classItem => {
-        return `${classItem.grade}${classItem.letter}`.toLowerCase().includes(searchQuery.toLowerCase());
-      });
-
-      const pageSize = 20;
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const pageClasses = filteredClasses.slice(startIndex, endIndex);
-
-      return {
-        values: pageClasses.map(c => c.id),
-        fullLoaded: endIndex >= filteredClasses.length,
-      };
-    },
-    initState: {
-      inList: filters.classes.inList,
-      itemsList: filters.classes.items,
-    },
-    searchPlaceholder: "Поиск классов...",
-    selectAllText: "Все классы",
-    loadingText: "Загрузка классов...",
-  }), [filters.classes, updateClassFilter]);
+  const getClassFilterOptions = useCallback((classes: Class[]) => {
+    return filterService.getFilterOptions(
+      filters.classes,
+      classes,
+      (classItem) => `${classItem.grade}${classItem.letter}`,
+      updateClassFilter
+    );
+  }, [filters.classes, updateClassFilter, filterService]);
 
   // Convert filters to API format
   const toApiFilters = useCallback((): LessonValuesFilters => {
-    const apiFilters: LessonValuesFilters = {};
-    
-    // Only include filters that have items selected
-    if (filters.teachers.items.length > 0) {
-      apiFilters.teachers = {
-        inList: filters.teachers.inList,
-        items: filters.teachers.items,
-      };
-    }
-    
-    if (filters.classes.items.length > 0) {
-      apiFilters.classes = {
-        inList: filters.classes.inList,
-        items: filters.classes.items,
-      };
-    }
-    
-    return apiFilters;
-  }, [filters]);
+    return filterService.toApiFormat(filters);
+  }, [filters, filterService]);
 
   const contextValue: ScheduleFiltersContextValue = useMemo(() => ({
     filters,

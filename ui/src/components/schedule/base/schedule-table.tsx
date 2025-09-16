@@ -26,12 +26,16 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({
     className: cn(
       'overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100',
       enableDragScroll && dragScroll.className,
+      // Улучшенная поддержка touch на мобильных устройствах
+      'touch-pan-x overscroll-x-contain',
       className
     ),
     ...dragScroll.eventHandlers,
   } : {
     className: cn(
       'overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100',
+      // Базовые touch стили даже без drag scroll
+      'touch-pan-x overscroll-x-contain',
       className
     ),
   };

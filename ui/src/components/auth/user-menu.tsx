@@ -51,7 +51,7 @@ export const UserMenu: React.FC = () => {
         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
           {getUserDisplayName().charAt(0).toUpperCase()}
         </div>
-        <span className="hidden sm:block">{getUserDisplayName()}</span>
+        <span className="hidden sm:block text-sm whitespace-nowrap">{getUserDisplayName()}</span>
       </Button>
 
       {isOpen && (

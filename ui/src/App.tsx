@@ -29,18 +29,15 @@ const Navigation: React.FC = () => {
     <nav className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="text-lg sm:text-xl font-bold text-gray-900 truncate">
+          <Link to="/" className="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">
             EduFlow
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
             {user && (
               <Link to="/schedule">
-                <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Button variant="ghost" size="sm" className="text-xs sm:text-sm whitespace-nowrap">
                   Расписание
-                </Button>
-                <Button variant="ghost" size="sm" className="sm:hidden">
-                  Р
                 </Button>
               </Link>
             )}
@@ -48,9 +45,8 @@ const Navigation: React.FC = () => {
             {user ? (
               <UserMenu />
             ) : (
-              <Button variant="outline" size="sm">
-                <span className="hidden sm:inline">Войти</span>
-                <span className="sm:hidden">В</span>
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm whitespace-nowrap">
+                Войти
               </Button>
             )}
           </div>

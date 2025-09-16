@@ -42,17 +42,16 @@ export const ScheduleTypeSelector: React.FC<ScheduleTypeSelectorProps> = ({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            'justify-between min-w-[140px] h-9',
+            'justify-between min-w-[100px] sm:min-w-[140px] h-9 px-2 sm:px-3',
             className
           )}
           disabled={disabled}
         >
-          <div className="flex items-center gap-2">
-            <IconComponent className="w-4 h-4" />
-            <span className="hidden sm:inline">{currentType.label}</span>
-            <span className="sm:hidden">{currentType.shortLabel}</span>
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+            <IconComponent className="w-4 h-4 shrink-0" />
+            <span className="text-xs sm:text-sm whitespace-nowrap">{currentType.label}</span>
           </div>
-          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-50 ml-1" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[160px] p-0" align="start">

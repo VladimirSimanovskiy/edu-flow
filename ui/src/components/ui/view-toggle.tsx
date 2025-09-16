@@ -31,14 +31,13 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
           variant="outline"
           size="sm"
           className={cn(
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-all border-0 h-8',
+            'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all border-0 h-8 min-w-[3rem] sm:min-w-[4rem]',
             viewType === option.value
               ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-600'
               : 'bg-transparent hover:bg-primary-50 hover:text-primary-700 active:bg-primary-100'
           )}
         >
-          <span className="hidden sm:inline">{option.label}</span>
-          <span className="sm:hidden">{option.shortLabel}</span>
+          <span className="whitespace-nowrap">{option.label}</span>
         </Toggle>
       ))}
     </div>

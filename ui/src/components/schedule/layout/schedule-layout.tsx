@@ -50,11 +50,11 @@ export const ScheduleLayout: React.FC<ScheduleLayoutProps> = ({
     <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
       {/* Header */}
       <Card className="shadow-lg border-0">
-        <CardHeader>
-          <CardTitle className="text-xl sm:text-2xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg sm:text-xl md:text-2xl leading-tight break-words">
             {title}
           </CardTitle>
-          <CardDescription className="text-sm sm:text-base">
+          <CardDescription className="text-xs sm:text-sm md:text-base leading-relaxed break-words">
             {description}
           </CardDescription>
         </CardHeader>

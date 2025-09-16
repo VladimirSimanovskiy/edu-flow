@@ -76,10 +76,7 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="hidden sm:inline">{entityLabel}</span>
-                  <span className="sm:hidden text-xs">
-                    {entityLabel === 'Классы' ? 'Кл.' : 'Уч.'}
-                  </span>
+                  <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{entityLabel}</span>
                 </div>
                 {filterOptions && (
                   <ScheduleColumnFilter

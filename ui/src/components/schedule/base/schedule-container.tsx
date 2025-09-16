@@ -39,14 +39,14 @@ export const ScheduleContainer: React.FC<ScheduleContainerProps> = ({
       className
     )}>
       {(title || subtitle) && (
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-3 sm:p-4 border-b border-gray-200">
           {title && (
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 leading-tight break-words">
               {title}
             </h3>
           )}
           {subtitle && (
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed break-words">
               {subtitle}
             </p>
           )}

@@ -1,10 +1,11 @@
 import rateLimit from 'express-rate-limit';
 import { createError } from './errorHandler';
+import { config } from '../config';
 
 // Rate limiter для логина
 export const loginRateLimiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 минут по умолчанию
-  max: parseInt(process.env.RATE_LIMIT_MAX_ATTEMPTS || '5'), // максимум 5 попыток
+  windowMs: parseInt(config.RATE_LIMIT_WINDOW_MS || '900000'),
+  max: parseInt(config.RATE_LIMIT_MAX_ATTEMPTS || '5'),
   message: {
     error: {
       message: 'Слишком много попыток входа. Попробуйте позже.',

@@ -8,7 +8,7 @@ import { authRoutes } from './routes/auth';
 import { createLessonRoutes } from './routes/lessons';
 import { createTeacherRoutes } from './routes/teachers';
 import { errorHandler } from './middleware/errorHandler';
-import { prisma } from './config';
+import { prisma } from './config/database';
 import { LessonRepository, TeacherRepository } from './repositories';
 import { LessonService, TeacherService } from './services';
 import { LessonController, TeacherController } from './controllers';
@@ -17,7 +17,7 @@ import { LessonController, TeacherController } from './controllers';
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['JWT_SECRET', 'DATABASE_URL'];
+const requiredEnvVars = ['JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET', 'DATABASE_URL'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {

@@ -2,12 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { createError } from './errorHandler';
 
+export interface AuthUserPayload {
+  id: number;
+  email: string;
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT';
+  iat?: number;
+  exp?: number;
+  iss?: string;
+  aud?: string;
+}
+
 export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-  };
+  user?: AuthUserPayload;
 }
 
 export const authenticateToken = (
@@ -22,16 +28,20 @@ export const authenticateToken = (
     return next(createError('Access token required', 401));
   }
 
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret) {
     return next(createError('Server configuration error', 500));
   }
 
-  jwt.verify(token, secret, (err, user) => {
+  jwt.verify(token, secret, {
+    algorithms: ['HS256'],
+    issuer: process.env.JWT_ISSUER || undefined,
+    audience: process.env.JWT_AUDIENCE || undefined,
+  }, (err, user) => {
     if (err) {
       return next(createError('Invalid or expired token', 403));
     }
-    req.user = user as any;
+    req.user = user as AuthUserPayload;
     next();
   });
 };

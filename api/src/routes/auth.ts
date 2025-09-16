@@ -4,29 +4,21 @@ import jwt from 'jsonwebtoken';
 import { createError } from '../middleware/errorHandler';
 import { AuthRequest, authenticateToken, requireRole } from '../middleware/auth';
 import { loginRateLimiter, registerRateLimiter } from '../middleware/rateLimiter';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole } from '@prisma/client';
 import { z } from 'zod';
+import { LoginRequestSchema, RegisterRequestSchema } from '../schemas/auth';
+import { prisma } from '../config/database';
+import { AuthRepository } from '../repositories/auth.repository';
+import { AuthService } from '../services/auth.service';
 
 const router: Router = Router();
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-});
+const authRepo = new AuthRepository(prisma);
+const authService = new AuthService(authRepo);
 
 // Validation schemas
-const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+export const loginSchema = LoginRequestSchema;
 
-const registerSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['ADMIN', 'TEACHER', 'STUDENT']),
-});
+export const registerSchema = RegisterRequestSchema;
 
 // Login
 router.post('/login', loginRateLimiter, async (req, res, next) => {
@@ -39,51 +31,8 @@ router.post('/login', loginRateLimiter, async (req, res, next) => {
 
     const { email, password } = validationResult.data;
 
-    // Find user in database
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { teacher: true },
-    });
-
-    if (!user) {
-      return next(createError('Invalid credentials', 401));
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return next(createError('Invalid credentials', 401));
-    }
-
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return next(createError('Server configuration error', 500));
-    }
-
-
-    // Generate access token (short-lived)
-    const accessToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      secret,
-      { expiresIn: '15m' }
-    );
-
-    // Generate refresh token (long-lived) 
-    const refreshToken = jwt.sign(
-      { id: user.id, type: 'refresh' },
-      secret,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        teacher: user.teacher,
-      },
-    });
+    const result = await authService.login(email, password);
+    res.json(result);
   } catch (error) {
     next(error);
   }
@@ -101,24 +50,13 @@ router.post('/register', registerRateLimiter, authenticateToken, requireRole(['A
     const { email, password, role } = validationResult.data;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
       return next(createError('User already exists', 409));
     }
 
-    const bcryptRounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
-    const hashedPassword = await bcrypt.hash(password, bcryptRounds);
-    
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        role,
-      },
-    });
+    const newUser = await authService.register(email, password, role);
 
     res.status(201).json({
       user: {
@@ -140,51 +78,19 @@ router.post('/refresh', async (req, res, next) => {
     if (!refreshToken) {
       return next(createError('Refresh token required', 400));
     }
-
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      return next(createError('Server configuration error', 500));
-    }
-
-    jwt.verify(refreshToken, secret, async (err: any, decoded: any) => {
-      if (err || decoded.type !== 'refresh') {
-        return next(createError('Invalid refresh token', 403));
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { id: parseInt(decoded.id) },
-        include: { teacher: true },
-      });
-
-      if (!user) {
-        return next(createError('User not found', 404));
-      }
-
-      // Generate new access token
-      const newAccessToken = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        secret,
-        { expiresIn: '15m' }
-      );
-
-      res.json({
-        accessToken: newAccessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          teacher: user.teacher,
-        },
-      });
-    });
+    const result = await authService.refresh(refreshToken);
+    res.json(result);
   } catch (error) {
     next(error);
   }
 });
 
 // Logout
-router.post('/logout', (req, res) => {
-  // В реальном приложении здесь можно добавить blacklist для токенов
+router.post('/logout', async (req, res) => {
+  const { refreshToken } = req.body || {};
+  if (refreshToken) {
+    await authService.logout(refreshToken);
+  }
   res.json({ message: 'Logged out successfully' });
 });
 

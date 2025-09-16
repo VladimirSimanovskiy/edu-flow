@@ -1,19 +1,11 @@
 import { Router } from 'express';
 import { createError } from '../middleware/errorHandler';
 import { authenticateToken, requireRole } from '../middleware/auth';
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { ScheduleController } from '../controllers/schedule.controller';
+import { prisma } from '../config/database';
 
 const router: Router = Router();
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-});
-
 const scheduleController = new ScheduleController(prisma);
 
 // Validation schemas

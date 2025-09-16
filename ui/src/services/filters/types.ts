@@ -86,6 +86,7 @@ export interface FilterService<T extends Record<string, FilterState>> {
 export interface ScheduleFilterState {
   teachers: ValuesFilterState;
   classes: ValuesFilterState;
+  [key: string]: FilterState;
 }
 
 // Опции для компонентов фильтров

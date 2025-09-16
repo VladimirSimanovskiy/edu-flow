@@ -2,28 +2,11 @@ import React, { createContext, useContext, useCallback, useMemo } from 'react';
 import type { Teacher, Class } from '@shared/types';
 import type { LessonValuesFilters } from '@shared/types';
 import { ScheduleFilterService } from '../../../../services/filters';
-
-// Types for filter state
-export interface FilterState {
-  teachers: {
-    id: string;
-    type: 'values';
-    isActive: boolean;
-    inList: boolean;
-    items: number[];
-  };
-  classes: {
-    id: string;
-    type: 'values';
-    isActive: boolean;
-    inList: boolean;
-    items: number[];
-  };
-}
+import type { ScheduleFilterState } from '../../../../services/filters/types';
 
 export interface ScheduleFiltersContextValue {
   // State
-  filters: FilterState;
+  filters: ScheduleFilterState;
   
   // Actions
   updateTeacherFilter: (inList: boolean, items: number[]) => void;
@@ -49,7 +32,7 @@ const ScheduleFiltersContext = createContext<ScheduleFiltersContextValue | null>
 
 interface ScheduleFiltersProviderProps {
   children: React.ReactNode;
-  onFiltersChange?: (filters: FilterState) => void;
+  onFiltersChange?: (filters: ScheduleFilterState) => void;
 }
 
 export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = ({
@@ -57,7 +40,7 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
   onFiltersChange,
 }) => {
   const filterService = useMemo(() => new ScheduleFilterService(), []);
-  const [filters, setFilters] = React.useState<FilterState>(() => filterService.createInitialState());
+  const [filters, setFilters] = React.useState<ScheduleFilterState>(() => filterService.createInitialState());
 
   // Update teacher filter
   const updateTeacherFilter = useCallback((inList: boolean, items: number[]) => {
@@ -79,7 +62,7 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
-    const clearedFilters = filterService.clearAllFilters(filters);
+    const clearedFilters = filterService.clearAllFilters();
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);
   }, [onFiltersChange, filterService, filters]);

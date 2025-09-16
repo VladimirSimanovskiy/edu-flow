@@ -2,7 +2,6 @@ import type {
   FilterService, 
   ScheduleFilterState, 
   ValuesFilterState,
-  FilterState 
 } from './types';
 
 export class ScheduleFilterService implements FilterService<ScheduleFilterState> {
@@ -73,7 +72,7 @@ export class ScheduleFilterService implements FilterService<ScheduleFilterState>
   /**
    * Очищает все фильтры
    */
-  clearAllFilters(state: ScheduleFilterState): ScheduleFilterState {
+  clearAllFilters(): ScheduleFilterState {
     return this.createInitialState();
   }
 

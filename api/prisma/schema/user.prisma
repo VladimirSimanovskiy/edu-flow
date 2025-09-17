@@ -9,4 +9,5 @@ model User {
   // Relations
   teacher Teacher?
   student Student?
+  refreshTokens RefreshToken[]
 }

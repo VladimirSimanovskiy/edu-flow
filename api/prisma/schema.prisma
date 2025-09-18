@@ -1,3 +1,5 @@
+//******** AUTO GENERATED FILE, DO NOT EDIT.  *********
+
 generator client {
   provider = "prisma-client-js"
 }

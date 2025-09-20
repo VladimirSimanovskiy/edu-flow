@@ -24,5 +24,8 @@ model Lesson {
   idScheduleVersion Int             @map("id_scheduleVersion")
   scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
 
+  // Relations
+  substitutions     Substitution[]
+
   @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion])
 }

@@ -67,12 +67,14 @@ export const ClassScheduleTable: React.FC<ClassScheduleTableProps> = ({
 
   // Проверка, должен ли урок быть подсвечен
   const isLessonHighlighted = (classId: number, day: Date, lessonNumber: number, _lesson: LessonData): boolean => {
+    const dbDay = (day.getDay() === 0 ? 7 : day.getDay());
+
     if (!highlight.highlightedTeacherId) return false;
 
     // Находим урок и проверяем, что это тот же учитель
     const lessonData = lessons.find(l => 
       l.idClass === classId && 
-      l.dayOfWeek === (day.getDay() === 0 ? 7 : day.getDay()) &&
+      l.dayOfWeek === dbDay &&
       l.lessonNumber === lessonNumber
     );
 

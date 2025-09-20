@@ -35,6 +35,8 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   filterOptions?: ValuesFilterOptions<number>;
   isFilterActive?: boolean;
   filteredEntities?: T[];
+  onLessonHoverChange?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData | undefined, hovered: boolean) => void;
+  isLessonHoverLinked?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
 }
 
 export const WeekScheduleTable = <T extends ScheduleEntity>({
@@ -49,6 +51,8 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   filterOptions,
   isFilterActive = false,
   filteredEntities,
+  onLessonHoverChange,
+  isLessonHoverLinked,
 }: WeekScheduleTableProps<T>) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
@@ -131,6 +135,8 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                     getLesson={(lessonNumber) => getLessonForEntity(entity.id, day, lessonNumber)}
                     onLessonClick={onLessonClick ? (lessonNumber, lesson) => onLessonClick(entity.id, day, lessonNumber, lesson) : undefined}
                     isLessonHighlighted={isLessonHighlighted ? (lessonNumber, lesson) => isLessonHighlighted(entity.id, day, lessonNumber, lesson) : undefined}
+                    onLessonHoverChange={onLessonHoverChange ? (lessonNumber, lesson, hovered) => onLessonHoverChange(entity.id, day, lessonNumber, lesson, hovered) : undefined}
+                    isLessonHoverLinked={isLessonHoverLinked ? (lessonNumber, lesson) => isLessonHoverLinked(entity.id, day, lessonNumber, lesson) : undefined}
                   />
                 </ScheduleTableCell>
               ))}

@@ -5,6 +5,7 @@ import { teacherToScheduleEntity, getLessonForTeacher } from './adapters/schedul
 import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
 import { useScheduleFiltersContext } from './filters';
 import type { LessonData } from './base/lesson-cell';
+import { useSubstitutionHover } from './hooks/useSubstitutionHover';
 
 interface TeacherScheduleTableProps {
   teachers: Teacher[];
@@ -25,7 +26,8 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
   className,
   enableDragScroll = true,
 }) => {
-  const { highlight, setHighlightedClass, clearHighlight } = useTeacherScheduleStore();
+  const { highlight, setHighlightedClass, clearHighlight, setHoverLinked } = useTeacherScheduleStore();
+  const { onTeacherWeekHoverChange, isTeacherWeekHoverLinked } = useSubstitutionHover(lessons);
   
   // Get filters from context
   const {
@@ -71,12 +73,14 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
 
   // Проверка, должен ли урок быть подсвечен
   const isLessonHighlighted = (teacherId: number, day: Date, lessonNumber: number, _lesson: LessonData): boolean => {
+    const dbDay = (day.getDay() === 0 ? 7 : day.getDay());
+
     if (!highlight.highlightedClassId) return false;
 
     // Находим урок и проверяем, что это тот же класс
     const lessonData = lessons.find(l => 
       l.idTeacher === teacherId && 
-      l.dayOfWeek === (day.getDay() === 0 ? 7 : day.getDay()) &&
+      l.dayOfWeek === dbDay &&
       l.lessonNumber === lessonNumber
     );
 
@@ -99,6 +103,14 @@ export const TeacherScheduleTable: React.FC<TeacherScheduleTableProps> = ({
       filterOptions={teacherFilterOptions}
       isFilterActive={isTeacherFilterActive}
       filteredEntities={filteredScheduleEntities}
+      onLessonHoverChange={(teacherId, day, lessonNumber, lesson, hovered) => {
+        if (!lesson) return setHoverLinked(undefined);
+        const payload = onTeacherWeekHoverChange(teacherId, day, lessonNumber, hovered);
+        setHoverLinked(payload);
+      }}
+      isLessonHoverLinked={(teacherId, day, lessonNumber, _lesson) => {
+        return isTeacherWeekHoverLinked(teacherId, day, lessonNumber, highlight.hoverLinked);
+      }}
     />
   );
 };

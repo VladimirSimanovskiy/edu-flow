@@ -33,6 +33,7 @@ import {
 import { LessonHeader } from './base/lesson-header';
 import { LessonGrid } from './base/lesson-grid';
 import { ScheduleColumnFilter } from './filters';
+import { useSubstitutionHover } from './hooks/useSubstitutionHover';
 
 interface TeacherDayScheduleProps {
   teachers: Teacher[];
@@ -49,7 +50,8 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
 }) => {
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
   const { getLessonForTeacher, getDayOfWeek } = useScheduleLogic(lessons);
-  const { highlight, setHighlightedClass, clearHighlight } = useTeacherScheduleStore();
+  const { highlight, setHighlightedClass, clearHighlight, setHoverLinked } = useTeacherScheduleStore();
+  const { onTeacherDayHoverChange, isTeacherDayHoverLinked } = useSubstitutionHover(lessons);
   
   // Get filters from context
   const {
@@ -97,6 +99,11 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
 
   // Проверка, должен ли урок быть подсвечен
   const isLessonHighlighted = (teacherId: number, lessonNumber: number, _lesson: LessonData): boolean => {
+    // Hover связка для дня
+    if (highlight.hoverLinked && highlight.hoverLinked.day === dayOfWeek && highlight.hoverLinked.lessonNumber === lessonNumber) {
+      return teacherId === highlight.hoverLinked.originalTeacherId || teacherId === highlight.hoverLinked.substituteTeacherId;
+    }
+
     if (!highlight.highlightedClassId) return false;
 
     // Находим урок и проверяем, что это тот же класс
@@ -158,7 +165,15 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                   lessonNumbers={lessonNumbers}
                   getLesson={(lessonNumber) => getLesson(teacher.id, lessonNumber)}
                   onLessonClick={(lessonNumber, lesson) => handleLessonClick(teacher.id, lessonNumber, lesson)}
-                  isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(teacher.id, lessonNumber, lesson)}
+                isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(teacher.id, lessonNumber, lesson)}
+                onLessonHoverChange={(lessonNumber, lesson, hovered) => {
+                  if (!lesson) return;
+                  const payload = onTeacherDayHoverChange(teacher.id, dayOfWeek, lessonNumber, hovered);
+                  setHoverLinked(payload);
+                }}
+                isLessonHoverLinked={(lessonNumber) => {
+                  return isTeacherDayHoverLinked(teacher.id, dayOfWeek, lessonNumber, highlight.hoverLinked);
+                }}
                 />
               </ScheduleTableCell>
             </ScheduleTableRow>

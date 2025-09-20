@@ -211,6 +211,10 @@ export class ScheduleController {
         return next(createError('Invalid date format. Expected YYYY-MM-DD', 400));
       }
 
+      // Границы дня для выборки замещений
+      const dayStart = new Date(`${date}T00:00:00.000Z`);
+      const dayEnd = new Date(`${date}T23:59:59.999Z`);
+
       const where = await this.filterService.buildDayFilter(
         this.prisma,
         date,
@@ -230,6 +234,22 @@ export class ScheduleController {
           classroom: true,
           lessonSchedule: true,
           scheduleVersion: true,
+          substitutions: {
+            where: {
+              date: {
+                gte: dayStart,
+                lt: dayEnd,
+              },
+            },
+            include: {
+              teacher: {
+                include: {
+                  user: true,
+                },
+              },
+              classroom: true,
+            },
+          },
         },
         orderBy: {
           lessonSchedule: { lessonNumber: 'asc' },
@@ -254,6 +274,16 @@ export class ScheduleController {
         return next(createError('Invalid date format. Expected YYYY-MM-DD', 400));
       }
 
+      // Вычисляем границы недели (понедельник - воскресенье) для выборки замещений
+      const base = new Date(`${date}T00:00:00.000Z`);
+      const day = base.getUTCDay(); // 0=Sun..6=Sat
+      const diffToMonday = (day === 0 ? -6 : 1 - day); // adjust to Monday
+      const weekStart = new Date(base);
+      weekStart.setUTCDate(base.getUTCDate() + diffToMonday);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+      weekEnd.setUTCHours(23, 59, 59, 999);
+
       const where = await this.filterService.buildWeekFilter(
         this.prisma,
         date,
@@ -273,6 +303,22 @@ export class ScheduleController {
           classroom: true,
           lessonSchedule: true,
           scheduleVersion: true,
+          substitutions: {
+            where: {
+              date: {
+                gte: weekStart,
+                lte: weekEnd,
+              },
+            },
+            include: {
+              teacher: {
+                include: {
+                  user: true,
+                },
+              },
+              classroom: true,
+            },
+          },
         },
         orderBy: [
           { dayOfWeek: 'asc' },

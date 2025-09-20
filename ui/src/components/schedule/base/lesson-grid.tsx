@@ -8,6 +8,8 @@ interface LessonGridProps {
   className?: string;
   onLessonClick?: (lessonNumber: number, lesson: LessonData) => void;
   isLessonHighlighted?: (lessonNumber: number, lesson: LessonData) => boolean;
+  onLessonHoverChange?: (lessonNumber: number, lesson: LessonData | undefined, hovered: boolean) => void;
+  isLessonHoverLinked?: (lessonNumber: number, lesson: LessonData) => boolean;
 }
 
 export const LessonGrid: React.FC<LessonGridProps> = ({
@@ -16,6 +18,8 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
   className,
   onLessonClick,
   isLessonHighlighted,
+  onLessonHoverChange,
+  isLessonHoverLinked,
 }) => {
   return (
     <div 
@@ -27,6 +31,7 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
       {lessonNumbers?.map(lessonNumber => {
         const lesson = getLesson(lessonNumber);
         const isHighlighted = lesson && isLessonHighlighted ? isLessonHighlighted(lessonNumber, lesson) : false;
+        const isHoverLinked = lesson && isLessonHoverLinked ? isLessonHoverLinked(lessonNumber, lesson) : false;
         
         return (
           <LessonCell
@@ -35,6 +40,9 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
             lessonNumber={lessonNumber}
             onClick={lesson && onLessonClick ? () => onLessonClick(lessonNumber, lesson) : undefined}
             isHighlighted={isHighlighted}
+            isHoverLinked={isHoverLinked}
+            onMouseEnter={lesson && onLessonHoverChange ? () => onLessonHoverChange(lessonNumber, lesson, true) : undefined}
+            onMouseLeave={lesson && onLessonHoverChange ? () => onLessonHoverChange(lessonNumber, lesson, false) : undefined}
           />
         );
       })}

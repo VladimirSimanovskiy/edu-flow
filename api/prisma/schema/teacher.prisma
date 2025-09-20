@@ -12,10 +12,11 @@ model Teacher {
     idAssignedClassroom Int?
 
     // Relations
-    idUser   Int?             @unique @map("id_user")
-    user     User?            @relation(fields: [idUser], references: [id], onDelete: SetNull)
-    subjects TeacherSubject[]
-    lessons  Lesson[]
+    idUser       Int?             @unique @map("id_user")
+    user         User?            @relation(fields: [idUser], references: [id], onDelete: SetNull)
+    subjects     TeacherSubject[]
+    lessons      Lesson[]
+    Substitution Substitution[]
 
     // Teacher-specific relations
     assignedClassroom Classroom? @relation("TeacherClassroom", fields: [idAssignedClassroom], references: [id], onDelete: SetNull)

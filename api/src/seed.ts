@@ -484,6 +484,74 @@ async function main() {
   ]);
 
 
+  // Create sample substitutions on specific dates
+  const substitutionDate1 = new Date('2025-09-19'); // Friday
+  const substitutionDate2 = new Date('2025-09-22'); // Monday
+
+  // Helper to pick a different teacher/classroom
+  const pickDifferentTeacher = (currentTeacherId: number) => {
+    const alt = teachers.find((t) => t.id !== currentTeacherId);
+    return alt ? alt.id : teachers[0].id;
+  };
+
+  const pickDifferentClassroom = (currentClassroomId: number) => {
+    const alt = classrooms.find((c) => c.id !== currentClassroomId);
+    return alt ? alt.id : classrooms[0].id;
+  };
+
+  // Two substitutions for Friday (Sep 19) for first class
+  const fridayLessons = await prisma.lesson.findMany({
+    where: {
+      dayOfWeek: 5,
+      idClass: classes[0].id,
+      idScheduleVersion: scheduleVersion.id,
+    },
+    orderBy: { lessonSchedule: { lessonNumber: 'asc' } },
+    take: 2,
+  });
+
+  for (const lesson of fridayLessons) {
+    await prisma.substitution.upsert({
+      where: {
+        idLesson_date: { idLesson: lesson.id, date: substitutionDate1 },
+      },
+      update: {},
+      create: {
+        date: substitutionDate1,
+        idLesson: lesson.id,
+        idTeacher: pickDifferentTeacher(lesson.idTeacher),
+        idClassroom: pickDifferentClassroom(lesson.idClassroom),
+      },
+    });
+  }
+
+  // Two substitutions for Monday (Sep 22) for second class
+  const mondayLessons = await prisma.lesson.findMany({
+    where: {
+      dayOfWeek: 1,
+      idClass: classes[1].id,
+      idScheduleVersion: scheduleVersion.id,
+    },
+    orderBy: { lessonSchedule: { lessonNumber: 'asc' } },
+    take: 2,
+  });
+
+  for (const lesson of mondayLessons) {
+    await prisma.substitution.upsert({
+      where: {
+        idLesson_date: { idLesson: lesson.id, date: substitutionDate2 },
+      },
+      update: {},
+      create: {
+        date: substitutionDate2,
+        idLesson: lesson.id,
+        idTeacher: pickDifferentTeacher(lesson.idTeacher),
+        idClassroom: pickDifferentClassroom(lesson.idClassroom),
+      },
+    });
+  }
+
+
   console.log('🎉 Database seeding completed successfully!');
   console.log(`📊 Summary:`);
   console.log(`   - Users: ${1 + teacherUsers.length}`);

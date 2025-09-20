@@ -7,5 +7,6 @@ model Classroom {
 
   // Relations
   lessons          Lesson[]
-  assignedTeachers Teacher[] @relation("TeacherClassroom")
+  assignedTeachers Teacher[]      @relation("TeacherClassroom")
+  substitution     Substitution[]
 }

@@ -120,6 +120,19 @@ export interface ScheduleVersion {
   updatedAt: Date;
 }
 
+export interface Substitution {
+  id: number;
+  date: Date;
+  idLesson: number;
+  idTeacher: number;
+  idClassroom: number;
+  lesson: Lesson;
+  teacher: Teacher;
+  classroom: Classroom;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Lesson {
   id: number;
   dayOfWeek: number;
@@ -135,6 +148,7 @@ export interface Lesson {
   classroom: Classroom;
   lessonSchedule: LessonSchedule;
   scheduleVersion: ScheduleVersion;
+  substitutions?: Substitution[];
   createdAt: Date;
   updatedAt: Date;
 }

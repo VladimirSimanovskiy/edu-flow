@@ -140,7 +140,9 @@ export const ClassDaySchedule: React.FC<ClassDayScheduleProps> = ({
                   lessonNumbers={lessonNumbers}
                   getLesson={(lessonNumber) => getLesson(classItem.id, lessonNumber)}
                   onLessonClick={(lessonNumber, lesson) => handleLessonClick(classItem.id, lessonNumber, lesson)}
-                  isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(classItem.id, lessonNumber, lesson)}
+                isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(classItem.id, lessonNumber, lesson)}
+                onLessonHoverChange={undefined}
+                isLessonHoverLinked={undefined}
                 />
               </ScheduleTableCell>
             </ScheduleTableRow>

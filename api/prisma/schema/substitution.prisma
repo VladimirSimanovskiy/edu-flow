@@ -1,0 +1,18 @@
+model Substitution {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    date      DateTime
+
+    // Foreign keys - all dependencies are on primary key
+    idLesson Int    @map("id_lesson")
+    lesson   Lesson @relation(fields: [idLesson], references: [id], onDelete: Cascade)
+
+    idTeacher Int     @map("id_teacher")
+    teacher   Teacher @relation(fields: [idTeacher], references: [id], onDelete: Cascade)
+
+    idClassroom Int       @map("id_classroom")
+    classroom   Classroom @relation(fields: [idClassroom], references: [id], onDelete: Cascade)
+
+    @@unique([idLesson, date])
+}

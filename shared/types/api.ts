@@ -248,6 +248,24 @@ export type LessonWithComputedFields = Pick<Lesson,
   startTime: string;
   endTime: string;
   lessonNumber: number;
+  // Если присутствует замещение для даты, возвращаем его краткие данные
+  substitution?: {
+    id: number;
+    date: Date;
+    idTeacher: number;
+    teacherName: string;
+    idClassroom: number;
+    classroomNumber: number;
+  };
+  // Для недельного вида: массив замещений на разные даты
+  substitutions?: Array<{
+    id: number;
+    date: Date;
+    idTeacher: number;
+    teacherName: string;
+    idClassroom: number;
+    classroomNumber: number;
+  }>;
 };
 
 export type TeacherWithComputedFields = Pick<Teacher,

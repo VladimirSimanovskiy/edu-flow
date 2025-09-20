@@ -10,5 +10,6 @@ export type {
   Classroom,
   LessonSchedule,
   ScheduleVersion,
-  Lesson
+  Lesson,
+  Substitution
 } from '@shared/types';

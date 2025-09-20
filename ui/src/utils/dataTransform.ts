@@ -39,7 +39,8 @@ const shortenTeacherName = (firstName: string, lastName: string, middleName?: st
 
 // Transform database lesson to UI lesson
 export const transformLesson = (dbLesson: DatabaseLesson): Lesson => {
-  return {
+  // Базовые поля основного урока
+  const base = {
     ...dbLesson,
     subjectName: dbLesson.subject.name,
     teacherName: shortenTeacherName(dbLesson.teacher.firstName, dbLesson.teacher.lastName, dbLesson.teacher.middleName),
@@ -48,7 +49,22 @@ export const transformLesson = (dbLesson: DatabaseLesson): Lesson => {
     startTime: formatTime(dbLesson.lessonSchedule.timeBegin),
     endTime: formatTime(dbLesson.lessonSchedule.timeEnd),
     lessonNumber: dbLesson.lessonSchedule.lessonNumber,
-  };
+  } as Lesson;
+
+  // Поддержка возможного замещения (берём первое для даты)
+  if ((dbLesson as any).substitutions && (dbLesson as any).substitutions.length > 0) {
+    const sub = (dbLesson as any).substitutions[0];
+    base.substitution = {
+      id: sub.id,
+      date: sub.date,
+      teacherName: shortenTeacherName(sub.teacher.firstName, sub.teacher.lastName, sub.teacher.middleName),
+      idTeacher: sub.idTeacher,
+      classroomNumber: sub.classroom.number,
+      idClassroom: sub.idClassroom,
+    };
+  }
+
+  return base;
 };
 
 // Transform database teacher to UI teacher

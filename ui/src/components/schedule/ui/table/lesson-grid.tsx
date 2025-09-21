@@ -1,7 +1,7 @@
 import React from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../../utils/cn';
 import { LessonCell, type LessonData } from './lesson-cell';
-import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from '../../../components/ui/context-menu';
+import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from '../../../../components/ui/context-menu';
 
 interface LessonGridProps {
   lessonNumbers: number[];
@@ -67,7 +67,6 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
         const canCreateSubstitution = !lesson.isSubstitution && !lesson.isReplacedOriginal;
         const canDeleteSubstitution = Boolean(lesson.isSubstitution);
 
-        // If no context actions available, return plain cell
         if (!onLessonContextMenu && !onLessonDeleteSubstitution) {
           return cell;
         }
@@ -95,3 +94,5 @@ export const LessonGrid: React.FC<LessonGridProps> = ({
     </div>
   );
 };
+
+

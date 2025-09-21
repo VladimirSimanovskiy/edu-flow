@@ -1,8 +1,3 @@
-/**
- * Компонент управления расписанием
- * Применяет принцип Single Responsibility - только элементы управления
- */
-
 import React from 'react';
 import { Card, CardContent } from '../../ui/card';
 import { ScheduleToolbar } from '../schedule-toolbar';

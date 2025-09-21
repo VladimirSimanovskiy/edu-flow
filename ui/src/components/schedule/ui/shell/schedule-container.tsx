@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../../utils/cn';
 
 interface ScheduleContainerProps {
   children: React.ReactNode;
@@ -56,3 +56,4 @@ export const ScheduleContainer: React.FC<ScheduleContainerProps> = ({
     </div>
   );
 };
+

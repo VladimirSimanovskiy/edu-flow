@@ -1,21 +1,20 @@
 import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useLessonNumbers } from '../hooks';
-import { ScheduleContainer } from './schedule-container';
-import { 
+import { useLessonNumbers } from '../../model/logic';
+import { ScheduleContainer } from '../shell';
+import {
   ScheduleTable,
   ScheduleTableHeader,
   ScheduleTableBody,
   ScheduleTableRow,
-  ScheduleTableCell
+  ScheduleTableCell,
 } from './schedule-table';
 import { LessonHeader } from './lesson-header';
 import { LessonGrid } from './lesson-grid';
-import { ScheduleColumnFilter } from '../filters';
-import type { Lesson } from '../../../types/schedule';
+import { ScheduleColumnFilter } from '../../model/filters';
+import type { Lesson } from '../../../../types/schedule';
 import type { LessonData } from './lesson-cell';
-import type { ValuesFilterOptions } from '../../../types/valuesFilter';
-import React from 'react';
+import type { ValuesFilterOptions } from '../../../../types/valuesFilter';
 
 export interface ScheduleEntity {
   id: number;
@@ -68,7 +67,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
 
   const weekTitle = `Неделя ${format(weekStart, 'd MMM', { locale: ru })} - ${format(addDays(weekStart, 6), 'd MMM yyyy', { locale: ru })}`;
 
-  // Use filtered entities if provided, otherwise use all entities
   const displayEntities = filteredEntities || entities;
 
   return (
@@ -80,7 +78,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
     >
       <ScheduleTable enableDragScroll={enableDragScroll}>
         <ScheduleTableHeader>
-          {/* Основной заголовок с днями недели и номерами уроков */}
           <ScheduleTableRow className="bg-gray-50">
             <ScheduleTableCell 
               header 
@@ -120,7 +117,6 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
             ))}
           </ScheduleTableRow>
         </ScheduleTableHeader>
-        
         <ScheduleTableBody>
           {displayEntities.map((entity) => (
             <ScheduleTableRow key={entity.id}>
@@ -160,3 +156,5 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
     </ScheduleContainer>
   );
 };
+
+

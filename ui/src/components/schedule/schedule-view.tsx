@@ -1,20 +1,17 @@
 import React from "react";
 import { startOfWeek } from "date-fns";
-import { useScheduleStore } from "../../store/scheduleStore";
+import { useScheduleStore } from "./model/store";
 import {
   useScheduleConfig,
   renderScheduleComponent,
 } from "./schedule-component-factory";
-import {
-  ScheduleDataProvider,
-  useScheduleData,
-} from "./data/schedule-data-provider";
+import { ScheduleDataProvider, useScheduleData } from "./api";
 import { ScheduleLayout } from "./layout/schedule-layout";
 import { ScheduleControls } from "./controls/schedule-controls";
 import { ScheduleLoadingProgress } from "./schedule-loading-progress";
-import { useScheduleLoadingProgress } from "./hooks/useScheduleLoadingProgress";
+import { useScheduleLoadingProgress } from "./model/logic";
 import { ScheduleLoadingUtils } from "../../types/scheduleLoading";
-import { ScheduleFiltersProvider } from "./filters";
+import { ScheduleFiltersProvider } from "./model/filters";
 import type { ScheduleType } from "../../types/scheduleConfig";
 
 interface ScheduleViewProps {

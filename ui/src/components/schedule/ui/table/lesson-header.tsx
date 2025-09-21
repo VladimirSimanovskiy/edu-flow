@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../../utils/cn';
 
 interface LessonHeaderProps {
   lessonNumbers: number[];
@@ -28,3 +28,5 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
     </div>
   );
 };
+
+

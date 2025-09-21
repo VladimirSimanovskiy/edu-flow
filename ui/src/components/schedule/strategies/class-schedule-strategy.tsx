@@ -1,6 +1,5 @@
 import React from 'react';
-import { ClassScheduleTable } from '../class-schedule-table';
-import { ClassDaySchedule } from '../class-day-schedule';
+import { ClassGrid } from '../renderers/class-grid';
 import type { ScheduleRenderer, ScheduleRendererProps } from '../interfaces/schedule-renderer.interface';
 import type { ViewType } from '../../../types/scheduleConfig';
 
@@ -12,25 +11,16 @@ export class ClassScheduleRenderer implements ScheduleRenderer {
   }
 
   render(props: ScheduleRendererProps): React.ReactElement {
-    const { classes, lessons, date, weekStart } = props;
+    const { classes, lessons, date } = props;
     const classesList = classes || [];
 
-    if (this.viewType === 'day') {
-      return (
-        <ClassDaySchedule
-          classes={classesList}
-          lessons={lessons}
-          date={date}
-        />
-      );
-    } else {
-      return (
-        <ClassScheduleTable
-          classes={classesList}
-          lessons={lessons}
-          weekStart={weekStart!}
-        />
-      );
-    }
+    return (
+      <ClassGrid
+        viewType={this.viewType}
+        date={date}
+        lessons={lessons}
+        classes={classesList}
+      />
+    );
   }
 }

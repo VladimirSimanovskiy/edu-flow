@@ -1,12 +1,11 @@
 import React from "react";
-import { cn } from "../../../utils/cn";
+import { cn } from "../../../../utils/cn";
 
 export interface LessonData {
   primary?: string;
   secondary?: string[];
-  // Метки для рендера состояний
-  isSubstitution?: boolean; // это запись замещения
-  isReplacedOriginal?: boolean; // основной урок, который был заменен
+  isSubstitution?: boolean;
+  isReplacedOriginal?: boolean;
   replaced?: {
     primary?: string;
     secondary?: string[];
@@ -42,7 +41,6 @@ export const LessonCell: React.FC<LessonCellProps> = ({
   const hasLesson = Boolean(lesson);
 
   const getClasses = () => {
-    // Определяем базовый вид по типу урока или пустой ячейки
     const baseType = !hasLesson
       ? 'bg-gray-50 border-gray-200 text-gray-500'
       : lesson?.isSubstitution
@@ -51,12 +49,10 @@ export const LessonCell: React.FC<LessonCellProps> = ({
           ? 'bg-gray-50 border-gray-200 text-gray-400 opacity-70'
           : 'bg-primary-50 border-primary-300 text-primary-800';
 
-    // При hover связке показываем только рамку, игнорируя кликовую заливку
     if (isHoverLinked) {
       return baseType + ' border-2 border-accent-400';
     }
 
-    // Кликавая подсветка — для пустых и непустых ячеек
     if (isHighlighted) {
       return 'bg-accent-100 border-accent-400 text-accent-900 shadow-[0_0_0_2px_hsl(280,100%,80%)]';
     }
@@ -112,3 +108,5 @@ export const LessonCell: React.FC<LessonCellProps> = ({
     </div>
   );
 };
+
+

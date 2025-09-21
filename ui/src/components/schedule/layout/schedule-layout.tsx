@@ -15,18 +15,6 @@ export const ScheduleLayout: React.FC<ScheduleLayoutProps> = ({
   children,
   error = null
 }) => {
-  // Убираем спиннер для основной загрузки, так как теперь используется прогресс-бар
-  // if (isLoading) {
-  //   return (
-  //     <div className="p-8">
-  //       <LoadingSpinner 
-  //         size="lg" 
-  //         text={loadingText}
-  //       />
-  //     </div>
-  //   );
-  // }
-
   if (error) {
     return (
       <div className="p-6">
@@ -65,3 +53,5 @@ export const ScheduleLayout: React.FC<ScheduleLayoutProps> = ({
     </div>
   );
 };
+
+export default ScheduleLayout;

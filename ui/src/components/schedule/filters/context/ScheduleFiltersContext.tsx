@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
-import type { Teacher, Class } from '@shared/types';
-import type { LessonValuesFilters } from '@shared/types';
+import type { Teacher, Class } from '../../../../types/schedule';
+import type { LessonValuesFilters } from '../../../../types/api';
 import { ScheduleFilterService } from '../../../../services/filters';
 import type { ScheduleFilterState } from '../../../../services/filters/types';
 

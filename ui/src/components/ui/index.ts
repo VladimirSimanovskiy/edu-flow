@@ -20,6 +20,9 @@ export { WeekPicker } from './week-picker';
 // New shadcn components
 export { Input } from './input';
 export { Checkbox } from './checkbox';
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog';
+export { Select } from './select';
+export { FormField } from './form-field';
 
 // New filter components
 export { SearchInput } from './search-input';

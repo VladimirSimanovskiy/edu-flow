@@ -81,7 +81,17 @@ class ApiClient {
       throw errorWithStatus;
     }
 
-    return response.json();
+    // Handle empty responses (e.g., 204 No Content)
+    if (response.status === 204) {
+      return undefined as unknown as T;
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    // Fallback for non-JSON/no-content
+    return undefined as unknown as T;
   }
 
   private async refreshAccessToken(): Promise<void> {
@@ -171,6 +181,13 @@ class ApiClient {
   // Classrooms methods
   async getClassrooms(): Promise<Classroom[]> {
     return this.request<Classroom[]>('/schedule/classrooms');
+  }
+
+  // Availability
+  async getAvailableClassrooms(date: string, lessonNumber: number, idLesson?: number): Promise<Classroom[]> {
+    const params = new URLSearchParams({ date, lessonNumber: String(lessonNumber) });
+    if (idLesson) params.append('idLesson', String(idLesson));
+    return this.request<Classroom[]>(`/schedule/available-classrooms?${params.toString()}`);
   }
 
   // Lessons methods
@@ -283,6 +300,20 @@ class ApiClient {
 
   async deleteLesson(id: number): Promise<void> {
     return this.request<void>(`/schedule/lessons/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Substitutions
+  async createSubstitution(input: { date: string; idLesson: number; idTeacher: number; idClassroom: number; }): Promise<any> {
+    return this.request<any>('/schedule/substitutions', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async deleteSubstitution(id: number): Promise<void> {
+    return this.request<void>(`/schedule/substitutions/${id}`, {
       method: 'DELETE',
     });
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { Teacher, Lesson } from '../../types/schedule';
@@ -6,6 +6,21 @@ import { useLessonNumbers, useScheduleLogic } from './hooks';
 import { useScheduleFiltersContext } from './filters';
 import { useTeacherScheduleStore } from '../../store/teacherScheduleStore';
 import type { LessonData } from './base/lesson-cell';
+import { ScheduleContainer } from './base/schedule-container';
+import { 
+  ScheduleTable,
+  ScheduleTableHeader,
+  ScheduleTableBody,
+  ScheduleTableRow,
+  ScheduleTableCell
+} from './base/schedule-table';
+import { LessonHeader } from './base/lesson-header';
+import { LessonGrid } from './base/lesson-grid';
+import { ScheduleColumnFilter } from './filters';
+import { useSubstitutionHover } from './hooks/useSubstitutionHover';
+import { CreateSubstitutionModal } from './modals/create-substitution-modal';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../../lib/api';
 
 // Функция для сокращения ФИО в формат "Иванов А.Д."
 const shortenTeacherName = (fullName: string): string => {
@@ -22,18 +37,6 @@ const shortenTeacherName = (fullName: string): string => {
   
   return `${lastName} ${firstInitial}.${middleInitial}.`;
 };
-import { ScheduleContainer } from './base/schedule-container';
-import { 
-  ScheduleTable,
-  ScheduleTableHeader,
-  ScheduleTableBody,
-  ScheduleTableRow,
-  ScheduleTableCell
-} from './base/schedule-table';
-import { LessonHeader } from './base/lesson-header';
-import { LessonGrid } from './base/lesson-grid';
-import { ScheduleColumnFilter } from './filters';
-import { useSubstitutionHover } from './hooks/useSubstitutionHover';
 
 interface TeacherDayScheduleProps {
   teachers: Teacher[];
@@ -50,7 +53,7 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
 }) => {
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
   const { getLessonForTeacher, getDayOfWeek } = useScheduleLogic(lessons);
-  const { highlight, setHighlightedClass, clearHighlight, setHoverLinked } = useTeacherScheduleStore();
+  const { highlight, setHighlightedClass, clearHighlight, setHoverLinked, enterSubstitutionMode, exitSubstitutionMode } = useTeacherScheduleStore();
   const { onTeacherDayHoverChange, isTeacherDayHoverLinked } = useSubstitutionHover(lessons);
   
   // Get filters from context
@@ -64,6 +67,10 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
 
   const dayOfWeek = getDayOfWeek(date);
   const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ru });
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSubstituteTeacherId, setSelectedSubstituteTeacherId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   // Filter teachers based on filter state
   const filteredTeachers = teachers.filter(teacher => isTeacherVisible(teacher.id));
@@ -97,8 +104,59 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
     }
   };
 
+  // ПКМ-пункт: сразу включаем режим замещения и подсветку
+  const handleLessonContextMenu = (teacherId: number, lessonNumber: number, lesson: LessonData) => {
+    if (!lesson || lesson.isSubstitution || lesson.isReplacedOriginal) return;
+
+    const lessonData = lessons.find(l => 
+      l.idTeacher === teacherId && 
+      l.dayOfWeek === dayOfWeek &&
+      l.lessonNumber === lessonNumber
+    );
+    if (!lessonData) return;
+
+    const freeTeacherIds = teachers
+      .filter(t => {
+        const hasOwnLesson = lessons.some(l => l.idTeacher === t.id && l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber);
+        const hasSubstitution = lessons.some(l => l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber && l.substitution && l.substitution.idTeacher === t.id);
+        return !hasOwnLesson && !hasSubstitution;
+      })
+      .map(t => t.id);
+
+    const dateStr = new Date(date).toISOString().split('T')[0];
+    enterSubstitutionMode({
+      date: dateStr,
+      lessonNumber,
+      idOriginalLesson: lessonData.id,
+      idOriginalTeacher: teacherId,
+      classId: lessonData.idClass,
+    }, freeTeacherIds);
+  };
+
+  // Удаление замещения через контекстное меню по замещению
+  const handleDeleteSubstitution = async (teacherId: number, lessonNumber: number, lesson: LessonData) => {
+    if (!lesson || !lesson.isSubstitution) return;
+
+    // Находим урок, у которого есть это замещение для данного слота
+    const base = lessons.find(l =>
+      l.dayOfWeek === dayOfWeek &&
+      l.lessonNumber === lessonNumber &&
+      l.substitution && l.substitution.idTeacher === teacherId
+    );
+    const substitutionId = base?.substitution?.id;
+    if (!substitutionId) return;
+
+    await apiClient.deleteSubstitution(substitutionId);
+    await queryClient.invalidateQueries({ queryKey: ["lessons"] });
+  };
+
   // Проверка, должен ли урок быть подсвечен
   const isLessonHighlighted = (teacherId: number, lessonNumber: number, _lesson: LessonData): boolean => {
+    // Подсветка свободных ячеек — только на выбранный номер урока (день у нас фиксирован этот компонент)
+    if (highlight.substitutionMode) {
+      if (lessonNumber !== highlight.substitutionMode.lessonNumber) return false;
+    }
+
     // Hover связка для дня
     if (highlight.hoverLinked && highlight.hoverLinked.day === dayOfWeek && highlight.hoverLinked.lessonNumber === lessonNumber) {
       return teacherId === highlight.hoverLinked.originalTeacherId || teacherId === highlight.hoverLinked.substituteTeacherId;
@@ -154,7 +212,7 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
             <ScheduleTableRow key={teacher.id}>
               <ScheduleTableCell className="border-r sticky left-0 bg-white z-10">
                 <div className="font-medium text-gray-900 text-xs sm:text-sm">
-                  {shortenTeacherName(teacher.fullName)}
+                  {teacher.fullName.split(' ').length >= 2 ? `${teacher.fullName.split(' ')[1]} ${teacher.fullName.split(' ')[0].charAt(0)}.${(teacher.fullName.split(' ')[2] || '').charAt(0)}.` : teacher.fullName}
                 </div>
                 <div className="text-xs text-gray-500 hidden sm:block">
                   {teacher.subjectNames.join(', ')}
@@ -165,21 +223,53 @@ export const TeacherDaySchedule: React.FC<TeacherDayScheduleProps> = ({
                   lessonNumbers={lessonNumbers}
                   getLesson={(lessonNumber) => getLesson(teacher.id, lessonNumber)}
                   onLessonClick={(lessonNumber, lesson) => handleLessonClick(teacher.id, lessonNumber, lesson)}
-                isLessonHighlighted={(lessonNumber, lesson) => isLessonHighlighted(teacher.id, lessonNumber, lesson)}
-                onLessonHoverChange={(lessonNumber, lesson, hovered) => {
-                  if (!lesson) return;
-                  const payload = onTeacherDayHoverChange(teacher.id, dayOfWeek, lessonNumber, hovered);
-                  setHoverLinked(payload);
-                }}
-                isLessonHoverLinked={(lessonNumber) => {
-                  return isTeacherDayHoverLinked(teacher.id, dayOfWeek, lessonNumber, highlight.hoverLinked);
-                }}
+                  onLessonContextMenu={(lessonNumber, lsn) => handleLessonContextMenu(teacher.id, lessonNumber, lsn)}
+                  onLessonDeleteSubstitution={(lessonNumber, lsn) => handleDeleteSubstitution(teacher.id, lessonNumber, lsn)}
+                  isLessonHighlighted={(lessonNumber, lesson) => {
+                    if (highlight.substitutionMode && highlight.freeTeacherIdsAtTimeslot) {
+                      if (lessonNumber !== highlight.substitutionMode.lessonNumber) return false;
+                      const hasOwn = lessons.some(l => l.idTeacher === teacher.id && l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber);
+                      const hasSub = lessons.some(l => l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber && l.substitution && l.substitution.idTeacher === teacher.id);
+                      const isFree = highlight.freeTeacherIdsAtTimeslot.includes(teacher.id) && !hasOwn && !hasSub;
+                      return isFree;
+                    }
+                    return isLessonHighlighted(teacher.id, lessonNumber, lesson);
+                  }}
+                  onLessonHoverChange={(lessonNumber, lesson, hovered) => {
+                    if (!lesson) return;
+                    const payload = onTeacherDayHoverChange(teacher.id, dayOfWeek, lessonNumber, hovered);
+                    setHoverLinked(payload);
+                  }}
+                  isLessonHoverLinked={(lessonNumber) => {
+                    return isTeacherDayHoverLinked(teacher.id, dayOfWeek, lessonNumber, highlight.hoverLinked);
+                  }}
+                  enableEmptyClick={Boolean(highlight.substitutionMode)}
+                  onEmptyCellClick={(lessonNumber) => {
+                    if (!highlight.substitutionMode || !highlight.freeTeacherIdsAtTimeslot) return;
+                    if (lessonNumber !== highlight.substitutionMode.lessonNumber) return;
+                    if (!highlight.freeTeacherIdsAtTimeslot.includes(teacher.id)) return;
+                    setSelectedSubstituteTeacherId(teacher.id);
+                    setModalOpen(true);
+                  }}
+                  isEmptyCellHighlighted={(lessonNumber) => {
+                    if (!highlight.substitutionMode || !highlight.freeTeacherIdsAtTimeslot) return false;
+                    if (lessonNumber !== highlight.substitutionMode.lessonNumber) return false;
+                    const hasOwn = lessons.some(l => l.idTeacher === teacher.id && l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber);
+                    const hasSub = lessons.some(l => l.idTeacher === teacher.id && l.dayOfWeek === dayOfWeek && l.lessonNumber === lessonNumber && l.substitution && l.substitution.idTeacher === teacher.id);
+                    return highlight.freeTeacherIdsAtTimeslot.includes(teacher.id) && !hasOwn && !hasSub;
+                  }}
                 />
               </ScheduleTableCell>
             </ScheduleTableRow>
           ))}
         </ScheduleTableBody>
       </ScheduleTable>
+      <CreateSubstitutionModal
+        open={modalOpen}
+        onClose={() => { setModalOpen(false); exitSubstitutionMode(); }}
+        teachers={teachers}
+        substituteTeacherId={selectedSubstituteTeacherId ?? 0}
+      />
     </ScheduleContainer>
   );
 };

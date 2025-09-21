@@ -15,6 +15,7 @@ import { ScheduleColumnFilter } from '../filters';
 import type { Lesson } from '../../../types/schedule';
 import type { LessonData } from './lesson-cell';
 import type { ValuesFilterOptions } from '../../../types/valuesFilter';
+import React from 'react';
 
 export interface ScheduleEntity {
   id: number;
@@ -30,6 +31,7 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   getLessonForEntity: (entityId: number, day: Date, lessonNumber: number) => LessonData | undefined;
   entityLabel: string;
   onLessonClick?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => void;
+  onLessonContextMenu?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => void;
   isLessonHighlighted?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
   enableDragScroll?: boolean;
   filterOptions?: ValuesFilterOptions<number>;
@@ -37,6 +39,9 @@ export interface WeekScheduleTableProps<T extends ScheduleEntity> {
   filteredEntities?: T[];
   onLessonHoverChange?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData | undefined, hovered: boolean) => void;
   isLessonHoverLinked?: (entityId: number, day: Date, lessonNumber: number, lesson: LessonData) => boolean;
+  enableEmptyClick?: boolean;
+  onEmptyCellClick?: (entityId: number, day: Date, lessonNumber: number) => void;
+  isEmptyCellHighlighted?: (entityId: number, day: Date, lessonNumber: number) => boolean;
 }
 
 export const WeekScheduleTable = <T extends ScheduleEntity>({
@@ -53,6 +58,10 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
   filteredEntities,
   onLessonHoverChange,
   isLessonHoverLinked,
+  onLessonContextMenu,
+  enableEmptyClick,
+  onEmptyCellClick,
+  isEmptyCellHighlighted,
 }: WeekScheduleTableProps<T>) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const { lessonNumbers, isLoading: lessonNumbersLoading } = useLessonNumbers();
@@ -134,9 +143,13 @@ export const WeekScheduleTable = <T extends ScheduleEntity>({
                     lessonNumbers={lessonNumbers}
                     getLesson={(lessonNumber) => getLessonForEntity(entity.id, day, lessonNumber)}
                     onLessonClick={onLessonClick ? (lessonNumber, lesson) => onLessonClick(entity.id, day, lessonNumber, lesson) : undefined}
+                    onLessonContextMenu={onLessonContextMenu ? (lessonNumber, lesson) => onLessonContextMenu(entity.id, day, lessonNumber, lesson) : undefined}
                     isLessonHighlighted={isLessonHighlighted ? (lessonNumber, lesson) => isLessonHighlighted(entity.id, day, lessonNumber, lesson) : undefined}
                     onLessonHoverChange={onLessonHoverChange ? (lessonNumber, lesson, hovered) => onLessonHoverChange(entity.id, day, lessonNumber, lesson, hovered) : undefined}
                     isLessonHoverLinked={isLessonHoverLinked ? (lessonNumber, lesson) => isLessonHoverLinked(entity.id, day, lessonNumber, lesson) : undefined}
+                    enableEmptyClick={Boolean(enableEmptyClick)}
+                    onEmptyCellClick={onEmptyCellClick ? (lessonNumber) => onEmptyCellClick(entity.id, day, lessonNumber) : undefined}
+                    isEmptyCellHighlighted={isEmptyCellHighlighted ? (lessonNumber) => isEmptyCellHighlighted(entity.id, day, lessonNumber) : undefined}
                   />
                 </ScheduleTableCell>
               ))}

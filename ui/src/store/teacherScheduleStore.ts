@@ -11,6 +11,16 @@ interface TeacherHighlightState {
     originalTeacherId: number;
     substituteTeacherId: number;
   };
+  // Режим создания замещения
+  substitutionMode?: {
+    date: string; // YYYY-MM-DD
+    lessonNumber: number;
+    idOriginalLesson: number;
+    idOriginalTeacher: number;
+    classId: number;
+  };
+  // Набор свободных учителей по lessonNumber (для подсветки пустых ячеек)
+  freeTeacherIdsAtTimeslot?: number[];
 }
 
 interface TeacherScheduleState {
@@ -18,6 +28,8 @@ interface TeacherScheduleState {
   setHighlightedClass: (classId: number | undefined, date: Date | undefined) => void;
   clearHighlight: () => void;
   setHoverLinked: (payload: TeacherHighlightState['hoverLinked'] | undefined) => void;
+  enterSubstitutionMode: (payload: TeacherHighlightState['substitutionMode'], freeTeacherIds: number[]) => void;
+  exitSubstitutionMode: () => void;
 }
 
 export const useTeacherScheduleStore = create<TeacherScheduleState>((set) => ({
@@ -40,6 +52,24 @@ export const useTeacherScheduleStore = create<TeacherScheduleState>((set) => ({
       highlight: {
         ...state.highlight,
         hoverLinked: payload,
+      }
+    }));
+  },
+  enterSubstitutionMode: (payload, freeTeacherIds) => {
+    set((state) => ({
+      highlight: {
+        ...state.highlight,
+        substitutionMode: payload,
+        freeTeacherIdsAtTimeslot: freeTeacherIds,
+      }
+    }));
+  },
+  exitSubstitutionMode: () => {
+    set((state) => ({
+      highlight: {
+        ...state.highlight,
+        substitutionMode: undefined,
+        freeTeacherIdsAtTimeslot: undefined,
       }
     }));
   },

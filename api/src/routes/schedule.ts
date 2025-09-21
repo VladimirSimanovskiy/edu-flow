@@ -159,5 +159,37 @@ router.get('/schedule-versions', authenticateToken, scheduleController.getSchedu
 // Get current schedule version
 router.get('/schedule-versions/current', authenticateToken, scheduleController.getCurrentScheduleVersion.bind(scheduleController));
 
+// Get available classrooms for a date and lesson number
+router.get('/available-classrooms', authenticateToken, scheduleController.getAvailableClassrooms.bind(scheduleController));
+
+// Create substitution
+router.post('/substitutions', authenticateToken, requireRole(['ADMIN']), async (req, res, next) => {
+  try {
+    // Basic zod validation
+    const substitutionSchema = z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      idLesson: z.number().int().positive(),
+      idTeacher: z.number().int().positive(),
+      idClassroom: z.number().int().positive(),
+    });
+    const validation = substitutionSchema.safeParse(req.body);
+    if (!validation.success) {
+      return next(createError('Validation failed: ' + validation.error.errors.map((e: any) => e.message).join(', '), 400));
+    }
+
+    return scheduleController.createSubstitution(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete substitution
+router.delete('/substitutions/:id', authenticateToken, requireRole(['ADMIN']), async (req, res, next) => {
+  try {
+    return scheduleController.deleteSubstitution(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export { router as scheduleRoutes };

@@ -18,41 +18,45 @@ interface LessonCellProps {
   lessonNumber: number;
   className?: string;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   isHighlighted?: boolean;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   isHoverLinked?: boolean;
+  enableEmptyClick?: boolean;
+  onEmptyClick?: () => void;
 }
 
 export const LessonCell: React.FC<LessonCellProps> = ({
   lesson,
   className,
   onClick,
+  onContextMenu,
   isHighlighted = false,
   onMouseEnter,
   onMouseLeave,
   isHoverLinked = false,
+  enableEmptyClick = false,
+  onEmptyClick,
 }) => {
   const hasLesson = Boolean(lesson);
 
   const getClasses = () => {
-    if (!hasLesson) {
-      return 'bg-gray-50 border-gray-200 text-gray-500';
-    }
-
-    // Определяем базовый вид по типу урока
-    const baseType = lesson?.isSubstitution
-      ? 'bg-warning-50 border-warning-300 text-warning-700'
-      : lesson?.isReplacedOriginal
-        ? 'bg-gray-50 border-gray-200 text-gray-400 opacity-70'
-        : 'bg-primary-50 border-primary-300 text-primary-800';
+    // Определяем базовый вид по типу урока или пустой ячейки
+    const baseType = !hasLesson
+      ? 'bg-gray-50 border-gray-200 text-gray-500'
+      : lesson?.isSubstitution
+        ? 'bg-warning-50 border-warning-300 text-warning-700'
+        : lesson?.isReplacedOriginal
+          ? 'bg-gray-50 border-gray-200 text-gray-400 opacity-70'
+          : 'bg-primary-50 border-primary-300 text-primary-800';
 
     // При hover связке показываем только рамку, игнорируя кликовую заливку
     if (isHoverLinked) {
       return baseType + ' border-2 border-accent-400';
     }
 
-    // Кликавая подсветка — только если не hover
+    // Кликавая подсветка — для пустых и непустых ячеек
     if (isHighlighted) {
       return 'bg-accent-100 border-accent-400 text-accent-900 shadow-[0_0_0_2px_hsl(280,100%,80%)]';
     }
@@ -66,11 +70,12 @@ export const LessonCell: React.FC<LessonCellProps> = ({
     <div
       className={cn(
         "h-16 sm:h-18 md:h-20 w-full border rounded text-xs flex flex-col items-center justify-center transition-colors p-1",
-        hasLesson && onClick && "cursor-pointer hover:opacity-80",
+        (hasLesson && onClick) || (!hasLesson && enableEmptyClick && onEmptyClick) ? "cursor-pointer hover:opacity-80" : undefined,
         classes,
         className
       )}
-      onClick={hasLesson ? onClick : undefined}
+      onClick={hasLesson ? onClick : enableEmptyClick ? onEmptyClick : undefined}
+      onContextMenu={hasLesson && onContextMenu ? (e) => { e.preventDefault(); onContextMenu(e); } : undefined}
       onMouseEnter={hasLesson ? onMouseEnter : undefined}
       onMouseLeave={hasLesson ? onMouseLeave : undefined}
     >

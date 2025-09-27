@@ -1,15 +1,14 @@
 import React from 'react';
-import { GridRenderer } from '../presenters/GridRenderer';
+import { GridRenderer } from '../ui/table/grid-renderer';
 import { buildLessonMatrix } from '../core/matrix';
-import type { Lesson, Teacher, Class } from '../../../types/schedule';
-import { DayViewStrategy } from '../strategies/time/DayViewStrategy';
-import { WeekViewStrategy } from '../strategies/time/WeekViewStrategy';
-import { useLessonNumbers } from '../model/logic';
-import { ClassDimensionStrategy } from '../strategies/entity/ClassDimensionStrategy';
-import type { ViewType } from '../../../types/scheduleConfig';
-import { LessonCell, type LessonData } from '../ui/table';
-import { useScheduleFiltersContext } from '../model/filters';
-import { ScheduleColumnFilter } from '../model/filters';
+import type { Lesson, Teacher, Class } from '@/types/schedule';
+import { DayViewStrategy, WeekViewStrategy } from '../core/time';
+import { useLessonNumbers } from '../hooks';
+import { ClassDimensionStrategy } from '../core/entity';
+import type { ViewType } from '@/types/scheduleConfig';
+import { LessonCell, type LessonData } from '../ui/table/lesson-cell';
+import { useScheduleFiltersContext } from '../filters/context/ScheduleFiltersContext';
+import { ScheduleColumnFilter } from '../filters/schedule-column-filter';
 import { getFeatureFlags } from '../config';
 import { useClassScheduleStore } from '../features';
 
@@ -84,8 +83,8 @@ export const ClassGrid: React.FC<Props> = ({ viewType, date, lessons, teachers, 
 			rowHeaderLabel="Классы"
 			rowHeaderControls={
 				<ScheduleColumnFilter
-					options={getClassFilterOptions(classes || [])}
-					isActive={isClassFilterActive}
+					options={useScheduleFiltersContext().getClassFilterOptions(classes || [])}
+					isActive={useScheduleFiltersContext().isClassFilterActive}
 				/>
 			}
 		/>

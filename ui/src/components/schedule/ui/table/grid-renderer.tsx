@@ -1,6 +1,6 @@
 import React from 'react';
-import type { GridModel, GridCell } from '../core/types';
-import { useDragScroll } from '../../../hooks';
+import type { GridModel, GridCell } from '@/components/schedule/core/types';
+import { useDragScroll } from '@/hooks';
 
 interface GridRendererProps {
 	model: GridModel;

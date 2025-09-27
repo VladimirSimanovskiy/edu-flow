@@ -1,5 +1,5 @@
-import type { EntityDimensionStrategy, EntityRow } from '../../core/types';
-import type { Teacher, Lesson } from '../../../../types/schedule';
+import type { EntityDimensionStrategy, EntityRow } from './types';
+import type { Teacher, Class, Lesson } from '@/types/schedule';
 
 export class TeacherDimensionStrategy implements EntityDimensionStrategy {
 	private isVisible: (id: number) => boolean;
@@ -13,7 +13,6 @@ export class TeacherDimensionStrategy implements EntityDimensionStrategy {
 		const shorten = (fullName?: string): string => {
 			if (!fullName) return '';
 			const parts = fullName.trim().split(' ').filter(Boolean);
-			// Ожидаем формат: Имя Фамилия Отчество
 			if (parts.length < 2) return fullName;
 			const first = parts[0];
 			const last = parts[1];
@@ -30,6 +29,30 @@ export class TeacherDimensionStrategy implements EntityDimensionStrategy {
 
 	getRowIdForLesson(lesson: Lesson): number {
 		return (lesson as any).idTeacher ?? (lesson as any).teacherId;
+	}
+
+	isRowVisible(rowId: number): boolean {
+		return this.isVisible(rowId);
+	}
+}
+
+export class ClassDimensionStrategy implements EntityDimensionStrategy {
+	private isVisible: (id: number) => boolean;
+
+	constructor(isVisible: (id: number) => boolean) {
+		this.isVisible = isVisible;
+	}
+
+	getRows(input: { classes?: Class[] }): EntityRow[] {
+		const classes = input.classes || [];
+		return classes.map(c => ({
+			id: c.id,
+			label: (c as any).name ?? `${(c as any).grade}${(c as any).letter}`,
+		}));
+	}
+
+	getRowIdForLesson(lesson: Lesson): number {
+		return (lesson as any).idClass ?? (lesson as any).classId;
 	}
 
 	isRowVisible(rowId: number): boolean {

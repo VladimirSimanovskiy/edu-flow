@@ -1,6 +1,6 @@
 import { Users } from 'lucide-react';
 import type { ScheduleConfig } from '../interfaces/schedule-renderer.interface';
-import type { ViewType } from '../../../types/scheduleConfig';
+import type { ViewType } from '@/types/scheduleConfig';
 import { TeacherScheduleRenderer } from '../strategies/teacher-schedule-strategy';
 
 export class TeacherScheduleConfig implements ScheduleConfig {
@@ -10,7 +10,6 @@ export class TeacherScheduleConfig implements ScheduleConfig {
 	readonly metadata = {
 		id: 'teachers' as const,
 		label: 'Учителя',
-		shortLabel: 'У',
 		icon: Users,
 		color: 'blue',
 	};

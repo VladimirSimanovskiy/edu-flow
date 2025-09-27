@@ -10,7 +10,6 @@ export type ViewType = 'day' | 'week';
 export interface ScheduleTypeMetadata {
 	id: ScheduleType;
 	label: string;
-	shortLabel: string;
 	icon: LucideIcon;
 	color: string;
 }

@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
-import { Button } from '../../ui/button';
-import { ValuesFilter } from '../../ui/values-filter';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { ValuesFilter } from '@/components/ui/values-filter';
 import { Filter } from 'lucide-react';
 import { cn } from '../../../utils/cn';
-import type { ValuesFilterOptions, ItemValue } from '../../../types/valuesFilter';
+import type { ValuesFilterOptions, ItemValue } from '@/types/valuesFilter';
 
 export interface ScheduleColumnFilterProps<T extends ItemValue> {
 	options: ValuesFilterOptions<T>;

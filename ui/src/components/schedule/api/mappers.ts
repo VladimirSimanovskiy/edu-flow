@@ -1,4 +1,4 @@
-import type { Class, Teacher, Lesson } from '../../../types/schedule';
+import type { Class, Teacher, Lesson } from '@/types/schedule';
 import type { ScheduleEntity } from '../ui/table/week-schedule-table';
 import type { LessonData } from '../ui/table/lesson-cell';
 

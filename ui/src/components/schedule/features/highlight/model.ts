@@ -1,1 +1,2 @@
-export { useClassScheduleStore, useTeacherScheduleStore } from '../../model/store';
+export { useClassScheduleStore } from './store/class-store';
+export { useTeacherScheduleStore } from './store/teacher-store';

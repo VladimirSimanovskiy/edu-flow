@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
-import { ErrorMessage } from '../../ui/error-message';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ErrorMessage } from '@/components/ui/error-message';
 
 interface ScheduleLayoutProps {
 	title: string;

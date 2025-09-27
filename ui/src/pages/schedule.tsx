@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScheduleView } from '../components/schedule/schedule-view';
+import { ScheduleView } from '../components/schedule';
 import type { ScheduleType } from '../types/scheduleConfig';
 
 export const Schedule: React.FC = () => {

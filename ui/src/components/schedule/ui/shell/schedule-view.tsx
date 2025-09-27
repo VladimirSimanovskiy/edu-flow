@@ -1,15 +1,15 @@
 import React from 'react';
 import { startOfWeek } from 'date-fns';
-import { useScheduleStore } from './model/store';
-import { useScheduleConfig, renderScheduleComponent } from './schedule-component-factory';
-import { ScheduleDataProvider, useScheduleData } from './api';
-import { ScheduleLayout } from './layout/schedule-layout';
-import { ScheduleControls } from './controls/schedule-controls';
-import { ScheduleLoadingProgress } from './schedule-loading-progress';
-import { useScheduleLoadingProgress } from './model/logic';
-import { ScheduleLoadingUtils } from '../../types/scheduleLoading';
-import { ScheduleFiltersProvider } from './model/filters';
-import type { ScheduleType } from '../../types/scheduleConfig';
+import { useScheduleStore } from '../../store';
+import { useScheduleConfig, renderScheduleComponent } from '../../schedule-component-factory';
+import { ScheduleDataProvider, useScheduleData } from '../../api';
+import { ScheduleLayout } from './schedule-layout';
+import { ScheduleControls } from '../../controls/schedule-controls';
+import { ScheduleLoadingProgress } from '../../schedule-loading-progress';
+import { useScheduleLoadingProgress } from '../../hooks';
+import { ScheduleLoadingUtils } from '@/types/scheduleLoading';
+import { ScheduleFiltersProvider } from '../../filters/context/ScheduleFiltersContext';
+import type { ScheduleType } from '@/types/scheduleConfig';
 
 interface ScheduleViewProps {
 	type: ScheduleType;
@@ -24,7 +24,6 @@ const ScheduleViewContent: React.FC<{
 	const scheduleConfig = useScheduleConfig(type);
 	const { teachers, classes, lessons, loadingState } = useScheduleData();
 
-	// Используем новый хук для прогресс-бара
 	const { progressState } = useScheduleLoadingProgress(loadingState);
 
 	const handleDateChange = (date: Date) => {
@@ -56,7 +55,7 @@ const ScheduleViewContent: React.FC<{
 
 			{/* Schedule Content */}
 			<div className="relative">
-				{/* Progress Bar - теперь внутри контейнера с таблицей */}
+				{/* Progress Bar */}
 				<ScheduleLoadingProgress state={progressState} position="top" />
 
 				{renderScheduleComponent(type, currentView.type, {
@@ -71,7 +70,7 @@ const ScheduleViewContent: React.FC<{
 	);
 };
 
-export const ScheduleView: React.FC<ScheduleViewProps> = ({ type, onScheduleTypeChange }) => {
+const ScheduleView: React.FC<ScheduleViewProps> = ({ type, onScheduleTypeChange }) => {
 	const { currentView } = useScheduleStore();
 
 	return (
@@ -82,3 +81,5 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({ type, onScheduleType
 		</ScheduleFiltersProvider>
 	);
 };
+
+export default ScheduleView;

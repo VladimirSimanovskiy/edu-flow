@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingProgressBar } from '../ui/loading-progress-bar';
+import { LoadingProgressBar } from '@/components/ui/loading-progress-bar';
 import type { LoadingProgressState } from '@/types/loadingProgress';
 import { cn } from '@/utils/cn';
 

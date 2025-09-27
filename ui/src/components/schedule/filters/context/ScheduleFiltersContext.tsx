@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useCallback, useMemo } from 'react';
-import type { Teacher, Class } from '../../../../types/schedule';
-import type { LessonValuesFilters } from '../../../../types/api';
-import { ScheduleFilterService } from '../../../../services/filters';
-import type { ScheduleFilterState } from '../../../../services/filters/types';
+import type { Teacher, Class } from '@/types/schedule';
+import type { LessonValuesFilters } from '@/types/api';
+import { ScheduleFilterService } from '@/services/filters';
+import type { ScheduleFilterState } from '@/services/filters/types';
+// Re-export-friendly alias
+export type FilterState = ScheduleFilterState;
 
 export interface ScheduleFiltersContextValue {
 	// State

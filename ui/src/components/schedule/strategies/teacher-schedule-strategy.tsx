@@ -1,10 +1,10 @@
 import React from 'react';
-import { TeacherGrid } from '../renderers/teacher-grid';
+import { TeacherGrid } from '../renderers/teacher';
 import type {
 	ScheduleRenderer,
 	ScheduleRendererProps,
 } from '../interfaces/schedule-renderer.interface';
-import type { ViewType } from '../../../types/scheduleConfig';
+import type { ViewType } from '@/types/scheduleConfig';
 
 export class TeacherScheduleRenderer implements ScheduleRenderer {
 	private viewType: ViewType;

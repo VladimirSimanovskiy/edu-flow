@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../../../lib/api';
+import { apiClient } from '@/lib/api';
 import type {
 	CreateLessonRequest,
 	UpdateLessonRequest,
 	LessonFilters,
 	LessonValuesFilters,
-} from '../../../types/api';
+} from '@/types/api';
 import {
 	transformTeachers,
 	transformClasses,

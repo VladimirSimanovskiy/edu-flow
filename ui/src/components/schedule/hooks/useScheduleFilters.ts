@@ -1,25 +1,11 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { Teacher, Class } from '../../../types/schedule';
-import type { ValuesFilterOptions } from '../../../types/valuesFilter';
-import type { LessonValuesFilters } from '../../../types/api';
-import { ScheduleFilterService } from '../../../services/filters';
+import type { Teacher, Class } from '@/types/schedule';
+import type { ValuesFilterOptions } from '@/types/valuesFilter';
+import type { LessonValuesFilters } from '@/types/api';
+import { ScheduleFilterService } from '@/services/filters';
+import type { ScheduleFilterState } from '@/services/filters/types';
 
-export interface ScheduleFilterState {
-	teachers: {
-		id: string;
-		type: 'values';
-		isActive: boolean;
-		inList: boolean;
-		items: number[];
-	};
-	classes: {
-		id: string;
-		type: 'values';
-		isActive: boolean;
-		inList: boolean;
-		items: number[];
-	};
-}
+// Use ScheduleFilterState from filters service to avoid type divergence
 
 export interface UseScheduleFiltersProps {
 	teachers: Teacher[];
@@ -85,7 +71,7 @@ export const useScheduleFilters = ({
 
 	// Clear all filters
 	const clearFilters = useCallback(() => {
-		const clearedFilters = filterService.clearAllFilters(filters);
+		const clearedFilters = filterService.clearAllFilters();
 		setFilters(clearedFilters);
 		onFiltersChange?.(clearedFilters);
 	}, [onFiltersChange, filterService, filters]);

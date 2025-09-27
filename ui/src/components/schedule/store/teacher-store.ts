@@ -1,25 +1,21 @@
 import { create } from 'zustand';
 
 interface TeacherHighlightState {
-	// Для расписания учителей: подсвечиваем уроки выбранного класса
 	highlightedClassId?: number;
 	highlightedClassDate?: Date;
-	// Hover подсветка пары замещения
 	hoverLinked?: {
 		day: number;
 		lessonNumber: number;
 		originalTeacherId: number;
 		substituteTeacherId: number;
 	};
-	// Режим создания замещения
 	substitutionMode?: {
-		date: string; // YYYY-MM-DD
+		date: string;
 		lessonNumber: number;
 		idOriginalLesson: number;
 		idOriginalTeacher: number;
 		classId: number;
 	};
-	// Набор свободных учителей по lessonNumber (для подсветки пустых ячеек)
 	freeTeacherIdsAtTimeslot?: number[];
 }
 

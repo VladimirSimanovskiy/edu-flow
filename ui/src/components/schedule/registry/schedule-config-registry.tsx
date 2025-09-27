@@ -2,7 +2,7 @@ import type {
 	ScheduleConfig,
 	IScheduleConfigRegistry,
 } from '../interfaces/schedule-renderer.interface';
-import type { ScheduleTypeMetadata } from '../../../types/scheduleConfig';
+import type { ScheduleTypeMetadata } from '@/types/scheduleConfig';
 
 class ScheduleConfigRegistry implements IScheduleConfigRegistry {
 	private configs = new Map<string, ScheduleConfig>();

@@ -8,12 +8,9 @@ import {
 	useScheduleDate,
 	useAutoPrefetch,
 } from '../hooks';
-import {
-	ScheduleLoadingService,
-	StateProviderFactory,
-} from '../../../services/scheduleLoadingService';
-import type { Teacher, Class, Lesson } from '../../../types/schedule';
-import type { ScheduleLoadingState } from '../../../types/scheduleLoading';
+import { ScheduleLoadingService, StateProviderFactory } from '@/services/scheduleLoadingService';
+import type { Teacher, Class, Lesson } from '@/types/schedule';
+import type { ScheduleLoadingState } from '@/types/scheduleLoading';
 import { useScheduleFiltersContext } from '../filters/context/ScheduleFiltersContext';
 
 interface ScheduleDataContextValue {
@@ -133,8 +130,6 @@ export const ScheduleDataProvider: React.FC<ScheduleDataProviderProps> = ({
 		classesError,
 		lessonsError,
 	]);
-
-	// Предзагрузка теперь происходит автоматически через useAutoPrefetch
 
 	const value: ScheduleDataContextValue = {
 		teachers: teachers || [],

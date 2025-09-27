@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { apiClient } from '../../../lib/api';
-import { useTeacherScheduleStore } from '../../../store/teacherScheduleStore';
-import type { Teacher } from '../../../types/schedule';
+import { apiClient } from '@/lib/api';
+import { useTeacherScheduleStore } from '../highlight/store/teacher-store';
+import type { Teacher } from '@/types/schedule';
 import type { Classroom } from '@shared/types';
 import {
 	Button,
@@ -12,9 +12,9 @@ import {
 	DialogFooter,
 	FormField,
 	Select,
-} from '../../ui';
+} from '@/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { DialogDescription } from '../../ui/dialog';
+import { DialogDescription } from '@/components/ui/dialog';
 
 interface CreateSubstitutionModalProps {
 	open: boolean;
@@ -123,3 +123,5 @@ export const CreateSubstitutionModal: React.FC<CreateSubstitutionModalProps> = (
 		</Dialog>
 	);
 };
+
+export default CreateSubstitutionModal;

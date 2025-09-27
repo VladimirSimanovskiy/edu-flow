@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '../../../utils/cn';
 import { scheduleConfigRegistry } from '../registry/schedule-config-registry';
-import type { ScheduleType } from '../../../types/scheduleConfig';
+import type { ScheduleType } from '@/types/scheduleConfig';
 
 interface ScheduleTypeSelectorProps {
 	scheduleType: ScheduleType;

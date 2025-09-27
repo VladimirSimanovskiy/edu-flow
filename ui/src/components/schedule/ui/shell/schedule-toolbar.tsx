@@ -1,9 +1,9 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
-import { ViewToggle } from '../ui/view-toggle';
-import { DateNavigation } from './toolbar/date-navigation';
-import { ScheduleTypeSelector } from './toolbar';
-import type { ScheduleType } from '../../types/scheduleConfig';
+import { cn } from '@/utils/cn';
+import { ViewToggle } from '@/components/ui/view-toggle';
+import { DateNavigation } from '../../toolbar/date-navigation';
+import { ScheduleTypeSelector } from '../../toolbar/schedule-type-selector';
+import type { ScheduleType } from '@/types/scheduleConfig';
 
 interface ScheduleToolbarProps {
 	value: Date;
@@ -100,3 +100,5 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
 		</div>
 	);
 };
+
+export default ScheduleToolbar;

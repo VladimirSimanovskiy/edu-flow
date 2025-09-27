@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Lesson } from '../../../types/schedule';
+import type { Lesson } from '@/types/schedule';
 
 export interface TeacherHoverLinkedPayload {
 	day: number;

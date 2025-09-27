@@ -1,6 +1,6 @@
 import { BookOpen } from 'lucide-react';
 import type { ScheduleConfig } from '../interfaces/schedule-renderer.interface';
-import type { ViewType } from '../../../types/scheduleConfig';
+import type { ViewType } from '@/types/scheduleConfig';
 import { ClassScheduleRenderer } from '../strategies/class-schedule-strategy';
 
 export class ClassScheduleConfig implements ScheduleConfig {
@@ -10,7 +10,6 @@ export class ClassScheduleConfig implements ScheduleConfig {
 	readonly metadata = {
 		id: 'classes' as const,
 		label: 'Классы',
-		shortLabel: 'К',
 		icon: BookOpen,
 		color: 'green',
 	};

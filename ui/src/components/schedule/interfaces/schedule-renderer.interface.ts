@@ -1,5 +1,5 @@
-import type { Teacher, Class, Lesson } from '../../../types/schedule';
-import type { ViewType, ScheduleTypeMetadata } from '../../../types/scheduleConfig';
+import type { Teacher, Class, Lesson } from '@/types/schedule';
+import type { ViewType, ScheduleTypeMetadata } from '@/types/scheduleConfig';
 
 export interface ScheduleRendererProps {
 	teachers?: Teacher[];

@@ -1,11 +1,6 @@
-/**
- * Фабрика компонентов расписания с применением принципов SOLID
- * Использует реестр конфигураций и стратегии рендеринга
- */
-
 import React from 'react';
-import type { ScheduleType, ViewType } from '../../types/scheduleConfig';
-import type { Teacher, Class, Lesson } from '../../types/schedule';
+import type { ScheduleType, ViewType } from '@/types/scheduleConfig';
+import type { Teacher, Class, Lesson } from '@/types/schedule';
 import { scheduleConfigRegistry } from './registry/schedule-config-registry';
 
 // Фабрика для получения конфигурации расписания

@@ -12,9 +12,9 @@ import {
 import { LessonHeader } from './lesson-header';
 import { LessonGrid } from './lesson-grid';
 import { ScheduleColumnFilter } from '../../model/filters';
-import type { Lesson } from '../../../../types/schedule';
+import type { Lesson } from '@/types/schedule';
 import type { LessonData } from './lesson-cell';
-import type { ValuesFilterOptions } from '../../../../types/valuesFilter';
+import type { ValuesFilterOptions } from '@/types/valuesFilter';
 
 export interface ScheduleEntity {
 	id: number;

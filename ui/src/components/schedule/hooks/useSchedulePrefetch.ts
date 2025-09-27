@@ -2,9 +2,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useLayoutEffect, useCallback } from 'react';
 import { addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { formatDateForApi } from '../../../utils/dateFormat';
-import { apiClient } from '../../../lib/api';
+import { apiClient } from '@/lib/api';
 import { transformLessons } from '../../../utils/dataTransform';
-import type { LessonFilters, LessonValuesFilters } from '../../../types/api';
+import type { LessonFilters, LessonValuesFilters } from '@/types/api';
 
 export const useSchedulePrefetch = () => {
 	const queryClient = useQueryClient();

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Lesson } from '../../../types/schedule';
+import type { Lesson } from '@/types/schedule';
 
 // Локальный тип для данных урока
 export interface LessonData {

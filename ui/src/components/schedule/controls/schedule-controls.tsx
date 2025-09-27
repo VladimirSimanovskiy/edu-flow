@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card, CardContent } from '../../ui/card';
-import { ScheduleToolbar } from '../schedule-toolbar';
-import type { ScheduleType } from '../../../types/scheduleConfig';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScheduleToolbar } from '../ui/shell';
+import type { ScheduleType } from '@/types/scheduleConfig';
 
 interface ScheduleControlsProps {
 	value: Date;

@@ -1,4 +1,4 @@
-import type { Lesson } from '../../../types/schedule';
+import type { Lesson } from '@/types/schedule';
 import type {
 	TimeViewStrategy,
 	EntityDimensionStrategy,

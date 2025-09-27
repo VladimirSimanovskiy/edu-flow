@@ -1,1 +1,1 @@
-export * from '../../model/logic';
+export { useSubstitutionHover } from './hooks/useSubstitutionHover';

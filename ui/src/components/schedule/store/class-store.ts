@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 
 interface ClassHighlightState {
-	// Для расписания классов: подсвечиваем уроки выбранного учителя
 	highlightedTeacherId?: number;
 	highlightedTeacherDate?: Date;
-	// Hover подсветка пары замещения
 	hoverLinked?: {
 		day: number;
 		lessonNumber: number;

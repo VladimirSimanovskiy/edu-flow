@@ -1,115 +1,121 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { 
-  LoadingProgressState, 
-  UseLoadingProgressOptions, 
-  UseLoadingProgressReturn 
+import type {
+	LoadingProgressState,
+	UseLoadingProgressOptions,
+	UseLoadingProgressReturn,
 } from '@/types/loadingProgress';
 
 export const useLoadingProgress = (
-  options: UseLoadingProgressOptions = {}
+	options: UseLoadingProgressOptions = {}
 ): UseLoadingProgressReturn => {
-  const {
-    minDuration = 500,
-    autoIncrement = true,
-    incrementInterval = 50,
-    initialProgress = 0,
-  } = options;
+	const {
+		minDuration = 500,
+		autoIncrement = true,
+		incrementInterval = 50,
+		initialProgress = 0,
+	} = options;
 
-  const [state, setState] = useState<LoadingProgressState>({
-    isLoading: false,
-    progress: initialProgress,
-  });
+	const [state, setState] = useState<LoadingProgressState>({
+		isLoading: false,
+		progress: initialProgress,
+	});
 
-  const startTimeRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const startTimeRef = useRef<number>(0);
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const clearTimers = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
+	const clearTimers = useCallback(() => {
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+			timeoutRef.current = null;
+		}
+	}, []);
 
-  const startLoading = useCallback((message?: string) => {
-    clearTimers();
-    startTimeRef.current = Date.now();
-    
-    setState({
-      isLoading: true,
-      progress: initialProgress,
-      message,
-    });
+	const startLoading = useCallback(
+		(message?: string) => {
+			clearTimers();
+			startTimeRef.current = Date.now();
 
-    if (autoIncrement) {
-      intervalRef.current = setInterval(() => {
-        setState(prev => {
-          if (!prev.isLoading) return prev;
-          
-          const elapsed = Date.now() - startTimeRef.current;
-          const timeProgress = Math.min(elapsed / (minDuration * 1.5), 0.85); // Максимум 85% по времени
-          const increment = Math.max(0.5, 2 - (elapsed / 1000)); // Замедляем со временем
-          const newProgress = Math.min(prev.progress + increment, timeProgress);
-          
-          return {
-            ...prev,
-            progress: Math.min(newProgress, 85), // Не доходим до 100% автоматически
-          };
-        });
-      }, incrementInterval);
-    }
-  }, [autoIncrement, incrementInterval, minDuration, initialProgress, clearTimers]);
+			setState({
+				isLoading: true,
+				progress: initialProgress,
+				message,
+			});
 
-  const updateProgress = useCallback((progress: number, message?: string) => {
-    setState(prev => ({
-      ...prev,
-      progress: Math.max(0, Math.min(100, progress)),
-      ...(message && { message }),
-    }));
-  }, []);
+			if (autoIncrement) {
+				intervalRef.current = setInterval(() => {
+					setState(prev => {
+						if (!prev.isLoading) return prev;
 
-  const finishLoading = useCallback(() => {
-    const elapsed = Date.now() - startTimeRef.current;
-    const remainingTime = Math.max(0, minDuration - elapsed);
+						const elapsed = Date.now() - startTimeRef.current;
+						const timeProgress = Math.min(elapsed / (minDuration * 1.5), 0.85); // Максимум 85% по времени
+						const increment = Math.max(0.5, 2 - elapsed / 1000); // Замедляем со временем
+						const newProgress = Math.min(prev.progress + increment, timeProgress);
 
-    // Устанавливаем 100% прогресс
-    setState(prev => ({
-      ...prev,
-      progress: 100,
-    }));
+						return {
+							...prev,
+							progress: Math.min(newProgress, 85), // Не доходим до 100% автоматически
+						};
+					});
+				}, incrementInterval);
+			}
+		},
+		[autoIncrement, incrementInterval, minDuration, initialProgress, clearTimers]
+	);
 
-    // Ждем минимальное время, затем скрываем
-    timeoutRef.current = setTimeout(() => {
-      setState({
-        isLoading: false,
-        progress: initialProgress,
-      });
-      clearTimers();
-    }, Math.max(remainingTime, 200)); // Минимум 200мс для показа 100%
-  }, [minDuration, initialProgress, clearTimers]);
+	const updateProgress = useCallback((progress: number, message?: string) => {
+		setState(prev => ({
+			...prev,
+			progress: Math.max(0, Math.min(100, progress)),
+			...(message && { message }),
+		}));
+	}, []);
 
-  const reset = useCallback(() => {
-    clearTimers();
-    setState({
-      isLoading: false,
-      progress: initialProgress,
-    });
-  }, [initialProgress, clearTimers]);
+	const finishLoading = useCallback(() => {
+		const elapsed = Date.now() - startTimeRef.current;
+		const remainingTime = Math.max(0, minDuration - elapsed);
 
-  // Очистка при размонтировании
-  useEffect(() => {
-    return clearTimers;
-  }, [clearTimers]);
+		// Устанавливаем 100% прогресс
+		setState(prev => ({
+			...prev,
+			progress: 100,
+		}));
 
-  return {
-    state,
-    startLoading,
-    updateProgress,
-    finishLoading,
-    reset,
-  };
+		// Ждем минимальное время, затем скрываем
+		timeoutRef.current = setTimeout(
+			() => {
+				setState({
+					isLoading: false,
+					progress: initialProgress,
+				});
+				clearTimers();
+			},
+			Math.max(remainingTime, 200)
+		); // Минимум 200мс для показа 100%
+	}, [minDuration, initialProgress, clearTimers]);
+
+	const reset = useCallback(() => {
+		clearTimers();
+		setState({
+			isLoading: false,
+			progress: initialProgress,
+		});
+	}, [initialProgress, clearTimers]);
+
+	// Очистка при размонтировании
+	useEffect(() => {
+		return clearTimers;
+	}, [clearTimers]);
+
+	return {
+		state,
+		startLoading,
+		updateProgress,
+		finishLoading,
+		reset,
+	};
 };

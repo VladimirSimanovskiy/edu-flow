@@ -6,4 +6,3 @@ export * from './types';
 
 // Convenience re-exports
 export { useClassScheduleStore, useTeacherScheduleStore } from './highlight/model';
-

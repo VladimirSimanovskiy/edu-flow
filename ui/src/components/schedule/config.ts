@@ -8,31 +8,29 @@ export type ScheduleKind = 'teachers' | 'classes';
 export type ViewKind = 'day' | 'week';
 
 type FeatureMatrix = {
-  [K in ScheduleKind]: { [V in ViewKind]: FeatureId[] }
+	[K in ScheduleKind]: { [V in ViewKind]: FeatureId[] };
 };
 
 export const featureMatrix: FeatureMatrix = {
-  teachers: {
-    day: ['highlight', 'substitution', 'hover-link'],
-    week: ['highlight', 'substitution', 'hover-link'],
-  },
-  classes: {
-    day: ['highlight'],
-    week: ['highlight'],
-  },
+	teachers: {
+		day: ['highlight', 'substitution', 'hover-link'],
+		week: ['highlight', 'substitution', 'hover-link'],
+	},
+	classes: {
+		day: ['highlight'],
+		week: ['highlight'],
+	},
 };
 
 export const getActiveFeatures = (kind: ScheduleKind, view: ViewKind): ReadonlyArray<FeatureId> => {
-  return featureMatrix[kind][view];
+	return featureMatrix[kind][view];
 };
 
 export const getFeatureFlags = (kind: ScheduleKind, view: ViewKind) => {
-  const list = new Set(getActiveFeatures(kind, view));
-  return {
-    highlight: list.has('highlight'),
-    substitution: list.has('substitution'),
-    hoverLink: list.has('hover-link'),
-  } as const;
+	const list = new Set(getActiveFeatures(kind, view));
+	return {
+		highlight: list.has('highlight'),
+		substitution: list.has('substitution'),
+		hoverLink: list.has('hover-link'),
+	} as const;
 };
-
-

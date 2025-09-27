@@ -4,18 +4,18 @@ import type { ViewType } from '../../../types/scheduleConfig';
 import { TeacherScheduleRenderer } from '../strategies/teacher-schedule-strategy';
 
 export class TeacherScheduleConfig implements ScheduleConfig {
-  readonly type = 'teachers';
-  readonly title = 'Расписание учителей';
-  readonly description = 'Просмотр расписания преподавателей';
-  readonly metadata = {
-    id: 'teachers' as const,
-    label: 'Учителя',
-    shortLabel: 'У',
-    icon: Users,
-    color: 'blue',
-  };
+	readonly type = 'teachers';
+	readonly title = 'Расписание учителей';
+	readonly description = 'Просмотр расписания преподавателей';
+	readonly metadata = {
+		id: 'teachers' as const,
+		label: 'Учителя',
+		shortLabel: 'У',
+		icon: Users,
+		color: 'blue',
+	};
 
-  getRenderer(viewType: ViewType): TeacherScheduleRenderer {
-    return new TeacherScheduleRenderer(viewType);
-  }
+	getRenderer(viewType: ViewType): TeacherScheduleRenderer {
+		return new TeacherScheduleRenderer(viewType);
+	}
 }

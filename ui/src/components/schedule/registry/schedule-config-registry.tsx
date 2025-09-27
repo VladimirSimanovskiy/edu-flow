@@ -1,29 +1,32 @@
-import type { ScheduleConfig, IScheduleConfigRegistry } from '../interfaces/schedule-renderer.interface';
+import type {
+	ScheduleConfig,
+	IScheduleConfigRegistry,
+} from '../interfaces/schedule-renderer.interface';
 import type { ScheduleTypeMetadata } from '../../../types/scheduleConfig';
 
 class ScheduleConfigRegistry implements IScheduleConfigRegistry {
-  private configs = new Map<string, ScheduleConfig>();
+	private configs = new Map<string, ScheduleConfig>();
 
-  register(config: ScheduleConfig): void {
-    this.configs.set(config.type, config);
-  }
+	register(config: ScheduleConfig): void {
+		this.configs.set(config.type, config);
+	}
 
-  get(type: string): ScheduleConfig | undefined {
-    return this.configs.get(type);
-  }
+	get(type: string): ScheduleConfig | undefined {
+		return this.configs.get(type);
+	}
 
-  getAll(): ScheduleConfig[] {
-    return Array.from(this.configs.values());
-  }
+	getAll(): ScheduleConfig[] {
+		return Array.from(this.configs.values());
+	}
 
-  getMetadata(type: string): ScheduleTypeMetadata | undefined {
-    const config = this.get(type);
-    return config?.metadata;
-  }
+	getMetadata(type: string): ScheduleTypeMetadata | undefined {
+		const config = this.get(type);
+		return config?.metadata;
+	}
 
-  getAllMetadata(): ScheduleTypeMetadata[] {
-    return this.getAll().map(config => config.metadata);
-  }
+	getAllMetadata(): ScheduleTypeMetadata[] {
+		return this.getAll().map(config => config.metadata);
+	}
 }
 
 export const scheduleConfigRegistry = new ScheduleConfigRegistry();

@@ -8,57 +8,65 @@ export type ViewType = 'day' | 'week';
 
 // Метаданные для типа расписания
 export interface ScheduleTypeMetadata {
-  id: ScheduleType;
-  label: string;
-  shortLabel: string;
-  icon: LucideIcon;
-  color: string;
+	id: ScheduleType;
+	label: string;
+	shortLabel: string;
+	icon: LucideIcon;
+	color: string;
 }
 
 // Базовые интерфейсы для компонентов расписания
 export interface BaseScheduleComponentProps {
-  lessons: Lesson[];
+	lessons: Lesson[];
 }
 
 export interface TeacherScheduleComponentProps extends BaseScheduleComponentProps {
-  teachers: Teacher[];
+	teachers: Teacher[];
 }
 
 export interface ClassScheduleComponentProps extends BaseScheduleComponentProps {
-  classes: Class[];
+	classes: Class[];
 }
 
 export interface DayScheduleComponentProps extends BaseScheduleComponentProps {
-  date: Date;
+	date: Date;
 }
 
 export interface WeekScheduleComponentProps extends BaseScheduleComponentProps {
-  weekStart: Date;
+	weekStart: Date;
 }
 
 // Объединенные интерфейсы для конкретных компонентов
-export interface TeacherDayScheduleProps extends TeacherScheduleComponentProps, DayScheduleComponentProps {}
-export interface TeacherWeekScheduleProps extends TeacherScheduleComponentProps, WeekScheduleComponentProps {}
-export interface ClassDayScheduleProps extends ClassScheduleComponentProps, DayScheduleComponentProps {}
-export interface ClassWeekScheduleProps extends ClassScheduleComponentProps, WeekScheduleComponentProps {}
+export interface TeacherDayScheduleProps
+	extends TeacherScheduleComponentProps,
+		DayScheduleComponentProps {}
+export interface TeacherWeekScheduleProps
+	extends TeacherScheduleComponentProps,
+		WeekScheduleComponentProps {}
+export interface ClassDayScheduleProps
+	extends ClassScheduleComponentProps,
+		DayScheduleComponentProps {}
+export interface ClassWeekScheduleProps
+	extends ClassScheduleComponentProps,
+		WeekScheduleComponentProps {}
 
 // Конфигурация компонентов расписания
 export interface ScheduleConfig<TDayProps = unknown, TWeekProps = unknown> {
-  type: ScheduleType;
-  title: string;
-  description: string;
-  dayComponent: ComponentType<TDayProps>;
-  weekComponent: ComponentType<TWeekProps>;
+	type: ScheduleType;
+	title: string;
+	description: string;
+	dayComponent: ComponentType<TDayProps>;
+	weekComponent: ComponentType<TWeekProps>;
 }
 
 // Константы для типов расписания
 export const SCHEDULE_TYPES = {
-  TEACHERS: 'teachers' as const,
-  CLASSES: 'classes' as const,
+	TEACHERS: 'teachers' as const,
+	CLASSES: 'classes' as const,
 } as const;
 
 // Константы для типов представления
 export const VIEW_TYPES = {
-  DAY: 'day' as const,
-  WEEK: 'week' as const,
+	DAY: 'day' as const,
+	WEEK: 'week' as const,
 } as const;

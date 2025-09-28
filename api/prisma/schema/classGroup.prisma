@@ -1,0 +1,22 @@
+model ClassGroup {
+  id                Int              @id @default(autoincrement())
+  idClass           Int              @map("id_class")
+  idSubject         Int              @map("id_subject")
+  idScheduleVersion Int              @map("id_scheduleVersion")
+  name              String
+  description       String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relations
+  class           Class           @relation(fields: [idClass], references: [id], onDelete: Cascade)
+  subject         Subject         @relation(fields: [idSubject], references: [id], onDelete: Cascade)
+  scheduleVersion ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
+  members         ClassGroupMembership[]
+  lessons         Lesson[]
+
+  @@unique([idClass, idSubject, idScheduleVersion, name])
+}
+
+
+

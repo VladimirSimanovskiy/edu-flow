@@ -7,4 +7,5 @@ model ScheduleVersion {
   updatedAt   DateTime  @updatedAt
 
   lessons Lesson[]
+  classGroups ClassGroup[]
 }

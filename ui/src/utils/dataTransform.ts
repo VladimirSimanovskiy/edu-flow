@@ -50,6 +50,7 @@ export const transformLesson = (dbLesson: DatabaseLesson): Lesson => {
 		startTime: formatTime(dbLesson.lessonSchedule.timeBegin),
 		endTime: formatTime(dbLesson.lessonSchedule.timeEnd),
 		lessonNumber: dbLesson.lessonSchedule.lessonNumber,
+		groupNumber: (dbLesson as any).groupNumber ?? null,
 	} as Lesson;
 
 	// Поддержка возможного замещения (берём первое для даты)

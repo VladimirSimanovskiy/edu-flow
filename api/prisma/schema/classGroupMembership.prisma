@@ -1,0 +1,18 @@
+model ClassGroupMembership {
+  id           Int        @id @default(autoincrement())
+  idClassGroup Int        @map("id_classGroup")
+  idStudent    Int        @map("id_student")
+  dateBegin    DateTime
+  dateEnd      DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  group   ClassGroup @relation(fields: [idClassGroup], references: [id], onDelete: Cascade)
+  student Student    @relation(fields: [idStudent], references: [id], onDelete: Cascade)
+
+  @@index([idStudent, dateBegin])
+  @@unique([idClassGroup, idStudent, dateBegin])
+}
+
+

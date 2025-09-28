@@ -17,4 +17,5 @@ model Student {
 
   // Historical class assignments
   classHistory StudentClassHistory[]
+  groupMemberships ClassGroupMembership[]
 }

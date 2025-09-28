@@ -24,8 +24,12 @@ model Lesson {
   idScheduleVersion Int             @map("id_scheduleVersion")
   scheduleVersion   ScheduleVersion @relation(fields: [idScheduleVersion], references: [id], onDelete: Cascade)
 
+  // Optional group reference (lesson for subgroup of the class)
+  idClassGroup Int?        @map("id_classGroup")
+  classGroup   ClassGroup? @relation(fields: [idClassGroup], references: [id], onDelete: SetNull)
+
   // Relations
   substitutions     Substitution[]
 
-  @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion])
+  @@unique([idTeacher, idClass, idSubject, idClassroom, idScheduleVersion, idClassGroup])
 }

@@ -144,9 +144,13 @@ export const TeacherGrid: React.FC<Props> = ({ viewType, date, lessons, teachers
 			? ((subRecord as any)?.classroomNumber ?? content?.classroomNumber)
 			: content?.classroomNumber;
 
+		// Build display values: primary -> "10Б (1)", secondary -> ["Электив", "каб. 203"]
+		const groupNumber = (content as any)?.groupNumber as number | undefined;
+		const groupSuffix = groupNumber ? ` (${groupNumber})` : '';
+
 		const lessonData: LessonData | undefined = content
 			? {
-					primary: content.className,
+					primary: `${content.className}${groupSuffix}`,
 					secondary: [
 						content.subjectName,
 						displayClassroomNumber ? `каб. ${displayClassroomNumber}` : undefined,

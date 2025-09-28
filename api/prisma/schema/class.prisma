@@ -9,6 +9,7 @@ model Class {
   lessons              Lesson[]
   idClassLeaderTeacher Int?
   classLeader          Teacher?  @relation("TeacherClassLeadership", fields: [idClassLeaderTeacher], references: [id], onDelete: SetNull)
+  classGroups          ClassGroup[]
   
   // Historical student assignments
   studentHistory       StudentClassHistory[]

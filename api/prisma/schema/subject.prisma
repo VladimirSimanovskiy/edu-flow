@@ -9,4 +9,5 @@ model Subject {
   // Relations
   lessons         Lesson[]
   teacherSubjects TeacherSubject[]
+  classGroups     ClassGroup[]
 }

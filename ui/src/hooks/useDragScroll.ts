@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 
 interface UseDragScrollOptions {
 	/**
@@ -26,6 +26,8 @@ interface UseDragScrollReturn {
 		onMouseUp: () => void;
 		onMouseLeave: () => void;
 	};
+	hasLeftShadow: boolean;
+	hasRightShadow: boolean;
 }
 
 export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScrollReturn => {
@@ -35,6 +37,18 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 	const isDraggingRef = useRef(false);
 	const startXRef = useRef(0);
 	const startScrollLeftRef = useRef(0);
+	const [hasLeftShadow, setHasLeftShadow] = useState(false);
+	const [hasRightShadow, setHasRightShadow] = useState(false);
+
+	const updateShadows = useCallback(() => {
+		const el = scrollRef.current;
+		if (!el) return;
+		const { scrollLeft, scrollWidth, clientWidth } = el;
+		const atStart = scrollLeft <= 0;
+		const atEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth;
+		setHasLeftShadow(!atStart);
+		setHasRightShadow(!atEnd);
+	}, []);
 
 	// Обработчик начала перетаскивания
 	const handleStart = useCallback((clientX: number) => {
@@ -54,8 +68,9 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 			const newScrollLeft = startScrollLeftRef.current - deltaX * sensitivity;
 
 			scrollRef.current.scrollLeft = newScrollLeft;
+			updateShadows();
 		},
-		[sensitivity]
+		[sensitivity, updateShadows]
 	);
 
 	// Обработчик окончания перетаскивания
@@ -89,6 +104,17 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 		handleEnd();
 	}, [handleEnd]);
 
+	useEffect(() => {
+		const el = scrollRef.current;
+		if (!el) return;
+		updateShadows();
+		const onScroll = () => updateShadows();
+		el.addEventListener('scroll', onScroll, { passive: true });
+		return () => {
+			el.removeEventListener('scroll', onScroll);
+		};
+	}, [updateShadows]);
+
 	return {
 		scrollRef,
 		className: 'select-none cursor-grab active:cursor-grabbing',
@@ -98,5 +124,7 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 			onMouseUp,
 			onMouseLeave,
 		},
+		hasLeftShadow,
+		hasRightShadow,
 	};
 };

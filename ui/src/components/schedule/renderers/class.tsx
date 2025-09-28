@@ -79,7 +79,7 @@ export const ClassGrid: React.FC<Props> = ({ viewType, date, lessons, teachers, 
 		<GridRenderer
 			model={model}
 			renderCell={renderCellContent}
-			enableDragScroll={viewType === 'week'}
+			enableDragScroll
 			rowHeaderLabel="Классы"
 			rowHeaderControls={
 				<ScheduleColumnFilter

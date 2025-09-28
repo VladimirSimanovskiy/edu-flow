@@ -166,7 +166,6 @@ export const ScheduleFiltersProvider: React.FC<ScheduleFiltersProviderProps> = (
 	);
 };
 
-// Custom hook to use the context
 export const useScheduleFiltersContext = (): ScheduleFiltersContextValue => {
 	const context = useContext(ScheduleFiltersContext);
 	if (!context) {

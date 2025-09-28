@@ -65,7 +65,7 @@ export const LessonCell: React.FC<LessonCellProps> = ({
 	return (
 		<div
 			className={cn(
-				'h-16 sm:h-18 md:h-20 w-full border rounded text-xs flex flex-col items-center justify-center transition-colors p-1',
+				'h-16 sm:h-18 md:h-20 w-full min-w-0 border rounded text-xs flex flex-col items-center justify-center transition-colors p-1',
 				(hasLesson && onClick) || (!hasLesson && enableEmptyClick && onEmptyClick)
 					? 'cursor-pointer hover:opacity-80'
 					: undefined,

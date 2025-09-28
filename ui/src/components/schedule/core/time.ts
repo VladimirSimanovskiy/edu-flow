@@ -40,7 +40,7 @@ export class WeekViewStrategy implements TimeViewStrategy {
 		const days = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i));
 		const columns: TimeColumn[] = [];
 		for (let i = 0; i < days.length; i++) {
-			const dayLabel = format(days[i], 'EEE', { locale: ru });
+			const dayLabel = format(days[i], 'eeee dd.MM', { locale: ru });
 			for (const n of this.lessonNumbers) {
 				columns.push({
 					key: `${i + 1}-${n}`,

@@ -103,13 +103,7 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
 								})()}
 							</tr>
 						)}
-						<tr
-							className={
-								hasGroups
-									? 'sticky top-10 z-30 bg-white'
-									: 'sticky top-0 z-20 bg-white border-b border-gray-200'
-							}
-						>
+						<tr>
 							{!hasGroups && (
 								<th className="sticky left-0 top-0 bg-white z-40 text-left px-2 py-2 w-40 min-w-[10rem] border-b border-r border-gray-300 text-xs sm:text-sm font-medium text-gray-600">
 									<div className="flex items-center justify-between gap-2">
@@ -141,19 +135,6 @@ export const GridRenderer: React.FC<GridRendererProps> = ({
 							})}
 						</tr>
 					</thead>
-					{/* Visual separator under header (ensures clear bottom border in week mode) */}
-					{hasGroups && (
-						<thead>
-							<tr className="sticky top-10 z-10 bg-white">
-								<th colSpan={1 + model.columns.length} className="p-0">
-									<div
-										className="h-px bg-gray-200"
-										style={{ marginLeft: '10rem', width: 'calc(100% - 10rem)' }}
-									/>
-								</th>
-							</tr>
-						</thead>
-					)}
 					<tbody>
 						{model.rows.map((row, rowIdx) => (
 							<tr

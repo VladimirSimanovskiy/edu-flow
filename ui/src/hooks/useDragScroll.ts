@@ -37,8 +37,13 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 	const isDraggingRef = useRef(false);
 	const startXRef = useRef(0);
 	const startScrollLeftRef = useRef(0);
+	const pendingClientXRef = useRef<number | null>(null);
+	const moveRafIdRef = useRef<number | null>(null);
+	const shadowRafIdRef = useRef<number | null>(null);
 	const [hasLeftShadow, setHasLeftShadow] = useState(false);
 	const [hasRightShadow, setHasRightShadow] = useState(false);
+	const lastLeftShadowRef = useRef(false);
+	const lastRightShadowRef = useRef(false);
 
 	const updateShadows = useCallback(() => {
 		const el = scrollRef.current;
@@ -46,8 +51,16 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 		const { scrollLeft, scrollWidth, clientWidth } = el;
 		const atStart = scrollLeft <= 0;
 		const atEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth;
-		setHasLeftShadow(!atStart);
-		setHasRightShadow(!atEnd);
+		const nextLeft = !atStart;
+		const nextRight = !atEnd;
+		if (lastLeftShadowRef.current !== nextLeft) {
+			lastLeftShadowRef.current = nextLeft;
+			setHasLeftShadow(nextLeft);
+		}
+		if (lastRightShadowRef.current !== nextRight) {
+			lastRightShadowRef.current = nextRight;
+			setHasRightShadow(nextRight);
+		}
 	}, []);
 
 	// Обработчик начала перетаскивания
@@ -63,15 +76,24 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 	const handleMove = useCallback(
 		(clientX: number) => {
 			if (!isDraggingRef.current || !scrollRef.current) return;
-
 			const deltaX = clientX - startXRef.current;
 			const newScrollLeft = startScrollLeftRef.current - deltaX * sensitivity;
-
 			scrollRef.current.scrollLeft = newScrollLeft;
 			updateShadows();
 		},
 		[sensitivity, updateShadows]
 	);
+
+	const scheduleMove = useCallback(() => {
+		if (moveRafIdRef.current !== null) return;
+		moveRafIdRef.current = requestAnimationFrame(() => {
+			moveRafIdRef.current = null;
+			const x = pendingClientXRef.current;
+			if (x != null) {
+				handleMove(x);
+			}
+		});
+	}, [handleMove]);
 
 	// Обработчик окончания перетаскивания
 	const handleEnd = useCallback(() => {
@@ -80,21 +102,30 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 		isDraggingRef.current = false;
 	}, []);
 
-	// Обработчики событий мыши
+	// Обработчики событий мыши (используем window listeners для движения во время drag)
 	const onMouseDown = useCallback(
 		(e: React.MouseEvent) => {
 			e.preventDefault();
 			handleStart(e.clientX);
+			const onMove = (ev: MouseEvent) => {
+				pendingClientXRef.current = ev.clientX;
+				scheduleMove();
+			};
+			const onUp = () => {
+				handleEnd();
+				window.removeEventListener('mousemove', onMove);
+				window.removeEventListener('mouseup', onUp);
+			};
+			window.addEventListener('mousemove', onMove, { passive: true });
+			window.addEventListener('mouseup', onUp, { passive: true });
 		},
-		[handleStart]
+		[handleStart, handleEnd, scheduleMove]
 	);
 
-	const onMouseMove = useCallback(
-		(e: React.MouseEvent) => {
-			handleMove(e.clientX);
-		},
-		[handleMove]
-	);
+	// noop, движение обрабатывается на window
+	const onMouseMove = useCallback((_e: React.MouseEvent) => {
+		// no-op
+	}, []);
 
 	const onMouseUp = useCallback(() => {
 		handleEnd();
@@ -108,12 +139,25 @@ export const useDragScroll = (options: UseDragScrollOptions = {}): UseDragScroll
 		const el = scrollRef.current;
 		if (!el) return;
 		updateShadows();
-		const onScroll = () => updateShadows();
+		const onScroll = () => {
+			if (shadowRafIdRef.current !== null) return;
+			shadowRafIdRef.current = requestAnimationFrame(() => {
+				shadowRafIdRef.current = null;
+				updateShadows();
+			});
+		};
 		el.addEventListener('scroll', onScroll, { passive: true });
 		return () => {
 			el.removeEventListener('scroll', onScroll);
 		};
 	}, [updateShadows]);
+
+	useEffect(() => {
+		return () => {
+			if (moveRafIdRef.current !== null) cancelAnimationFrame(moveRafIdRef.current);
+			if (shadowRafIdRef.current !== null) cancelAnimationFrame(shadowRafIdRef.current);
+		};
+	}, []);
 
 	return {
 		scrollRef,

@@ -29,8 +29,6 @@ interface ClassroomFormProps {
 export const ClassroomForm: React.FC<ClassroomFormProps> = ({
 	classroom,
 	onSubmit,
-	onCancel,
-	isLoading = false,
 }) => {
 	const form = useForm<ClassroomFormValues>({
 		resolver: zodResolver(classroomFormSchema),

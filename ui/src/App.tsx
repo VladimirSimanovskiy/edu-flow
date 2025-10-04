@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Home } from './pages/home';
+import { Home } from './pages/Home';
 import { Schedule } from './pages/schedule';
 import { Teachers } from './pages/teachers';
 import { Classrooms } from './pages/classrooms';

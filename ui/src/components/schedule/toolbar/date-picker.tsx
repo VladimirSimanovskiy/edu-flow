@@ -10,13 +10,7 @@ import { cn } from '../../../utils/cn';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { QuickDateActions } from '@/components/ui/quick-date-actions';
-import {
-	formatDateForDisplay,
-	getWeekStart,
-	getWeekEnd,
-	getQuickActions,
-} from '../../../utils/dateControlUtils';
+import { formatDateForDisplay, getWeekStart, getWeekEnd } from '../../../utils/dateControlUtils';
 
 interface DatePickerProps {
 	/** Текущая дата */
@@ -42,8 +36,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 	viewType,
 	onChange,
 	disabled = false,
-	minDate,
-	maxDate,
 	locale = 'ru',
 }) => {
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -54,7 +46,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 		setDisplayedMonth(value);
 	}, [value]);
 
-	const handleDateSelect = (date: Date | undefined) => {
+	const handleDateSelect = (date: Date) => {
 		if (date) {
 			if (viewType === 'week') {
 				const weekStart = getWeekStart(date);
@@ -99,22 +91,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 		}
 	};
 
-	const handleQuickAction = (action: ReturnType<typeof getQuickActions>[0]) => {
-		const newDate = action.getDate();
-		onChange(newDate);
-		// Обновляем отображаемый месяц на месяц новой даты
-		setDisplayedMonth(newDate);
-	};
-
 	const displayDate = formatDateForDisplay(value, viewType, locale);
 	const weekStart = getWeekStart(value);
 	const weekEnd = getWeekEnd(value);
-
-	const isDateDisabled = (date: Date) => {
-		if (minDate && date < minDate) return true;
-		if (maxDate && date > maxDate) return true;
-		return false;
-	};
 
 	return (
 		<Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -131,51 +110,48 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					<span className="text-xs sm:text-sm whitespace-nowrap">{displayDate}</span>
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align="center">
-				<div className="flex flex-col">
-					{/* Quick actions */}
-					<div className="p-3 border-b">
-						<QuickDateActions
-							viewType={viewType}
-							onActionSelect={handleQuickAction}
-							disabled={disabled}
-						/>
-					</div>
+			<PopoverContent className="w-auto p-0">
+				{/* Calendar */}
+				{viewType === 'week' ? (
+					<Calendar
+						className="border-0"
+						mode="range"
+						selected={{ from: weekStart, to: weekEnd }}
+						onSelect={handleWeekRangeSelect}
+						month={displayedMonth}
+						onMonthChange={setDisplayedMonth}
+						locale={ru}
+						required
+					/>
+				) : (
+					<Calendar
+						className="border-0"
+						mode="single"
+						selected={value}
+						onSelect={handleDateSelect}
+						month={displayedMonth}
+						onMonthChange={setDisplayedMonth}
+						locale={ru}
+						required
+					/>
+				)}
 
-					{/* Calendar */}
-					<div className="p-3">
-						{viewType === 'week' ? (
-							<Calendar
-								mode="range"
-								selected={{ from: weekStart, to: weekEnd }}
-								onSelect={handleWeekRangeSelect}
-								initialFocus
-								month={displayedMonth}
-								onMonthChange={setDisplayedMonth}
-								locale={locale === 'ru' ? ru : undefined}
-								disabled={isDateDisabled}
-								modifiersClassNames={{
-									range_start:
-										'bg-primary text-primary-foreground rounded-l-md font-medium',
-									range_end:
-										'bg-primary text-primary-foreground rounded-r-md font-medium',
-									range_middle:
-										'bg-primary/30 text-primary-foreground font-medium',
-								}}
-							/>
-						) : (
-							<Calendar
-								mode="single"
-								selected={value}
-								onSelect={handleDateSelect}
-								initialFocus
-								month={displayedMonth}
-								onMonthChange={setDisplayedMonth}
-								locale={locale === 'ru' ? ru : undefined}
-								disabled={isDateDisabled}
-							/>
-						)}
-					</div>
+				<div className="p-3 border-b flex justify-center">
+					{/* Quick actions */}
+					<Button
+						variant="outline"
+						size="xs"
+						className="w-full"
+						onClick={() => {
+							const today = new Date();
+							onChange(today);
+							setDisplayedMonth(today);
+							setIsCalendarOpen(false);
+						}}
+						disabled={disabled}
+					>
+						Сегодня
+					</Button>
 				</div>
 			</PopoverContent>
 		</Popover>

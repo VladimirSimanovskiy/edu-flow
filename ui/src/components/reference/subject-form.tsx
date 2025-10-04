@@ -27,8 +27,6 @@ interface SubjectFormProps {
 export const SubjectForm: React.FC<SubjectFormProps> = ({
 	subject,
 	onSubmit,
-	onCancel,
-	isLoading = false,
 }) => {
 	const form = useForm<SubjectFormValues>({
 		resolver: zodResolver(subjectFormSchema),

@@ -6,7 +6,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { cn } from '../../../utils/cn';
 import { scheduleConfigRegistry } from '../registry/schedule-config-registry';
 import type { ScheduleType } from '@/types/scheduleConfig';
 
@@ -32,7 +31,7 @@ export const ScheduleTypeSelector: React.FC<ScheduleTypeSelectorProps> = ({
 
 	return (
 		<Select value={scheduleType} onValueChange={onChange} disabled={disabled}>
-			<SelectTrigger className={cn('min-w-[100px] sm:min-w-[140px] h-9', className)}>
+			<SelectTrigger className={className}>
 				<SelectValue>
 					<div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
 						<currentType.icon className="w-4 h-4 shrink-0" />

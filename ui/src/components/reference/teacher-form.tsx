@@ -30,8 +30,6 @@ interface TeacherFormProps {
 export const TeacherForm: React.FC<TeacherFormProps> = ({
 	teacher,
 	onSubmit,
-	onCancel,
-	isLoading = false,
 }) => {
 	const form = useForm<TeacherFormValues>({
 		resolver: zodResolver(teacherFormSchema),

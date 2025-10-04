@@ -7,7 +7,8 @@ import {
 	type UseFormStateReturn,
 	type ControllerFieldState,
 } from 'react-hook-form';
-import { FormFieldControl, FormItem, FormControl } from '../../Form';
+import { FormFieldControl, FormControl } from '../../Form';
+import { Field } from '@/components/ui/field';
 
 export type FormFieldControlRenderer<TFieldValues extends FieldValues = FieldValues> = (props: {
 	field: ControllerRenderProps<TFieldValues, FieldPath<TFieldValues>>;
@@ -77,7 +78,15 @@ export interface FormFieldProps<
 export function FormField<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({ name, title, description, control, required }: FormFieldProps<TFieldValues, TName>) {
+>({
+	name,
+	title,
+	description,
+	control,
+	required,
+	layout = 'responsive',
+	readonly,
+}: FormFieldProps<TFieldValues, TName>) {
 	const form = useFormContext<TFieldValues>();
 
 	return (
@@ -86,25 +95,24 @@ export function FormField<
 			name={name}
 			render={({ field, fieldState, formState }) => {
 				return (
-					<FormItem>
-						<div className="space-y-2">
-							<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-								{title}
-								{required && <span className="text-destructive ml-1">*</span>}
-							</label>
-							{description && (
-								<p className="text-sm text-muted-foreground">{description}</p>
-							)}
-							<FormControl id={`${name}-form-item`}>
-								{control({ field, fieldState, formState })}
+					<Field
+						title={title}
+						description={description}
+						required={required}
+						layout={layout}
+						readonly={readonly}
+						error={fieldState.error?.message}
+						control={({ id, readonly: fieldReadonly }) => (
+							<FormControl id={id}>
+								{control({
+									field: { ...field, disabled: fieldReadonly || field.disabled },
+									fieldState,
+									formState,
+									readonly: fieldReadonly,
+								})}
 							</FormControl>
-							{fieldState.error?.message && (
-								<p className="text-[0.8rem] font-medium text-destructive">
-									{fieldState.error.message}
-								</p>
-							)}
-						</div>
-					</FormItem>
+						)}
+					/>
 				);
 			}}
 		/>

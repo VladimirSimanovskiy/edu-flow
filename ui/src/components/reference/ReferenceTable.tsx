@@ -1,4 +1,12 @@
-import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Button } from '../ui/button';
+import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '../ui/dropdown';
 import type { ReferenceTableProps } from '@/types/reference-system';
 
 /**
@@ -12,55 +20,71 @@ export const ReferenceTable = <T extends any>({
   onDelete,
 }: ReferenceTableProps<T>) => {
   if (isLoading) {
-    return <div>Загрузка...</div>;
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   if (!data || data.length === 0) {
-    return <div>Нет данных для отображения</div>;
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>Нет данных для отображения</p>
+      </div>
+    );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr>
+    <div className="border rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
             {columns.map((column, index) => (
-              <th key={index} className="border p-2 text-left">
+              <TableHead key={index} className="font-medium">
                 {column.title}
-              </th>
+              </TableHead>
             ))}
-            <th className="border p-2 text-left">Действия</th>
-          </tr>
-        </thead>
-        <tbody>
+            <TableHead className="w-12"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {data.map((item, index) => (
-            <tr key={index}>
+            <TableRow key={index} className="hover:bg-gray-50">
               {columns.map((column, colIndex) => (
-                <td key={colIndex} className="border p-2">
+                <TableCell key={colIndex}>
                   {column.render 
                     ? column.render(item[column.key], item)
                     : String(item[column.key] || '')
                   }
-                </td>
+                </TableCell>
               ))}
-              <td className="border p-2">
-                <button 
-                  onClick={() => onEdit(item)}
-                  className="mr-2 text-blue-600 hover:text-blue-800"
-                >
-                  Редактировать
-                </button>
-                <button 
-                  onClick={() => onDelete(item.id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  Удалить
-                </button>
-              </td>
-            </tr>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onEdit(item)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Редактировать
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete(item.id)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Удалить
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };

@@ -13,20 +13,31 @@ export {
 	AlertDialogCancel,
 } from './alert-dialog';
 export { Badge } from './badge';
-export { Button } from './button';
+export { Button, IconButton } from './button';
 export { Calendar } from './calendar';
 export { Card } from './card';
-export { DatePicker } from './date-picker';
 export { ErrorBoundary } from './error-boundary';
 export { ErrorMessage } from './error-message';
 export { LoadingSpinner } from './loading-spinner';
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
 export { Progress } from './progress';
 export type { ProgressProps, ProgressBarVariants, ProgressBarSizeVariants } from './progress';
-export { QuickDateActions } from './quick-date-actions';
-export { Table } from './table';
+export {
+	Table,
+	TableHeader,
+	TableBody,
+	TableFooter,
+	TableHead,
+	TableRow,
+	TableCell,
+	TableCaption,
+} from './table';
+export { Field } from './field';
+export { FieldLabel } from './label/field-label';
+export { Description } from './description';
+export { Icon, FeatureIcon } from './icon';
+export { IconTooltip } from './icon-tooltip';
 export { Toggle } from './toggle';
-export { WeekPicker } from './week-picker';
 export { Input } from './input';
 export { Textarea } from './textarea';
 export type { TextareaProps, TextareaVariants } from './textarea';
@@ -48,10 +59,11 @@ export {
 	ModalFooterTemplate,
 } from './modal';
 export { Select } from './select';
-export { FormField } from './form-field';
 export { CheckboxList } from './checkbox-list';
 export { ScrollShadow } from './scroll-shadow';
 export { ValuesFilter } from './values-filter';
+export { Shortcut } from './shortcut';
+export * from './menu-item';
 export {
 	DropdownMenu,
 	DropdownMenuTrigger,

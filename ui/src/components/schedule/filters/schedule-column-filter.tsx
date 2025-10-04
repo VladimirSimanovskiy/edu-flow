@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button/button/Button';
 import { ValuesFilter } from '@/components/ui/values-filter';
 import { Filter } from 'lucide-react';
 import { cn } from '../../../utils/cn';
@@ -25,7 +25,7 @@ export const ScheduleColumnFilter = <T extends ItemValue>({
 		<Popover open={isOpen} onOpenChange={setIsOpen}>
 			<PopoverTrigger asChild>
 				<Button
-					variant={isActive ? 'default' : 'outline'}
+					variant={isActive ? 'primary' : 'outline'}
 					size="sm"
 					className={cn(
 						'h-8 px-2 text-xs',

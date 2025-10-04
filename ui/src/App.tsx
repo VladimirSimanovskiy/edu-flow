@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Home } from './pages/home';
 import { Schedule } from './pages/schedule';
+import { Teachers } from './pages/teachers';
+import { Classrooms } from './pages/classrooms';
+import { Subjects } from './pages/subjects';
 import { Button } from './components/ui/button';
 import { ErrorBoundary } from './components/ui/error-boundary';
 import { ProtectedRoute, UserMenu } from './components/auth';
@@ -38,15 +41,44 @@ const Navigation: React.FC = () => {
 
 					<div className="flex items-center gap-2 sm:gap-4">
 						{user && (
-							<Link to="/schedule">
-								<Button
-									variant="ghost"
-									size="sm"
-									className="text-xs sm:text-sm whitespace-nowrap"
-								>
-									Расписание
-								</Button>
-							</Link>
+							<>
+								<Link to="/schedule">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-xs sm:text-sm whitespace-nowrap"
+									>
+										Расписание
+									</Button>
+								</Link>
+								<Link to="/teachers">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-xs sm:text-sm whitespace-nowrap"
+									>
+										Учителя
+									</Button>
+								</Link>
+								<Link to="/classrooms">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-xs sm:text-sm whitespace-nowrap"
+									>
+										Кабинеты
+									</Button>
+								</Link>
+								<Link to="/subjects">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="text-xs sm:text-sm whitespace-nowrap"
+									>
+										Предметы
+									</Button>
+								</Link>
+							</>
 						)}
 
 						{user ? (
@@ -90,6 +122,30 @@ function App() {
 									element={
 										<ProtectedRoute>
 											<Schedule />
+										</ProtectedRoute>
+									}
+								/>
+								<Route
+									path="/teachers"
+									element={
+										<ProtectedRoute>
+											<Teachers />
+										</ProtectedRoute>
+									}
+								/>
+								<Route
+									path="/classrooms"
+									element={
+										<ProtectedRoute>
+											<Classrooms />
+										</ProtectedRoute>
+									}
+								/>
+								<Route
+									path="/subjects"
+									element={
+										<ProtectedRoute>
+											<Subjects />
 										</ProtectedRoute>
 									}
 								/>

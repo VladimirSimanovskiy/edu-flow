@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input/input/Input';
 import { Search } from 'lucide-react';
 import { cn } from '../../utils/cn';
 

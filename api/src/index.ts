@@ -7,6 +7,7 @@ import { scheduleRoutes } from './routes/schedule';
 import { authRoutes } from './routes/auth';
 import { createLessonRoutes } from './routes/lessons';
 import { createTeacherRoutes } from './routes/teachers';
+import { createReferenceRoutes } from './routes/reference.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { prisma } from './config/database';
 import { LessonRepository, TeacherRepository } from './repositories';
@@ -60,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/lessons', createLessonRoutes(lessonController));
 app.use('/api/teachers', createTeacherRoutes(teacherController));
+app.use('/api/references', createReferenceRoutes(prisma));
 
 // Health check
 app.get('/api/health', (req, res) => {

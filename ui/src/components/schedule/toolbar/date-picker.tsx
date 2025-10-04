@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { ru } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '../../../utils/cn';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button/button/Button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QuickDateActions } from '@/components/ui/quick-date-actions';

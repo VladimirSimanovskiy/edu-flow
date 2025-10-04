@@ -28,7 +28,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
 	};
 
 	return (
-		<Alert variant="destructive" className={cn(getVariantClasses(), className)}>
+		<Alert status="error" className={cn(getVariantClasses(), className)}>
 			<AlertCircle className="h-4 w-4" />
 			<AlertTitle>Ошибка</AlertTitle>
 			<AlertDescription className="mt-1">

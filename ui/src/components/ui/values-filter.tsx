@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { SearchInput } from './search-input';
 import { CheckboxList } from './checkbox-list';
 import { cn } from '../../utils/cn';

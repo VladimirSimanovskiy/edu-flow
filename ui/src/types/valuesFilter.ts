@@ -28,13 +28,6 @@ export interface CheckboxListState<T extends ItemValue> {
 	searchQuery: string;
 }
 
-export interface SearchInputProps {
-	value: string;
-	onChange: (value: string) => void;
-	placeholder?: string;
-	debounceMs?: number;
-}
-
 export interface CheckboxListProps<T extends ItemValue> {
 	items: T[];
 	toggledItems: T[];

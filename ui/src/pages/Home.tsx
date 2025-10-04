@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardFooter, CardSubTitle, CardTitle } from '../components/ui/card';
 
 export const Home: React.FC = () => {
 	return (
@@ -18,41 +18,41 @@ export const Home: React.FC = () => {
 				<div className="max-w-2xl mx-auto">
 					{/* Schedule Card */}
 					<Card className="hover:shadow-xl transition-shadow">
-						<CardHeader className="text-center">
+						<CardTitle className="text-center">
 							<div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
 								<Calendar className="w-8 h-8 text-blue-600" />
 							</div>
-							<CardTitle>Школьное расписание</CardTitle>
-							<CardDescription>
+							Школьное расписание
+							<CardSubTitle>
 								Просмотр расписания учителей и классов по дням и неделям.
 								Переключайтесь между режимами прямо в интерфейсе.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
+							</CardSubTitle>
+						</CardTitle>
+						<CardFooter>
 							<Link to="/schedule">
 								<Button className="w-full">Открыть расписание</Button>
 							</Link>
-						</CardContent>
+						</CardFooter>
 					</Card>
 				</div>
 
 				{/* Coming Soon Section */}
 				<div className="mt-16 text-center">
 					<Card className="max-w-2xl mx-auto">
-						<CardHeader>
+						<CardTitle>
 							<div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
 								<Calendar className="w-8 h-8 text-purple-600" />
 							</div>
-							<CardTitle>Управление проектами</CardTitle>
-							<CardDescription>
+							Управление проектами
+							<CardSubTitle>
 								Скоро: Канбан доска для управления школьными проектами
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
+							</CardSubTitle>
+						</CardTitle>
+						<CardFooter>
 							<Button variant="outline" disabled>
 								Скоро будет доступно
 							</Button>
-						</CardContent>
+						</CardFooter>
 					</Card>
 				</div>
 			</div>

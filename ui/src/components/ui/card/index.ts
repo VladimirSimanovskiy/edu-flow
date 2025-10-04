@@ -1,25 +1,28 @@
-export { Card } from "./Card";
-export type { CardProps } from "./Card";
+export { Card } from './Card';
+export type { CardProps } from './Card';
 
-export { ActionCard } from "./components/ActionCard";
-export type { ActionCardProps } from "./components/ActionCard";
+export { ActionCard } from './components/ActionCard';
+export type { ActionCardProps } from './components/ActionCard';
 
-export { CardTitle } from "./components/CardTitle";
-export type { CardTitleProps } from "./components/CardTitle";
+export { CardTitle } from './components/CardTitle';
+export type { CardTitleProps } from './components/CardTitle';
 
-export { CardSubTitle } from "./components/CardSubTitle";
-export type { CardSubTitleProps } from "./components/CardSubTitle";
+export { CardSubTitle } from './components/CardSubTitle';
+export type { CardSubTitleProps } from './components/CardSubTitle';
 
-export { CardFooter } from "./components/CardFooter";
-export type { CardFooterProps } from "./components/CardFooter";
+export { CardFooter } from './components/CardFooter';
+export type { CardFooterProps } from './components/CardFooter';
 
-export { CardContent } from "./components/CardContent";
-export type { CardContentProps } from "./components/CardContent";
+export { CardVisualBadge } from './components/CardVisualBadge';
+export type { CardVisualBadgeProps } from './components/CardVisualBadge';
 
-export { CardHeader } from "./components/CardHeader";
-export type { CardHeaderProps } from "./components/CardHeader";
+export { CardFeature } from './components/CardFeature';
+export type { CardFeatureProps } from './components/CardFeature';
 
-export { CardDescription } from "./components/CardDescription";
-export type { CardDescriptionProps } from "./components/CardDescription";
+export { CardMenuTrigger } from './components/CardMenuTrigger';
+export type { CardMenuTriggerProps } from './components/CardMenuTrigger';
 
-export { cardStyles } from "./styles";
+export { CardFolder } from './components/CardFolder';
+export type { CardFolderProps } from './components/CardFolder';
+
+export { cardStyles } from './styles';

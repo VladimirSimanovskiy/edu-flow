@@ -1,18 +1,18 @@
-import React from "react";
-import { tv } from "tailwind-variants";
-import { Slot } from "@radix-ui/react-slot";
+import React from 'react';
+import { tv } from 'tailwind-variants';
+import { Slot } from '@radix-ui/react-slot';
 
 const cardSubTitleStyles = tv({
-	base: "mb-1 text-xs text-muted"
+	base: 'mb-1 text-xs text-muted',
 });
 
-export type CardSubTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
+export type CardSubTitleProps = React.HTMLAttributes<HTMLParagraphElement> & {
 	asChild?: boolean;
 };
 
-export const CardSubTitle = React.forwardRef<HTMLHeadingElement, CardSubTitleProps>(
+export const CardSubTitle = React.forwardRef<HTMLParagraphElement, CardSubTitleProps>(
 	({ className, children, asChild = false, ...props }, ref) => {
-		const Comp = asChild ? Slot : "h4";
+		const Comp = asChild ? Slot : 'p';
 
 		return (
 			<Comp className={cardSubTitleStyles({ className })} ref={ref} {...props}>
@@ -22,4 +22,4 @@ export const CardSubTitle = React.forwardRef<HTMLHeadingElement, CardSubTitlePro
 	}
 );
 
-CardSubTitle.displayName = "CardSubTitle";
+CardSubTitle.displayName = 'CardSubTitle';

@@ -8,8 +8,8 @@ export function useCustomValidity<T extends HTMLElement>(
 	error?: string
 ) {
 	useEffect(() => {
-		if (ref.current) {
-			ref.current.setCustomValidity(error || "");
+		if (ref.current && 'setCustomValidity' in ref.current) {
+			(ref.current as any).setCustomValidity(error || "");
 		}
 	}, [ref, error]);
 }

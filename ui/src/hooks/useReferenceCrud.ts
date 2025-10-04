@@ -1,187 +1,205 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { referenceService } from '../services/reference.service';
-import type {
-  Teacher,
-  Classroom,
-  Subject,
-  ReferenceFilters,
-  TeacherFormData,
-  ClassroomFormData,
-  SubjectFormData,
-} from '../types/reference';
+import { useState, useCallback, useEffect } from 'react';
+import type { ReferenceEntity, ReferenceFilters, ReferenceApiService } from '@/types/reference-system';
+
+interface UseReferenceCrudOptions<T extends ReferenceEntity> {
+  apiService: ReferenceApiService<T>;
+  initialFilters?: ReferenceFilters;
+}
+
+interface UseReferenceCrudReturn<T extends ReferenceEntity> {
+  // Данные
+  data: T[];
+  pagination?: any;
+  isLoading: boolean;
+  error: Error | null;
+  
+  // Фильтры и поиск
+  filters: ReferenceFilters;
+  updateFilters: (newFilters: Partial<ReferenceFilters>) => void;
+  resetFilters: () => void;
+  
+  // CRUD операции
+  create: (data: Omit<T, 'id'>, options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => Promise<void>;
+  update: (id: number, data: Partial<T>, options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => Promise<void>;
+  delete: (id: number, options?: { onSuccess?: () => void; onError?: (error: Error) => void }) => Promise<void>;
+  
+  // Состояние операций
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  
+  // Ошибки операций
+  createError: Error | null;
+  updateError: Error | null;
+  deleteError: Error | null;
+  
+  // Обновление данных
+  refresh: () => Promise<void>;
+}
 
 /**
- * Универсальный хук для CRUD операций со справочниками
- * Использует React Query для кэширования и синхронизации состояния
+ * Универсальный хук для работы с справочными данными
+ * Следует принципу Single Responsibility - отвечает только за CRUD операции
  */
-export const useReferenceCrud = <T extends Teacher | Classroom | Subject>(
-  entityType: 'teachers' | 'classrooms' | 'subjects',
-  initialFilters?: ReferenceFilters
-) => {
-  const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<ReferenceFilters>(initialFilters || {});
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  // Получение списка сущностей
-  const {
-    data: listData,
-    isLoading: isLoadingList,
-    error: listError,
-    refetch: refetchList,
-  } = useQuery({
-    queryKey: [entityType, 'list', filters],
-    queryFn: () => {
-      switch (entityType) {
-        case 'teachers':
-          return referenceService.getTeachers(filters);
-        case 'classrooms':
-          return referenceService.getClassrooms(filters);
-        case 'subjects':
-          return referenceService.getSubjects(filters);
-        default:
-          throw new Error(`Unknown entity type: ${entityType}`);
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 минут
+export const useReferenceCrud = <T extends ReferenceEntity>({
+  apiService,
+  initialFilters = {},
+}: UseReferenceCrudOptions<T>): UseReferenceCrudReturn<T> => {
+  // Состояние данных
+  const [data, setData] = useState<T[]>([]);
+  const [pagination, setPagination] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Состояние фильтров
+  const [filters, setFilters] = useState<ReferenceFilters>({
+    page: 1,
+    limit: 10,
+    ...initialFilters,
   });
+  
+  // Состояние операций
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Ошибки операций
+  const [createError, setCreateError] = useState<Error | null>(null);
+  const [updateError, setUpdateError] = useState<Error | null>(null);
+  const [deleteError, setDeleteError] = useState<Error | null>(null);
 
-  // Получение одной сущности
-  const {
-    data: itemData,
-    isLoading: isLoadingItem,
-    error: itemError,
-  } = useQuery({
-    queryKey: [entityType, 'item', selectedId],
-    queryFn: () => {
-      if (!selectedId) return null;
-      switch (entityType) {
-        case 'teachers':
-          return referenceService.getTeacher(selectedId);
-        case 'classrooms':
-          return referenceService.getClassroom(selectedId);
-        case 'subjects':
-          return referenceService.getSubject(selectedId);
-        default:
-          throw new Error(`Unknown entity type: ${entityType}`);
-      }
-    },
-    enabled: !!selectedId,
-  });
+  // Загрузка данных
+  const loadData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const result = await apiService.getAll(filters);
+      setData(result.data);
+      setPagination(result.pagination);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Ошибка загрузки данных'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiService, filters]);
 
-  // Создание сущности
-  const createMutation = useMutation({
-    mutationFn: (data: TeacherFormData | ClassroomFormData | SubjectFormData) => {
-      switch (entityType) {
-        case 'teachers':
-          return referenceService.createTeacher(data as TeacherFormData);
-        case 'classrooms':
-          return referenceService.createClassroom(data as ClassroomFormData);
-        case 'subjects':
-          return referenceService.createSubject(data as SubjectFormData);
-        default:
-          throw new Error(`Unknown entity type: ${entityType}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [entityType, 'list'] });
-    },
-  });
+  // Обновление фильтров
+  const updateFilters = useCallback((newFilters: Partial<ReferenceFilters>) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters,
+      page: newFilters.page || 1, // Сбрасываем страницу при изменении фильтров
+    }));
+  }, []);
 
-  // Обновление сущности
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<TeacherFormData | ClassroomFormData | SubjectFormData> }) => {
-      switch (entityType) {
-        case 'teachers':
-          return referenceService.updateTeacher(id, data as Partial<TeacherFormData>);
-        case 'classrooms':
-          return referenceService.updateClassroom(id, data as Partial<ClassroomFormData>);
-        case 'subjects':
-          return referenceService.updateSubject(id, data as Partial<SubjectFormData>);
-        default:
-          throw new Error(`Unknown entity type: ${entityType}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [entityType, 'list'] });
-      queryClient.invalidateQueries({ queryKey: [entityType, 'item'] });
-    },
-  });
+  // Сброс фильтров
+  const resetFilters = useCallback(() => {
+    setFilters({
+      page: 1,
+      limit: 10,
+      ...initialFilters,
+    });
+  }, [initialFilters]);
 
-  // Удаление сущности
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => {
-      switch (entityType) {
-        case 'teachers':
-          return referenceService.deleteTeacher(id);
-        case 'classrooms':
-          return referenceService.deleteClassroom(id);
-        case 'subjects':
-          return referenceService.deleteSubject(id);
-        default:
-          throw new Error(`Unknown entity type: ${entityType}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [entityType, 'list'] });
-      if (selectedId) {
-        setSelectedId(null);
-      }
-    },
-  });
+  // Создание записи
+  const create = useCallback(async (
+    newData: Omit<T, 'id'>,
+    options?: { onSuccess?: () => void; onError?: (error: Error) => void }
+  ) => {
+    try {
+      setIsCreating(true);
+      setCreateError(null);
+      await apiService.create(newData);
+      await loadData(); // Перезагружаем данные
+      options?.onSuccess?.();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Ошибка создания записи');
+      setCreateError(error);
+      options?.onError?.(error);
+    } finally {
+      setIsCreating(false);
+    }
+  }, [apiService, loadData]);
 
-  // Методы для управления фильтрами
-  const updateFilters = (newFilters: Partial<ReferenceFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
+  // Обновление записи
+  const update = useCallback(async (
+    id: number,
+    updateData: Partial<T>,
+    options?: { onSuccess?: () => void; onError?: (error: Error) => void }
+  ) => {
+    try {
+      setIsUpdating(true);
+      setUpdateError(null);
+      await apiService.update(id, updateData);
+      await loadData(); // Перезагружаем данные
+      options?.onSuccess?.();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Ошибка обновления записи');
+      setUpdateError(error);
+      options?.onError?.(error);
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [apiService, loadData]);
 
-  const resetFilters = () => {
-    setFilters(initialFilters || {});
-  };
+  // Удаление записи
+  const deleteRecord = useCallback(async (
+    id: number,
+    options?: { onSuccess?: () => void; onError?: (error: Error) => void }
+  ) => {
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+      await apiService.delete(id);
+      await loadData(); // Перезагружаем данные
+      options?.onSuccess?.();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Ошибка удаления записи');
+      setDeleteError(error);
+      options?.onError?.(error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [apiService, loadData]);
 
-  // Методы для управления выбранной сущностью
-  const selectItem = (id: number) => {
-    setSelectedId(id);
-  };
+  // Обновление данных
+  const refresh = useCallback(async () => {
+    await loadData();
+  }, [loadData]);
 
-  const clearSelection = () => {
-    setSelectedId(null);
-  };
+  // Загружаем данные при изменении фильтров
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return {
     // Данные
-    listData,
-    itemData,
-    selectedId,
+    data,
+    pagination,
+    isLoading,
+    error,
+    
+    // Фильтры
     filters,
-
-    // Состояние загрузки
-    isLoadingList,
-    isLoadingItem,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
-
-    // Ошибки
-    listError,
-    itemError,
-    createError: createMutation.error,
-    updateError: updateMutation.error,
-    deleteError: deleteMutation.error,
-
-    // Методы
-    refetchList,
     updateFilters,
     resetFilters,
-    selectItem,
-    clearSelection,
-    create: createMutation.mutate,
-    update: updateMutation.mutate,
-    delete: deleteMutation.mutate,
-
-    // Состояние мутаций
-    isCreateSuccess: createMutation.isSuccess,
-    isUpdateSuccess: updateMutation.isSuccess,
-    isDeleteSuccess: deleteMutation.isSuccess,
+    
+    // CRUD операции
+    create,
+    update,
+    delete: deleteRecord,
+    
+    // Состояние операций
+    isCreating,
+    isUpdating,
+    isDeleting,
+    
+    // Ошибки
+    createError,
+    updateError,
+    deleteError,
+    
+    // Обновление
+    refresh,
   };
 };

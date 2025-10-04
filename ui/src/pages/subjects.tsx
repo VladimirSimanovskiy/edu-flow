@@ -1,12 +1,11 @@
 import React from 'react';
-import { ReferencePage } from '../components/reference/reference-page';
+import { ReferencePage } from '../components/reference/ReferencePage';
+import { ReferenceConfigFactory } from '../services/reference-config-factory';
+import { SubjectForm } from '../components/reference/forms/SubjectForm';
 
 export const Subjects: React.FC = () => {
-  return (
-    <ReferencePage
-      entityType="subjects"
-      title="Предметы"
-      description="Управление информацией о предметах"
-    />
-  );
+  const config = ReferenceConfigFactory.createSubjectConfig();
+  config.formComponent = SubjectForm;
+  
+  return <ReferencePage config={config} />;
 };

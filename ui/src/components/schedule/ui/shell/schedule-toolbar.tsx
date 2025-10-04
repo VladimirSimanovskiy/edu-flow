@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
-import { ViewToggle } from '@/components/ui/view-toggle';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { DateNavigation } from '../../toolbar/date-navigation';
 import { ScheduleTypeSelector } from '../../toolbar/schedule-type-selector';
 import type { ScheduleType } from '@/types/scheduleConfig';
@@ -45,11 +45,24 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
 							disabled={disabled}
 						/>
 					)}
-					<ViewToggle
-						viewType={viewType}
-						onChange={onViewTypeChange}
+					<ToggleGroup
+						type="single"
+						value={viewType}
+						onValueChange={(value: string | undefined) =>
+							!disabled && value && onViewTypeChange(value as 'day' | 'week')
+						}
 						disabled={disabled}
-					/>
+						variant="outline"
+						size="sm"
+						className="inline-flex rounded-lg border p-0.5 bg-background"
+					>
+						<ToggleGroupItem value="day">
+							<span className="whitespace-nowrap">День</span>
+						</ToggleGroupItem>
+						<ToggleGroupItem value="week">
+							<span className="whitespace-nowrap">Неделя</span>
+						</ToggleGroupItem>
+					</ToggleGroup>
 				</div>
 
 				{/* Bottom row - Date Navigation */}
@@ -77,11 +90,40 @@ export const ScheduleToolbar: React.FC<ScheduleToolbarProps> = ({
 							disabled={disabled}
 						/>
 					)}
-					<ViewToggle
-						viewType={viewType}
-						onChange={onViewTypeChange}
+					<ToggleGroup
+						type="single"
+						value={viewType}
+						onValueChange={(value: string | undefined) =>
+							!disabled && value && onViewTypeChange(value as 'day' | 'week')
+						}
 						disabled={disabled}
-					/>
+						variant="outline"
+						size="sm"
+						className="inline-flex rounded-lg border p-0.5 bg-background"
+					>
+						<ToggleGroupItem
+							value="day"
+							className={cn(
+								'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all border-0 h-8 min-w-[3rem] sm:min-w-[4rem]',
+								viewType === 'day'
+									? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-600'
+									: 'bg-transparent hover:bg-primary-50 hover:text-primary-700 active:bg-primary-100'
+							)}
+						>
+							<span className="whitespace-nowrap">День</span>
+						</ToggleGroupItem>
+						<ToggleGroupItem
+							value="week"
+							className={cn(
+								'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all border-0 h-8 min-w-[3rem] sm:min-w-[4rem]',
+								viewType === 'week'
+									? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-600'
+									: 'bg-transparent hover:bg-primary-50 hover:text-primary-700 active:bg-primary-100'
+							)}
+						>
+							<span className="whitespace-nowrap">Неделя</span>
+						</ToggleGroupItem>
+					</ToggleGroup>
 				</div>
 
 				{/* Right Zone - Date Navigation */}

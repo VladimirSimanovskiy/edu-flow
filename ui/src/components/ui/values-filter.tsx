@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SearchInput } from './search-input';
+import { TextInput } from './input';
+import { Search } from 'lucide-react';
 import { CheckboxList } from './checkbox-list';
 import { cn } from '../../utils/cn';
 import type { ValuesFilterOptions, CheckboxListState, ItemValue } from '../../types/valuesFilter';
@@ -221,11 +222,12 @@ export const ValuesFilter = <T extends ItemValue>({ options, className }: Values
 	return (
 		<div className={cn('w-full space-y-3', className)}>
 			{/* Search Input */}
-			<SearchInput
+			<TextInput
 				value={state.searchQuery}
-				onChange={handleSearch}
+				onChange={value => handleSearch(value || '')}
 				placeholder={options.searchPlaceholder || 'Поиск...'}
-				debounceMs={300}
+				startIcon={<Search className="h-4 w-4" />}
+				showClearIcon
 			/>
 
 			{/* Checkbox List */}

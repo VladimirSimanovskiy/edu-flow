@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { ErrorMessage } from './error-message';
-import { Card, CardContent, CardHeader, CardTitle } from './card';
+import { Card, CardFooter, CardTitle } from './card';
 
 interface Props {
 	children: ReactNode;
@@ -44,10 +44,8 @@ export class ErrorBoundary extends Component<Props, State> {
 			return (
 				<div className="p-6">
 					<Card>
-						<CardHeader>
-							<CardTitle className="text-error-600">Что-то пошло не так</CardTitle>
-						</CardHeader>
-						<CardContent>
+						<CardTitle className="text-error-600">Что-то пошло не так</CardTitle>
+						<CardFooter>
 							<ErrorMessage
 								error={
 									this.state.error?.message || 'Произошла непредвиденная ошибка'
@@ -66,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
 									</pre>
 								</details>
 							)}
-						</CardContent>
+						</CardFooter>
 					</Card>
 				</div>
 			);

@@ -1,12 +1,10 @@
-import React, { type PropsWithChildren } from "react";
+import React from "react";
+import type { PropsWithChildren } from "react";
 import { tv } from "tailwind-variants";
-import { ButtonBase } from "../button-base/ButtonBase";
-import type { ButtonBaseProps } from "../button-base/ButtonBase";
+import { ButtonBase, type ButtonBaseProps, type ButtonBaseVariants } from "../button-base/ButtonBase";
 import type { VariantsConfig } from "../../../../lib/utils/variants";
 
-type ButtonVariants = {
-	size?: "xs" | "sm" | "md" | "lg" | "xl" | "icon";
-};
+type ButtonVariants = Pick<ButtonBaseVariants, "size">;
 
 const buttonStyles = tv({
 	slots: {
@@ -17,8 +15,8 @@ const buttonStyles = tv({
 		size: {
 			xs: { icon: "h-3 w-3" },
 			sm: { icon: "h-3.5 w-3.5" },
-			md: {},
-			lg: {},
+			md: { icon: "h-4 w-4" },
+			lg: { icon: "h-4 w-4" },
 			xl: { icon: "h-5 w-5", container: "gap-3" },
 			icon: { icon: "h-4 w-4" }
 		}

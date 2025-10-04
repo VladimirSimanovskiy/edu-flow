@@ -5,16 +5,16 @@ import type { Teacher } from '@/types/schedule';
 import type { Classroom } from '@shared/types';
 import {
 	Button,
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	FormField,
-	Select,
+	Modal,
+	ModalContent,
+	ModalHeader,
+	ModalTitle,
+	ModalFooter,
+	ModalBody,
 } from '@/components/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { DialogDescription } from '@/components/ui/dialog';
+import { ModalDescription } from '@/components/ui/modal';
+import SubstitutionForm from '@/components/schedule/features/substitution/SubstitutionForm';
 
 interface CreateSubstitutionModalProps {
 	open: boolean;
@@ -83,44 +83,33 @@ export const CreateSubstitutionModal: React.FC<CreateSubstitutionModalProps> = (
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={o => !o && onClose()}>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Создание замещения</DialogTitle>
-					<DialogDescription className="sr-only">
+		<Modal open={open} onOpenChange={o => !o && onClose()}>
+			<ModalContent>
+				<ModalHeader>
+					<ModalTitle>Создание замещения</ModalTitle>
+					<ModalDescription className="sr-only">
 						Форма создания замещения для выбранного урока
-					</DialogDescription>
-				</DialogHeader>
-				<div className="space-y-3">
-					<FormField label="Учитель">
-						<input
-							className="w-full border rounded px-2 py-1 text-sm bg-gray-50"
-							readOnly
-							value={substituteTeacher ? substituteTeacher.fullName : ''}
-						/>
-					</FormField>
-					<FormField label="Кабинет">
-						<Select
-							value={selectedClassroomValue}
-							onChange={v => setSelectedClassroomValue(String(v))}
-							options={classrooms.map(c => ({
-								value: String(c.id),
-								label: `каб. ${c.number}`,
-							}))}
-							placeholder="Выберите кабинет"
-						/>
-					</FormField>
-				</div>
-				<DialogFooter>
+					</ModalDescription>
+				</ModalHeader>
+				<ModalBody>
+					<SubstitutionForm
+						substituteTeacher={substituteTeacher}
+						classrooms={classrooms}
+						selectedClassroomValue={selectedClassroomValue}
+						onClassroomChange={setSelectedClassroomValue}
+						onSubmit={onSave}
+					/>
+				</ModalBody>
+				<ModalFooter>
 					<Button variant="secondary" onClick={onClose} disabled={saving}>
 						Отмена
 					</Button>
 					<Button onClick={onSave} disabled={saving || !selectedClassroomValue}>
 						Сохранить
 					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+				</ModalFooter>
+			</ModalContent>
+		</Modal>
 	);
 };
 

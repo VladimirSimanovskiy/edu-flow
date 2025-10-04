@@ -8,7 +8,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '../ui/dropdown';
 import type { Teacher, Classroom, Subject } from '../../types/reference';
 
 interface ReferenceTableProps<T extends Teacher | Classroom | Subject> {
@@ -139,9 +139,7 @@ export const teacherColumns: ColumnConfig<Teacher>[] = [
 		key: 'isActive',
 		label: 'Статус',
 		render: (value: boolean) => (
-			<Badge variant={value ? 'default' : 'secondary'}>
-				{value ? 'Активен' : 'Неактивен'}
-			</Badge>
+			<Badge status={value ? 'success' : 'error'}>{value ? 'Активен' : 'Неактивен'}</Badge>
 		),
 	},
 ];

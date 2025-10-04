@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/button';
-import { Select } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import type { ReferencePagination } from '../../types/reference';
 
@@ -55,16 +55,17 @@ export const ReferencePagination: React.FC<ReferencePaginationProps> = ({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-700">На странице:</span>
-          <Select
-            value={limit}
-            onChange={handleLimitChange}
-            options={[
-              { value: 10, label: '10' },
-              { value: 25, label: '25' },
-              { value: 50, label: '50' },
-              { value: 100, label: '100' }
-            ]}
-          />
+          <Select value={String(limit)} onValueChange={(value) => handleLimitChange(Number(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     );
@@ -127,16 +128,17 @@ export const ReferencePagination: React.FC<ReferencePaginationProps> = ({
         
         <div className="flex items-center gap-2 ml-4">
           <span className="text-sm text-gray-700">На странице:</span>
-          <Select
-            value={limit}
-            onChange={handleLimitChange}
-            options={[
-              { value: 10, label: '10' },
-              { value: 25, label: '25' },
-              { value: 50, label: '50' },
-              { value: 100, label: '100' }
-            ]}
-          />
+          <Select value={String(limit)} onValueChange={(value) => handleLimitChange(Number(value))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="25">25</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+              <SelectItem value="100">100</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

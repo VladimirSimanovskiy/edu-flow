@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardFooter } from '@/components/ui/card';
 import { ScheduleToolbar } from '../ui/shell';
 import type { ScheduleType } from '@/types/scheduleConfig';
 
@@ -31,7 +31,7 @@ export const ScheduleControls: React.FC<ScheduleControlsProps> = ({
 }) => {
 	return (
 		<Card className="border shadow-none">
-			<CardContent className="p-4">
+			<CardFooter className="p-4">
 				<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
 					<ScheduleToolbar
 						value={value}
@@ -46,7 +46,7 @@ export const ScheduleControls: React.FC<ScheduleControlsProps> = ({
 						locale={locale}
 					/>
 				</div>
-			</CardContent>
+			</CardFooter>
 		</Card>
 	);
 };

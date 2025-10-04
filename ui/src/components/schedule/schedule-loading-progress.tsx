@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingProgressBar } from '@/components/ui/loading-progress-bar';
+import { Progress } from '@/components/ui/progress';
 import type { LoadingProgressState } from '@/types/loadingProgress';
 import { cn } from '@/utils/cn';
 
@@ -20,21 +20,32 @@ export const ScheduleLoadingProgress: React.FC<ScheduleLoadingProgressProps> = (
 	className,
 	showMessage = true,
 }) => {
-	return (
-		<div className="h-1">
-			{' '}
-			{/* Зарезервированное место под прогресс-бар - 4px */}
-			{state.isLoading && (
-				<LoadingProgressBar
-					state={state}
-					position={position}
-					size="md"
-					variant="default"
-					showMessage={showMessage}
-					animated={false} // Убираем pulse анимацию
-					className={cn(position === 'overlay' && 'shadow-lg', className)}
-				/>
-			)}
-		</div>
+	if (!state.isLoading && state.progress === 0) {
+		return null;
+	}
+
+	const progressBar = (
+		<Progress
+			value={state.isLoading ? state.progress : 0}
+			size="sm"
+			indeterminate={state.isLoading && state.progress === 0}
+			className={cn(position === 'overlay' && 'shadow-lg', className)}
+		/>
 	);
+
+	if (position === 'overlay') {
+		return (
+			<div
+				className={cn(
+					'absolute top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm',
+					'transition-all duration-300 ease-in-out',
+					state.isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+				)}
+			>
+				<div className="p-2">{progressBar}</div>
+			</div>
+		);
+	}
+
+	return <div className="h-1">{progressBar}</div>;
 };

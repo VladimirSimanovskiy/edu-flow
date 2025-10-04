@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button/button/Button';
+import { Button } from '@/components/ui/button';
 import { ValuesFilter } from '@/components/ui/values-filter';
 import { Filter } from 'lucide-react';
 import { cn } from '../../../utils/cn';

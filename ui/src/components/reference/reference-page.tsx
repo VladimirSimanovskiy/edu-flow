@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Card, CardFooter, CardSubTitle, CardTitle } from '../ui/card';
+import {
+	Modal,
+	ModalContent,
+	ModalBody,
+	ModalTrigger,
+	ModalHeaderTemplate,
+	ModalFooterTemplate,
+} from '../ui/modal';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -205,9 +212,32 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 					<h1 className="text-3xl font-bold text-gray-900">{title}</h1>
 					<p className="text-gray-600 mt-1">{description}</p>
 				</div>
-				<Button onClick={() => setIsCreateDialogOpen(true)} startIcon={Plus}>
-					Добавить
-				</Button>
+				<Modal open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+					<ModalTrigger asChild>
+						<Button startIcon={Plus}>Добавить</Button>
+					</ModalTrigger>
+					<ModalContent className="max-w-4xl">
+						<ModalHeaderTemplate
+							title={`Добавить ${title.toLowerCase().slice(0, -1)}`}
+							description={`Заполните форму для добавления нового ${title.toLowerCase().slice(0, -1)} в систему`}
+							icon={Plus}
+						/>
+						<ModalBody>{renderForm(false)}</ModalBody>
+						<ModalFooterTemplate
+							primaryButton={isCreating ? 'Создание...' : 'Создать'}
+							secondaryButton="Отмена"
+							primaryButtonProps={{
+								onClick: () => {
+									// Обработка будет в форме
+								},
+								disabled: isCreating,
+							}}
+							secondaryButtonProps={{
+								onClick: handleCancel,
+							}}
+						/>
+					</ModalContent>
+				</Modal>
 			</div>
 
 			{/* Фильтры */}
@@ -221,11 +251,9 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 
 			{/* Таблица */}
 			<Card>
-				<CardHeader>
-					<CardTitle>Список {title.toLowerCase()}</CardTitle>
-					<CardDescription>Управление {title.toLowerCase()} в системе</CardDescription>
-				</CardHeader>
-				<CardContent>
+				<CardTitle>Список {title.toLowerCase()}</CardTitle>
+				<CardSubTitle>Управление {title.toLowerCase()} в системе</CardSubTitle>
+				<CardFooter>
 					<ReferenceTable
 						data={Array.isArray(listData?.data) ? listData.data : []}
 						isLoading={isLoadingList}
@@ -234,7 +262,7 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 						columns={columns}
 						entityType={entityType}
 					/>
-				</CardContent>
+				</CardFooter>
 			</Card>
 
 			{/* Пагинация */}
@@ -246,25 +274,30 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 				/>
 			)}
 
-			{/* Диалог создания */}
-			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<DialogContent className="max-w-4xl">
-					<DialogHeader>
-						<DialogTitle>Добавить {title.toLowerCase().slice(0, -1)}</DialogTitle>
-					</DialogHeader>
-					{renderForm(false)}
-				</DialogContent>
-			</Dialog>
-
 			{/* Диалог редактирования */}
-			<Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-				<DialogContent className="max-w-4xl">
-					<DialogHeader>
-						<DialogTitle>Редактировать {title.toLowerCase().slice(0, -1)}</DialogTitle>
-					</DialogHeader>
-					{renderForm(true)}
-				</DialogContent>
-			</Dialog>
+			<Modal open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+				<ModalContent className="max-w-4xl">
+					<ModalHeaderTemplate
+						title={`Редактировать ${title.toLowerCase().slice(0, -1)}`}
+						description={`Внесите изменения в данные ${title.toLowerCase().slice(0, -1)}`}
+						icon={Plus}
+					/>
+					<ModalBody>{renderForm(true)}</ModalBody>
+					<ModalFooterTemplate
+						primaryButton={isUpdating ? 'Обновление...' : 'Обновить'}
+						secondaryButton="Отмена"
+						primaryButtonProps={{
+							onClick: () => {
+								// Обработка будет в форме
+							},
+							disabled: isUpdating,
+						}}
+						secondaryButtonProps={{
+							onClick: handleCancel,
+						}}
+					/>
+				</ModalContent>
+			</Modal>
 
 			{/* Диалог удаления */}
 			<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

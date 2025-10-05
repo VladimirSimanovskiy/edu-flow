@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
@@ -10,32 +10,69 @@ import {
 	DropdownMenuTrigger,
 } from '../ui/dropdown';
 import type { Teacher, Classroom, Subject } from '../../types/reference';
+import type { ReferenceEntity } from '@/types/reference-system';
+import { DataTable } from '@/components/ui/data-table';
 
-interface ReferenceTableProps<T extends Teacher | Classroom | Subject> {
+interface ReferenceTableProps<T extends ReferenceEntity> {
 	data: T[];
 	isLoading?: boolean;
 	onEdit: (item: T) => void;
 	onDelete: (id: number) => void;
 	onView?: (item: T) => void;
-	columns: ColumnConfig<T>[];
-	entityType: 'teachers' | 'classrooms' | 'subjects';
+	columns: ColumnDef<T, any>[];
+	entityType?: string;
 }
 
-interface ColumnConfig<T> {
-	key: keyof T;
-	label: string;
-	render?: (value: any, item: T) => React.ReactNode;
-	sortable?: boolean;
-}
-
-export const ReferenceTable = <T extends Teacher | Classroom | Subject>({
+export const ReferenceTable = <T extends ReferenceEntity>({
 	data,
 	isLoading,
 	onEdit,
 	onDelete,
 	onView,
-	columns,
+	columns: inputColumns,
 }: ReferenceTableProps<T>) => {
+	const actionColumn: ColumnDef<T> = {
+		id: 'actions',
+		header: '',
+		enableSorting: false,
+		enableHiding: false,
+		cell: ({ row }) => {
+			const item = row.original as T;
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button variant="ghost" size="sm">
+							<MoreHorizontal className="h-4 w-4" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						{onView && (
+							<DropdownMenuItem onClick={() => onView(item)}>
+								<Eye className="mr-2 h-4 w-4" />
+								Просмотр
+							</DropdownMenuItem>
+						)}
+						<DropdownMenuItem onClick={() => onEdit(item)}>
+							<Edit className="mr-2 h-4 w-4" />
+							Редактировать
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => onDelete(item.id)}
+							className="text-red-600 focus:text-red-600"
+						>
+							<Trash2 className="mr-2 h-4 w-4" />
+							Удалить
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
+		},
+	};
+
+	const columns = React.useMemo<ColumnDef<T, any>[]>(() => {
+		return [...inputColumns, actionColumn];
+	}, [inputColumns]);
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center h-32">
@@ -44,132 +81,70 @@ export const ReferenceTable = <T extends Teacher | Classroom | Subject>({
 		);
 	}
 
-	if (!data || !Array.isArray(data) || data.length === 0) {
-		return (
-			<div className="text-center py-8 text-gray-500">
-				<p>Нет данных для отображения</p>
-			</div>
-		);
-	}
-
 	return (
-		<div className="border rounded-lg overflow-hidden">
-			<Table>
-				<TableHeader>
-					<TableRow>
-						{columns.map(column => (
-							<TableHead key={String(column.key)} className="font-medium">
-								{column.label}
-							</TableHead>
-						))}
-						<TableHead className="w-12"></TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{data.map(item => (
-						<TableRow key={item.id} className="hover:bg-gray-50">
-							{columns.map(column => (
-								<TableCell key={String(column.key)}>
-									{column.render
-										? column.render(item[column.key], item)
-										: String(item[column.key] || '')}
-								</TableCell>
-							))}
-							<TableCell>
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<Button variant="ghost" size="sm">
-											<MoreHorizontal className="h-4 w-4" />
-										</Button>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end">
-										{onView && (
-											<DropdownMenuItem onClick={() => onView(item)}>
-												<Eye className="mr-2 h-4 w-4" />
-												Просмотр
-											</DropdownMenuItem>
-										)}
-										<DropdownMenuItem onClick={() => onEdit(item)}>
-											<Edit className="mr-2 h-4 w-4" />
-											Редактировать
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											onClick={() => onDelete(item.id)}
-											className="text-red-600 focus:text-red-600"
-										>
-											<Trash2 className="mr-2 h-4 w-4" />
-											Удалить
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</TableCell>
-						</TableRow>
-					))}
-				</TableBody>
-			</Table>
-		</div>
+		<DataTable<T, any>
+			columns={columns}
+			enableRowSelection={true}
+			data={Array.isArray(data) ? data : []}
+		/>
 	);
 };
 
 // Предустановленные конфигурации колонок для каждого типа справочника
-export const teacherColumns: ColumnConfig<Teacher>[] = [
+export const teacherColumns: ColumnDef<Teacher, any>[] = [
 	{
-		key: 'lastName',
-		label: 'Фамилия',
-		sortable: true,
+		accessorKey: 'lastName',
+		header: 'Фамилия',
 	},
 	{
-		key: 'firstName',
-		label: 'Имя',
-		sortable: true,
+		accessorKey: 'firstName',
+		header: 'Имя',
 	},
 	{
-		key: 'middleName',
-		label: 'Отчество',
+		accessorKey: 'middleName',
+		header: 'Отчество',
 	},
 	{
-		key: 'email',
-		label: 'Email',
+		accessorKey: 'email',
+		header: 'Email',
 	},
 	{
-		key: 'phone',
-		label: 'Телефон',
+		accessorKey: 'phone',
+		header: 'Телефон',
 	},
 	{
-		key: 'isActive',
-		label: 'Статус',
-		render: (value: boolean) => (
-			<Badge status={value ? 'success' : 'error'}>{value ? 'Активен' : 'Неактивен'}</Badge>
+		accessorKey: 'isActive',
+		header: 'Статус',
+		cell: ({ row }) => (
+			<Badge status={row.original.isActive ? 'success' : 'error'}>
+				{row.original.isActive ? 'Активен' : 'Неактивен'}
+			</Badge>
 		),
 	},
 ];
 
-export const classroomColumns: ColumnConfig<Classroom>[] = [
+export const classroomColumns: ColumnDef<Classroom, any>[] = [
 	{
-		key: 'number',
-		label: 'Номер',
-		sortable: true,
+		accessorKey: 'number',
+		header: 'Номер',
 	},
 	{
-		key: 'floor',
-		label: 'Этаж',
-		sortable: true,
+		accessorKey: 'floor',
+		header: 'Этаж',
 	},
 ];
 
-export const subjectColumns: ColumnConfig<Subject>[] = [
+export const subjectColumns: ColumnDef<Subject, any>[] = [
 	{
-		key: 'name',
-		label: 'Название',
-		sortable: true,
+		accessorKey: 'name',
+		header: 'Название',
 	},
 	{
-		key: 'code',
-		label: 'Код',
-		sortable: true,
+		accessorKey: 'code',
+		header: 'Код',
 	},
 	{
-		key: 'description',
-		label: 'Описание',
+		accessorKey: 'description',
+		header: 'Описание',
 	},
 ];

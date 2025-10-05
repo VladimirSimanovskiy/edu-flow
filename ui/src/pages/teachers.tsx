@@ -1,5 +1,5 @@
 import React from 'react';
-import { ReferencePage } from '../components/reference/ReferencePage';
+import { ReferencePage } from '../components/reference/reference-page';
 import { ReferenceConfigFactory } from '../services/reference-config-factory';
 import { TeacherForm } from '../components/reference/forms/TeacherForm';
 

@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { Button } from '../ui/button';
-import { Card, CardFooter, CardSubTitle, CardTitle } from '../ui/card';
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardFooter, CardSubTitle, CardTitle } from '@/components/ui/card';
 import {
 	Modal,
 	ModalContent,
+	ModalHeader,
+	ModalTitle,
 	ModalBody,
 	ModalTrigger,
-	ModalHeaderTemplate,
-	ModalFooterTemplate,
-} from '../ui/modal';
+	ModalDescription,
+} from '@/components/ui/modal';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,98 +20,49 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from '../ui/alert-dialog';
-import { Plus, AlertCircle } from 'lucide-react';
-import { useReferenceCrud } from '../../hooks/useReferenceCrud';
-import {
-	ReferenceTable,
-	teacherColumns,
-	classroomColumns,
-	subjectColumns,
-} from './reference-table';
-import { ReferenceFilters } from './reference-filters';
+} from '@/components/ui/alert-dialog';
+import { AlertCircle } from 'lucide-react';
+import { useReferenceCrud } from '@/hooks/useReferenceCrud';
+import { ReferenceTable } from './reference-table';
 import { ReferencePagination } from './reference-pagination';
-import { TeacherForm } from './teacher-form';
-import { ClassroomForm } from './classroom-form';
-import { SubjectForm } from './subject-form';
-import type {
-	Teacher,
-	Classroom,
-	Subject,
-	TeacherFormData,
-	ClassroomFormData,
-	SubjectFormData,
-} from '../../types/reference';
+import type { ReferencePageProps, ReferenceEntity } from '@/types/reference-system';
 
-interface ReferencePageProps {
-	entityType: 'teachers' | 'classrooms' | 'subjects';
-	title: string;
-	description: string;
-}
-
-export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title, description }) => {
+/**
+ * Универсальная страница справочника
+ * Следует принципу Open/Closed - легко расширяется новыми типами сущностей
+ * Следует принципу Single Responsibility - отвечает только за отображение справочника
+ */
+export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePageProps<T>) => {
+	// Состояние модальных окон
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-	const [selectedItem, setSelectedItem] = useState<Teacher | Classroom | Subject | null>(null);
-	const [itemToDelete, setItemToDelete] = useState<Teacher | Classroom | Subject | null>(null);
+	const [selectedItem, setSelectedItem] = useState<T | null>(null);
+	const [itemToDelete, setItemToDelete] = useState<T | null>(null);
 
+	// Хук для работы с данными
 	const {
-		listData,
+		data,
+		pagination,
+		isLoading,
 		filters,
-		isLoadingList,
-		isCreating,
-		isUpdating,
-		createError,
-		updateError,
-		deleteError,
 		updateFilters,
 		resetFilters,
 		create,
 		update,
-		delete: deleteItem,
-	} = useReferenceCrud(entityType);
-
-	// Получаем конфигурацию для текущего типа сущности
-	const getEntityConfig = () => {
-		switch (entityType) {
-			case 'teachers':
-				return {
-					columns: teacherColumns,
-					sortOptions: [
-						{ value: 'lastName', label: 'По фамилии' },
-						{ value: 'firstName', label: 'По имени' },
-						{ value: 'email', label: 'По email' },
-						{ value: 'createdAt', label: 'По дате создания' },
-					],
-				};
-			case 'classrooms':
-				return {
-					columns: classroomColumns,
-					sortOptions: [
-						{ value: 'number', label: 'По номеру' },
-						{ value: 'floor', label: 'По этажу' },
-						{ value: 'createdAt', label: 'По дате создания' },
-					],
-				};
-			case 'subjects':
-				return {
-					columns: subjectColumns,
-					sortOptions: [
-						{ value: 'name', label: 'По названию' },
-						{ value: 'code', label: 'По коду' },
-						{ value: 'createdAt', label: 'По дате создания' },
-					],
-				};
-			default:
-				return { columns: [], sortOptions: [] };
-		}
-	};
-
-	const { columns, sortOptions } = getEntityConfig();
+		delete: deleteRecord,
+		isCreating,
+		isUpdating,
+		isDeleting,
+		createError,
+		updateError,
+		deleteError,
+	} = useReferenceCrud<T>({
+		apiService: config.apiService,
+	});
 
 	// Обработчики для CRUD операций
-	const handleCreate = (data: TeacherFormData | ClassroomFormData | SubjectFormData) => {
+	const handleCreate = (data: Omit<T, 'id'>) => {
 		create(data, {
 			onSuccess: () => {
 				setIsCreateDialogOpen(false);
@@ -117,33 +70,30 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 		});
 	};
 
-	const handleEdit = (item: Teacher | Classroom | Subject) => {
+	const handleEdit = (item: T) => {
 		setSelectedItem(item);
 		setIsEditDialogOpen(true);
 	};
 
-	const handleUpdate = (data: TeacherFormData | ClassroomFormData | SubjectFormData) => {
+	const handleUpdate = (data: Partial<T>) => {
 		if (selectedItem) {
-			update(
-				{ id: selectedItem.id, data },
-				{
-					onSuccess: () => {
-						setIsEditDialogOpen(false);
-						setSelectedItem(null);
-					},
-				}
-			);
+			update(selectedItem.id, data, {
+				onSuccess: () => {
+					setIsEditDialogOpen(false);
+					setSelectedItem(null);
+				},
+			});
 		}
 	};
 
-	const handleDeleteClick = (item: Teacher | Classroom | Subject) => {
+	const handleDeleteClick = (item: T) => {
 		setItemToDelete(item);
 		setIsDeleteDialogOpen(true);
 	};
 
 	const handleDeleteConfirm = () => {
 		if (itemToDelete) {
-			deleteItem(itemToDelete.id, {
+			deleteRecord(itemToDelete.id, {
 				onSuccess: () => {
 					setIsDeleteDialogOpen(false);
 					setItemToDelete(null);
@@ -170,37 +120,27 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 
 	// Рендер формы в зависимости от типа сущности
 	const renderForm = (isEdit: boolean) => {
+		const FormComponent = config.formComponent;
+		const onSubmit = (payload: Omit<T, 'id'>) => {
+			if (isEdit) {
+				// cast to Partial<T> is safe here because edit form may submit partial fields
+				handleUpdate(payload as Partial<T>);
+			} else {
+				handleCreate(payload);
+			}
+		};
 		const commonProps = {
-			onSubmit: isEdit ? handleUpdate : handleCreate,
+			onSubmit,
 			onCancel: handleCancel,
 			isLoading: isEdit ? isUpdating : isCreating,
 		};
 
-		switch (entityType) {
-			case 'teachers':
-				return (
-					<TeacherForm
-						{...commonProps}
-						teacher={isEdit ? (selectedItem as Teacher) : undefined}
-					/>
-				);
-			case 'classrooms':
-				return (
-					<ClassroomForm
-						{...commonProps}
-						classroom={isEdit ? (selectedItem as Classroom) : undefined}
-					/>
-				);
-			case 'subjects':
-				return (
-					<SubjectForm
-						{...commonProps}
-						subject={isEdit ? (selectedItem as Subject) : undefined}
-					/>
-				);
-			default:
-				return null;
-		}
+		return (
+			<FormComponent
+				{...commonProps}
+				entity={isEdit && selectedItem ? selectedItem : undefined}
+			/>
+		);
 	};
 
 	return (
@@ -208,66 +148,51 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 			{/* Заголовок */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-					<p className="text-gray-600 mt-1">{description}</p>
+					<h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
+					<p className="text-gray-600 mt-1">{config.description}</p>
 				</div>
 				<Modal open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
 					<ModalTrigger asChild>
 						<Button startIcon={Plus}>Добавить</Button>
 					</ModalTrigger>
 					<ModalContent className="max-w-4xl">
-						<ModalHeaderTemplate
-							title={`Добавить ${title.toLowerCase().slice(0, -1)}`}
-							description={`Заполните форму для добавления нового ${title.toLowerCase().slice(0, -1)} в систему`}
-							icon={Plus}
-						/>
+						<ModalHeader>
+							<ModalTitle>
+								Добавить {config.title.toLowerCase().slice(0, -1)}
+							</ModalTitle>
+							<ModalDescription>
+								Заполните форму для добавления нового{' '}
+								{config.title.toLowerCase().slice(0, -1)} в систему
+							</ModalDescription>
+						</ModalHeader>
 						<ModalBody>{renderForm(false)}</ModalBody>
-						<ModalFooterTemplate
-							primaryButton={isCreating ? 'Создание...' : 'Создать'}
-							secondaryButton="Отмена"
-							primaryButtonProps={{
-								onClick: () => {
-									// Обработка будет в форме
-								},
-								disabled: isCreating,
-							}}
-							secondaryButtonProps={{
-								onClick: handleCancel,
-							}}
-						/>
 					</ModalContent>
 				</Modal>
 			</div>
 
-			{/* Фильтры */}
-			<ReferenceFilters
-				filters={filters}
-				onFiltersChange={updateFilters}
-				onReset={resetFilters}
-				sortOptions={sortOptions}
-				entityType={entityType}
-			/>
-
 			{/* Таблица */}
 			<Card>
-				<CardTitle>Список {title.toLowerCase()}</CardTitle>
-				<CardSubTitle>Управление {title.toLowerCase()} в системе</CardSubTitle>
+				<CardTitle>Список {config.title.toLowerCase()}</CardTitle>
+				<CardSubTitle>Управление {config.title.toLowerCase()} в системе</CardSubTitle>
 				<CardFooter>
 					<ReferenceTable
-						data={Array.isArray(listData?.data) ? listData.data : []}
-						isLoading={isLoadingList}
+						data={data}
+						columns={config.columns}
+						isLoading={isLoading}
 						onEdit={handleEdit}
-						onDelete={handleDeleteClick}
-						columns={columns}
-						entityType={entityType}
+						onDelete={(id: number) => {
+							const item = data.find(x => x.id === id);
+							if (item) handleDeleteClick(item);
+						}}
+						entityType={config.entityType as any}
 					/>
 				</CardFooter>
 			</Card>
 
 			{/* Пагинация */}
-			{listData?.pagination && (
+			{pagination && (
 				<ReferencePagination
-					pagination={listData.pagination}
+					pagination={pagination}
 					onPageChange={handlePageChange}
 					onLimitChange={handleLimitChange}
 				/>
@@ -276,25 +201,15 @@ export const ReferencePage: React.FC<ReferencePageProps> = ({ entityType, title,
 			{/* Диалог редактирования */}
 			<Modal open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
 				<ModalContent className="max-w-4xl">
-					<ModalHeaderTemplate
-						title={`Редактировать ${title.toLowerCase().slice(0, -1)}`}
-						description={`Внесите изменения в данные ${title.toLowerCase().slice(0, -1)}`}
-						icon={Plus}
-					/>
+					<ModalHeader>
+						<ModalTitle>
+							Редактировать {config.title.toLowerCase().slice(0, -1)}
+						</ModalTitle>
+						<ModalDescription>
+							Внесите изменения в данные {config.title.toLowerCase().slice(0, -1)}
+						</ModalDescription>
+					</ModalHeader>
 					<ModalBody>{renderForm(true)}</ModalBody>
-					<ModalFooterTemplate
-						primaryButton={isUpdating ? 'Обновление...' : 'Обновить'}
-						secondaryButton="Отмена"
-						primaryButtonProps={{
-							onClick: () => {
-								// Обработка будет в форме
-							},
-							disabled: isUpdating,
-						}}
-						secondaryButtonProps={{
-							onClick: handleCancel,
-						}}
-					/>
 				</ModalContent>
 			</Modal>
 

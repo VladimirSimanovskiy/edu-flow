@@ -50,7 +50,7 @@ export const DateNavigation: React.FC<DateNavigationProps> = ({
 	};
 
 	return (
-		<div className={cn('flex items-center gap-2', className)}>
+		<div className={cn('flex items-center gap-2 w-full', className)}>
 			{/* Previous button */}
 			<Button
 				variant="outline"

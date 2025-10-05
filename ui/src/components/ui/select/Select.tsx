@@ -3,12 +3,25 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 import type { VariantsConfig } from '../../../lib/utils/variants';
+import { cn } from '@/lib/utils';
 
 const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
 
-const SelectValue = SelectPrimitive.Value;
+const SelectValue = React.forwardRef<
+	React.ElementRef<typeof SelectPrimitive.Value>,
+	React.ComponentPropsWithoutRef<typeof SelectPrimitive.Value>
+>(({ className, ...props }, ref) => {
+	return (
+		<SelectPrimitive.Value
+			ref={ref}
+			className={cn('flex items-center gap-1', className)}
+			{...props}
+		/>
+	);
+});
+SelectValue.displayName = SelectPrimitive.Value.displayName;
 
 export interface SelectTriggerVariants {
 	invalid?: boolean;
@@ -201,7 +214,7 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const selectItemStyles = tv({
 	base: [
-		'relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 px-2 text-sm outline-none',
+		'relative flex w-full cursor-default select-none items-center gap-1 rounded-sm py-1.5 px-2 text-sm outline-none',
 		'bg-secondary-bg text-primary-fg',
 		'hover:bg-secondary-bg-hover focus:bg-secondary-bg-hover focus:outline-none',
 		'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',

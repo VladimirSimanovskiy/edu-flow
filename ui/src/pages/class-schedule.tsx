@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScheduleView } from '../components/schedule/schedule-view';
+import ScheduleView from '../components/schedule/ui/shell/schedule-view';
 
 export const ClassSchedule: React.FC = () => {
 	return (

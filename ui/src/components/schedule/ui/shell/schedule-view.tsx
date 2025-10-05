@@ -4,7 +4,7 @@ import { useScheduleStore } from '../../store';
 import { useScheduleConfig, renderScheduleComponent } from '../../schedule-component-factory';
 import { ScheduleDataProvider, useScheduleData } from '../../api';
 import { ScheduleLayout } from './schedule-layout';
-import { ScheduleControls } from '../../controls/schedule-controls';
+import { ScheduleToolbar } from './schedule-toolbar';
 import { ScheduleLoadingProgress } from '../../schedule-loading-progress';
 import { useScheduleLoadingProgress } from '../../hooks';
 import { ScheduleLoadingUtils } from '@/types/scheduleLoading';
@@ -43,7 +43,7 @@ const ScheduleViewContent: React.FC<{
 			error={ScheduleLoadingUtils.hasError(loadingState) ? loadingState.error : null}
 		>
 			{/* Controls */}
-			<ScheduleControls
+			<ScheduleToolbar
 				value={currentView.date}
 				onChange={handleDateChange}
 				viewType={currentView.type}

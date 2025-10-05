@@ -101,13 +101,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				<Button
 					variant="outline"
 					className={cn(
-						'justify-start text-left font-normal min-w-[100px] sm:min-w-[140px] px-2 sm:px-3 h-8',
+						// Mobile: grow to fill available width
+						'justify-start text-left font-normal w-full flex-1 px-2 h-8',
+						// Desktop: fixed width
+						'sm:w-[200px] sm:flex-none sm:px-3',
 						!value && 'text-muted-foreground'
 					)}
 					disabled={disabled}
 				>
 					<CalendarIcon className="mr-1 sm:mr-2 h-4 w-4 shrink-0" />
-					<span className="text-xs sm:text-sm whitespace-nowrap">{displayDate}</span>
+					<span className="text-xs sm:text-sm whitespace-nowrap tabular-nums leading-none">
+						{displayDate}
+					</span>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-auto p-0">

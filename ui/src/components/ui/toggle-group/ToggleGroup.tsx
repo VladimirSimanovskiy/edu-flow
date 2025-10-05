@@ -10,7 +10,7 @@ const ToggleGroupContext = React.createContext<ToggleVariants>({
 });
 
 const toggleGroupStyles = tv({
-	base: 'flex items-center justify-center gap-1',
+	base: 'flex items-center justify-center gap-1 w-full',
 });
 
 const ToggleGroup = React.forwardRef<
@@ -40,6 +40,8 @@ const ToggleGroupItem = React.forwardRef<
 					variant: context.variant || variant,
 					size: context.size || size,
 				}),
+				// Mobile: make items stretch equally; desktop: intrinsic width
+				'flex-1 w-full sm:flex-none sm:w-auto',
 				className
 			)}
 			{...props}

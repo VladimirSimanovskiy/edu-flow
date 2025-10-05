@@ -1,19 +1,34 @@
-import React from 'react';
+import { tv } from 'tailwind-variants';
 import type { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { forwardRef } from 'react';
+import type { VariantsConfig } from '@/lib/utils/variants';
 
-export interface IconProps {
-	icon: LucideIcon;
-	size?: 'sm' | 'md' | 'lg';
-	className?: string;
+export interface IconVariants {
+	size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const sizeClasses = {
-	sm: 'h-4 w-4',
-	md: 'h-5 w-5',
-	lg: 'h-6 w-6',
+const iconVariants = tv({
+	base: 'h-4 w-4',
+	variants: {
+		size: {
+			sm: 'h-3 w-3',
+			md: 'h-4 w-4',
+			lg: 'h-5 w-5',
+			xl: 'h-6 w-6',
+		},
+	} satisfies VariantsConfig<IconVariants>,
+	defaultVariants: {
+		size: 'md',
+	},
+});
+
+export type IconProps = IconVariants & {
+	icon: LucideIcon;
+	className?: string;
 };
 
-export const Icon: React.FC<IconProps> = ({ icon: IconComponent, size = 'md', className }) => {
-	return <IconComponent className={cn(sizeClasses[size], className)} />;
-};
+export const Icon = forwardRef<SVGSVGElement, IconProps>(({ icon: Icon, className, size }, ref) => {
+	return <Icon ref={ref} className={iconVariants({ size, className })} />;
+});
+
+Icon.displayName = 'Icon';

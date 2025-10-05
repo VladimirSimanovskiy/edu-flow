@@ -81,3 +81,4 @@ export {
 	DropdownMenuSubTrigger,
 	DropdownMenuRadioGroup,
 } from './dropdown';
+export { Toolbar, ToolbarButton, ToolbarSeparator, ToolbarText } from './toolbar';

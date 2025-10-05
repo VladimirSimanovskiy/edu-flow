@@ -1,17 +1,11 @@
 import React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '../ui/dropdown';
+import { Button } from '../ui/button';
 import type { Teacher, Classroom, Subject } from '../../types/reference';
 import type { ReferenceEntity } from '@/types/reference-system';
-import { DataTable } from '@/components/ui/data-table';
+import { DataTable } from '../ui/data-table';
+import { createEditColumn } from '../ui/data-table/components/EditColumn';
 
 interface ReferenceTableProps<T extends ReferenceEntity> {
 	data: T[];
@@ -31,47 +25,12 @@ export const ReferenceTable = <T extends ReferenceEntity>({
 	onView,
 	columns: inputColumns,
 }: ReferenceTableProps<T>) => {
-	const actionColumn: ColumnDef<T> = {
-		id: 'actions',
-		header: '',
-		enableSorting: false,
-		enableHiding: false,
-		cell: ({ row }) => {
-			const item = row.original as T;
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" size="sm">
-							<MoreHorizontal className="h-4 w-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						{onView && (
-							<DropdownMenuItem onClick={() => onView(item)}>
-								<Eye className="mr-2 h-4 w-4" />
-								Просмотр
-							</DropdownMenuItem>
-						)}
-						<DropdownMenuItem onClick={() => onEdit(item)}>
-							<Edit className="mr-2 h-4 w-4" />
-							Редактировать
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => onDelete(item.id)}
-							className="text-red-600 focus:text-red-600"
-						>
-							<Trash2 className="mr-2 h-4 w-4" />
-							Удалить
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		},
-	};
-
+	const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({});
+	const [selected, setSelected] = React.useState<T[]>([]);
 	const columns = React.useMemo<ColumnDef<T, any>[]>(() => {
-		return [...inputColumns, actionColumn];
-	}, [inputColumns]);
+		const leading = [createEditColumn<T>(onEdit)];
+		return [...leading, ...inputColumns];
+	}, [inputColumns, onEdit]);
 
 	if (isLoading) {
 		return (
@@ -82,11 +41,48 @@ export const ReferenceTable = <T extends ReferenceEntity>({
 	}
 
 	return (
-		<DataTable<T, any>
-			columns={columns}
-			enableRowSelection={true}
-			data={Array.isArray(data) ? data : []}
-		/>
+		<div className="space-y-3">
+			<div className="flex items-center justify-between">
+				<div className="font-medium">Справочник</div>
+				<div className="flex items-center gap-2">
+					{Object.keys(rowSelection).length > 0 ? (
+						<Button
+							variant="primary"
+							size="sm"
+							onClick={() => {
+								const ids = Object.keys(rowSelection)
+									.filter(k => rowSelection[k])
+									.map(Number);
+								ids.forEach(id => onDelete(id));
+								setRowSelection({});
+							}}
+						>
+							Удалить выбранные ({Object.keys(rowSelection).length})
+						</Button>
+					) : (
+						<Button
+							variant="primary"
+							size="sm"
+							onClick={() => onEdit(undefined as unknown as T)}
+						>
+							Добавить
+						</Button>
+					)}
+				</div>
+			</div>
+			<DataTable<T, any>
+				columns={columns}
+				enableRowSelection={true}
+				data={Array.isArray(data) ? data : []}
+				rowSelection={rowSelection}
+				onRowSelectionChange={updater => {
+					setRowSelection(prev =>
+						typeof updater === 'function' ? updater(prev) : updater
+					);
+				}}
+				getRowId={(row, index) => String((row as any).id ?? index)}
+			/>
+		</div>
 	);
 };
 

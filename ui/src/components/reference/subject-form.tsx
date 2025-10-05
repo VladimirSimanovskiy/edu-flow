@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormStack } from '../ui/form';
+import { Button } from '../ui/button';
 import { FormField } from '../ui/form/components/form-field/FormField';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
@@ -25,8 +26,10 @@ interface SubjectFormProps {
 }
 
 export const SubjectForm: React.FC<SubjectFormProps> = ({
-	subject,
-	onSubmit,
+    subject,
+    onSubmit,
+    onCancel,
+    isLoading,
 }) => {
 	const form = useForm<SubjectFormValues>({
 		resolver: zodResolver(subjectFormSchema),
@@ -80,7 +83,15 @@ export const SubjectForm: React.FC<SubjectFormProps> = ({
 						)}
 					/>
 				</FormStack>
-			</form>
+                <div className="mt-6 flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={onCancel}>
+                        Отмена
+                    </Button>
+                    <Button type="submit" variant="primary" disabled={isLoading}>
+                        Создать
+                    </Button>
+                </div>
+            </form>
 		</Form>
 	);
 };

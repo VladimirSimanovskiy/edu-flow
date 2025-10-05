@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormStack, FormSectionTitle, FormDivider } from '../ui/form';
+import { Button } from '../ui/button';
 import { FormField } from '../ui/form/components/form-field/FormField';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
@@ -28,8 +29,10 @@ interface TeacherFormProps {
 }
 
 export const TeacherForm: React.FC<TeacherFormProps> = ({
-	teacher,
-	onSubmit,
+    teacher,
+    onSubmit,
+    onCancel,
+    isLoading,
 }) => {
 	const form = useForm<TeacherFormValues>({
 		resolver: zodResolver(teacherFormSchema),
@@ -123,7 +126,15 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({
 						)}
 					/>
 				</FormStack>
-			</form>
+                <div className="mt-6 flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={onCancel}>
+                        Отмена
+                    </Button>
+                    <Button type="submit" variant="primary" disabled={isLoading}>
+                        Создать
+                    </Button>
+                </div>
+            </form>
 		</Form>
 	);
 };

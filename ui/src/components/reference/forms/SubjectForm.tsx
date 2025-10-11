@@ -2,24 +2,33 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { BaseReferenceForm } from './BaseReferenceForm';
+import { BookOpen, Hash, FileText } from 'lucide-react';
+import { Form } from '@/components/ui/form';
+import { FormField } from '@/components/ui/form/components/form-field/FormField';
+import { FormStack } from '@/components/ui/form/components/form-stack/FormStack';
+import { FormFooterTemplate } from '@/components/ui/form/templates/footer-template/FormFooterTemplate';
+import { FormDivider } from '@/components/ui/form/components/form-divider/FormDivider';
+import { FormSectionTitle } from '@/components/ui/form/components/form-section-title/FormSectionTitle';
+import { ModalBody, ModalHeaderTemplate } from '@/components/ui/modal';
+import { TextInput } from '@/components/ui/input';
 import type { ReferenceFormProps } from '@/types/reference-system';
 import type { Subject } from '@/types/reference';
 
 // Схема валидации
 const subjectFormSchema = z.object({
-	name: z.string().min(1, 'Название предмета обязательно'),
-	code: z.string().min(1, 'Код предмета обязателен'),
-	description: z.string().optional(),
+	name: z.string().trim(),
+	code: z
+		.string()
+		.trim()
+		.transform(val => val.toUpperCase()),
+	description: z.string().trim().optional().or(z.literal('')),
 });
 
 type SubjectFormValues = z.infer<typeof subjectFormSchema>;
 
 /**
  * Форма для работы с предметами
- * Использует Composition Pattern - наследует структуру от BaseReferenceForm
+ * Использует FormField для консистентного UI
  */
 export const SubjectForm: React.FC<ReferenceFormProps<Subject>> = ({
 	entity: subject,
@@ -27,11 +36,7 @@ export const SubjectForm: React.FC<ReferenceFormProps<Subject>> = ({
 	onCancel,
 	isLoading = false,
 }) => {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<SubjectFormValues>({
+	const form = useForm<SubjectFormValues>({
 		resolver: zodResolver(subjectFormSchema),
 		defaultValues: {
 			name: subject?.name || '',
@@ -41,72 +46,93 @@ export const SubjectForm: React.FC<ReferenceFormProps<Subject>> = ({
 	});
 
 	const handleFormSubmit = (data: SubjectFormValues) => {
-		onSubmit({
-			name: data.name,
-			code: data.code,
+		// Добавляем поля createdAt и updatedAt для совместимости с типом Subject
+		const subjectData = {
+			...data,
 			description: data.description || undefined,
-		});
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		};
+		onSubmit(subjectData as Omit<Subject, 'id'>);
 	};
 
 	return (
-		<BaseReferenceForm
-			entity={subject}
-			onSubmit={onSubmit}
-			onCancel={onCancel}
-			isLoading={isLoading}
-			title={subject ? 'Редактировать предмет' : 'Добавить предмет'}
-			description={
-				subject
-					? 'Внесите изменения в информацию о предмете'
-					: 'Заполните информацию о новом предмете'
-			}
-			submitButtonText={subject ? 'Обновить' : 'Создать'}
-		>
-			<div className="space-y-4">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Название предмета */}
-					<div className="space-y-2">
-						<Label htmlFor="name">Название предмета *</Label>
-						<Input
-							id="name"
-							{...register('name')}
-							placeholder="Введите название предмета"
-							className={errors.name ? 'border-red-500' : ''}
-						/>
-						{errors.name && (
-							<p className="text-sm text-red-500">{errors.name.message}</p>
-						)}
-					</div>
+		<Form {...form} asChild>
+			<form onSubmit={form.handleSubmit(handleFormSubmit)}>
+				<ModalHeaderTemplate
+					title={subject ? 'Редактировать предмет' : 'Добавить предмет'}
+					description={
+						subject
+							? 'Внесите изменения в информацию о предмете'
+							: 'Заполните информацию о новом предмете'
+					}
+				/>
 
-					{/* Код предмета */}
-					<div className="space-y-2">
-						<Label htmlFor="code">Код предмета *</Label>
-						<Input
-							id="code"
-							{...register('code')}
-							placeholder="Введите код предмета"
-							className={errors.code ? 'border-red-500' : ''}
-						/>
-						{errors.code && (
-							<p className="text-sm text-red-500">{errors.code.message}</p>
-						)}
-					</div>
-				</div>
+				<ModalBody className="flex-1 p-6 pt-0">
+					<FormStack>
+						<FormSectionTitle>Основная информация</FormSectionTitle>
 
-				{/* Описание */}
-				<div className="space-y-2">
-					<Label htmlFor="description">Описание</Label>
-					<Input
-						id="description"
-						{...register('description')}
-						placeholder="Введите описание предмета"
-						className={errors.description ? 'border-red-500' : ''}
-					/>
-					{errors.description && (
-						<p className="text-sm text-red-500">{errors.description.message}</p>
-					)}
-				</div>
-			</div>
-		</BaseReferenceForm>
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите название предмета"
+									startIcon={<BookOpen className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="name"
+							title="Название предмета"
+							description="Полное название учебного предмета"
+							required
+						/>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите код предмета"
+									startIcon={<Hash className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="code"
+							title="Код предмета"
+							description="Краткий код для идентификации предмета"
+							required
+						/>
+
+						<FormDivider />
+
+						<FormSectionTitle>Дополнительная информация</FormSectionTitle>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите описание предмета"
+									startIcon={<FileText className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="description"
+							title="Описание"
+							description="Дополнительное описание предмета (необязательно)"
+						/>
+					</FormStack>
+				</ModalBody>
+
+				<FormFooterTemplate
+					primaryButton={subject ? 'Сохранить изменения' : 'Добавить предмет'}
+					secondaryButton="Отмена"
+					primaryButtonProps={{
+						type: 'submit',
+						disabled: isLoading,
+					}}
+					secondaryButtonProps={{
+						type: 'button',
+						onClick: onCancel,
+					}}
+					className="!border-0 !px-6 !py-6 !pt-0"
+				/>
+			</form>
+		</Form>
 	);
 };

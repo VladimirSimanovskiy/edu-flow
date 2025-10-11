@@ -2,20 +2,31 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { BaseReferenceForm } from './BaseReferenceForm';
+import { User, Mail, Phone } from 'lucide-react';
+import { Form, FormFieldControl, FormItem, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField } from '@/components/ui/form/components/form-field/FormField';
+import { FormStack } from '@/components/ui/form/components/form-stack/FormStack';
+import { FormFooterTemplate } from '@/components/ui/form/templates/footer-template/FormFooterTemplate';
+import { FormDivider } from '@/components/ui/form/components/form-divider/FormDivider';
+import { FormSectionTitle } from '@/components/ui/form/components/form-section-title/FormSectionTitle';
+import { ModalBody, ModalHeaderTemplate } from '@/components/ui/modal';
+import { TextInput } from '@/components/ui/input';
+import { SwitchField } from '@/components/ui/switch';
 import type { ReferenceFormProps } from '@/types/reference-system';
 import type { Teacher } from '@/types/reference';
 
 // Схема валидации
 const teacherFormSchema = z.object({
-	firstName: z.string().min(1, 'Имя обязательно').max(50, 'Имя слишком длинное'),
-	lastName: z.string().min(1, 'Фамилия обязательна').max(50, 'Фамилия слишком длинная'),
-	middleName: z.string().max(50, 'Отчество слишком длинное').optional(),
-	email: z.string().email('Некорректный email').optional().or(z.literal('')),
-	phone: z.string().max(20, 'Телефон слишком длинный').optional().or(z.literal('')),
+	firstName: z.string().trim(),
+	lastName: z.string().trim(),
+	middleName: z.string().trim().optional().or(z.literal('')),
+	email: z.string().email('Некорректный email').trim().optional().or(z.literal('')),
+	phone: z
+		.string()
+		.regex(/^[\+]?[0-9\s\-\(\)]*$/, 'Некорректный формат номера телефона')
+		.trim()
+		.optional()
+		.or(z.literal('')),
 	isActive: z.boolean(),
 });
 
@@ -23,7 +34,7 @@ type TeacherFormValues = z.infer<typeof teacherFormSchema>;
 
 /**
  * Форма для работы с учителями
- * Использует Composition Pattern - наследует структуру от BaseReferenceForm
+ * Использует FormField для консистентного UI
  * Следует принципу Single Responsibility - отвечает только за поля учителя
  */
 export const TeacherForm: React.FC<ReferenceFormProps<Teacher>> = ({
@@ -32,13 +43,7 @@ export const TeacherForm: React.FC<ReferenceFormProps<Teacher>> = ({
 	onCancel,
 	isLoading = false,
 }) => {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		setValue,
-		watch,
-	} = useForm<TeacherFormValues>({
+	const form = useForm<TeacherFormValues>({
 		resolver: zodResolver(teacherFormSchema),
 		defaultValues: {
 			firstName: teacher?.firstName || '',
@@ -50,119 +55,147 @@ export const TeacherForm: React.FC<ReferenceFormProps<Teacher>> = ({
 		},
 	});
 
-	const isActive = watch('isActive');
-
 	const handleFormSubmit = (data: TeacherFormValues) => {
-		onSubmit({
+		// Добавляем поля createdAt и updatedAt для совместимости с типом Teacher
+		const teacherData = {
 			firstName: data.firstName,
 			lastName: data.lastName,
 			middleName: data.middleName || undefined,
 			email: data.email || undefined,
 			phone: data.phone || undefined,
 			isActive: data.isActive,
-		});
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		};
+		onSubmit(teacherData as Omit<Teacher, 'id'>);
 	};
 
 	return (
-		<BaseReferenceForm
-			entity={teacher}
-			onSubmit={onSubmit}
-			onCancel={onCancel}
-			isLoading={isLoading}
-			title={teacher ? 'Редактировать учителя' : 'Добавить учителя'}
-			description={
-				teacher
-					? 'Внесите изменения в информацию об учителе'
-					: 'Заполните информацию о новом учителе'
-			}
-			submitButtonText={teacher ? 'Обновить' : 'Создать'}
-		>
-			<div className="space-y-4">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Фамилия */}
-					<div className="space-y-2">
-						<Label htmlFor="lastName">Фамилия *</Label>
-						<Input
-							id="lastName"
-							{...register('lastName')}
-							placeholder="Введите фамилию"
-							className={errors.lastName ? 'border-red-500' : ''}
+		<Form {...form} asChild>
+			<form onSubmit={form.handleSubmit(handleFormSubmit)}>
+				<ModalHeaderTemplate
+					title={teacher ? 'Редактировать учителя' : 'Добавить учителя'}
+					description={
+						teacher
+							? 'Внесите изменения в информацию об учителе'
+							: 'Заполните информацию о новом учителе'
+					}
+				/>
+
+				<ModalBody className="flex-1 p-6 pt-0">
+					<FormStack>
+						<FormSectionTitle>Основная информация</FormSectionTitle>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите фамилию"
+									startIcon={<User className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="lastName"
+							title="Фамилия"
+							required
+							labelClassName="w-24"
 						/>
-						{errors.lastName && (
-							<p className="text-sm text-red-500">{errors.lastName.message}</p>
-						)}
-					</div>
 
-					{/* Имя */}
-					<div className="space-y-2">
-						<Label htmlFor="firstName">Имя *</Label>
-						<Input
-							id="firstName"
-							{...register('firstName')}
-							placeholder="Введите имя"
-							className={errors.firstName ? 'border-red-500' : ''}
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите имя"
+									startIcon={<User className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="firstName"
+							title="Имя"
+							required
+							labelClassName="w-24"
 						/>
-						{errors.firstName && (
-							<p className="text-sm text-red-500">{errors.firstName.message}</p>
-						)}
-					</div>
-				</div>
 
-				{/* Отчество */}
-				<div className="space-y-2">
-					<Label htmlFor="middleName">Отчество</Label>
-					<Input
-						id="middleName"
-						{...register('middleName')}
-						placeholder="Введите отчество"
-						className={errors.middleName ? 'border-red-500' : ''}
-					/>
-					{errors.middleName && (
-						<p className="text-sm text-red-500">{errors.middleName.message}</p>
-					)}
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Email */}
-					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
-						<Input
-							id="email"
-							type="email"
-							{...register('email')}
-							placeholder="Введите email"
-							className={errors.email ? 'border-red-500' : ''}
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									placeholder="Введите отчество"
+									startIcon={<User className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="middleName"
+							title="Отчество"
+							labelClassName="w-24"
 						/>
-						{errors.email && (
-							<p className="text-sm text-red-500">{errors.email.message}</p>
-						)}
-					</div>
 
-					{/* Телефон */}
-					<div className="space-y-2">
-						<Label htmlFor="phone">Телефон</Label>
-						<Input
-							id="phone"
-							{...register('phone')}
-							placeholder="Введите телефон"
-							className={errors.phone ? 'border-red-500' : ''}
+						<FormDivider />
+
+						<FormSectionTitle>Контактная информация</FormSectionTitle>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									type="email"
+									placeholder="Введите email"
+									startIcon={<Mail className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="email"
+							title="Email"
+							labelClassName="w-24"
 						/>
-						{errors.phone && (
-							<p className="text-sm text-red-500">{errors.phone.message}</p>
-						)}
-					</div>
-				</div>
 
-				{/* Активный учитель */}
-				<div className="flex items-center space-x-2">
-					<Switch
-						id="isActive"
-						checked={isActive}
-						onCheckedChange={checked => setValue('isActive', checked)}
-					/>
-					<Label htmlFor="isActive">Активный учитель</Label>
-				</div>
-			</div>
-		</BaseReferenceForm>
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									type="tel"
+									placeholder="Введите номер телефона"
+									startIcon={<Phone className="h-4 w-4" />}
+									{...field}
+								/>
+							)}
+							name="phone"
+							title="Телефон"
+							labelClassName="w-24"
+						/>
+
+						<FormDivider />
+
+						<FormSectionTitle>Настройки</FormSectionTitle>
+
+						<FormFieldControl
+							control={form.control}
+							name="isActive"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<SwitchField
+											id="isActive"
+											label="Активен"
+											checked={field.value}
+											onCheckedChange={field.onChange}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</FormStack>
+				</ModalBody>
+
+				<FormFooterTemplate
+					primaryButton={teacher ? 'Сохранить изменения' : 'Добавить учителя'}
+					secondaryButton="Отмена"
+					primaryButtonProps={{
+						type: 'submit',
+						disabled: isLoading,
+					}}
+					secondaryButtonProps={{
+						type: 'button',
+						onClick: onCancel,
+					}}
+				/>
+			</form>
+		</Form>
 	);
 };

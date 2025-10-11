@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import type { ReferenceConfig, ReferenceApiService } from '@/types/reference-system';
+import type {
+	ReferenceConfig,
+	ReferenceApiService,
+	ReferenceEntity,
+} from '@/types/reference-system';
 import type { Teacher, Classroom, Subject } from '@/types/reference';
 import {
 	teacherColumns,
@@ -8,100 +12,118 @@ import {
 } from '@/components/reference/reference-table';
 
 // Импортируем реальные API сервисы
-import { apiClient } from '@/lib/api';
+import { referenceService } from './reference.service';
 
 // API сервисы для учителей
 const teacherApiService: ReferenceApiService<Teacher> = {
 	getAll: async params => {
-		const response = await apiClient.getTeachers();
-		return { data: response || [], pagination: null };
+		const response = await referenceService.getTeachers(params);
+		return { data: response.data || [], pagination: response.pagination };
 	},
 	getById: async id => {
-		const response = await apiClient.getTeachers();
-		return response.find(t => t.id === id) || ({} as Teacher);
+		const response = await referenceService.getTeacher(id);
+		return response.data;
 	},
 	create: async data => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id: Date.now() } as Teacher;
+		const response = await referenceService.createTeacher(data);
+		return response.data;
 	},
 	update: async (id, data) => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id } as Teacher;
+		const response = await referenceService.updateTeacher(id, data);
+		return response.data;
 	},
 	delete: async id => {
-		// Заглушка - в реальном проекте будет API метод
+		await referenceService.deleteTeacher(id);
 	},
 };
 
 // API сервисы для кабинетов
 const classroomApiService: ReferenceApiService<Classroom> = {
 	getAll: async params => {
-		const response = await apiClient.getClassrooms();
-		return { data: response || [], pagination: null };
+		const response = await referenceService.getClassrooms(params);
+		return { data: response.data || [], pagination: response.pagination };
 	},
 	getById: async id => {
-		const response = await apiClient.getClassrooms();
-		return response.find(c => c.id === id) || ({} as Classroom);
+		const response = await referenceService.getClassroom(id);
+		return response.data;
 	},
 	create: async data => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id: Date.now() } as Classroom;
+		const response = await referenceService.createClassroom(data);
+		return response.data;
 	},
 	update: async (id, data) => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id } as Classroom;
+		const response = await referenceService.updateClassroom(id, data);
+		return response.data;
 	},
 	delete: async id => {
-		// Заглушка - в реальном проекте будет API метод
+		await referenceService.deleteClassroom(id);
 	},
 };
 
 // API сервисы для предметов
 const subjectApiService: ReferenceApiService<Subject> = {
 	getAll: async params => {
-		const response = await apiClient.getSubjects();
-		return { data: response || [], pagination: null };
+		const response = await referenceService.getSubjects(params);
+		return { data: response.data || [], pagination: response.pagination };
 	},
 	getById: async id => {
-		const response = await apiClient.getSubjects();
-		return response.find(s => s.id === id) || ({} as Subject);
+		const response = await referenceService.getSubject(id);
+		return response.data;
 	},
 	create: async data => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id: Date.now() } as Subject;
+		const response = await referenceService.createSubject(data);
+		return response.data;
 	},
 	update: async (id, data) => {
-		// Заглушка - в реальном проекте будет API метод
-		return { ...data, id } as Subject;
+		const response = await referenceService.updateSubject(id, data);
+		return response.data;
 	},
 	delete: async id => {
-		// Заглушка - в реальном проекте будет API метод
+		await referenceService.deleteSubject(id);
 	},
 };
 
-// Схемы валидации
+// Схемы валидации (упрощенные для API)
 const teacherSchema = z.object({
-	firstName: z.string().min(1, 'Имя обязательно'),
-	lastName: z.string().min(1, 'Фамилия обязательна'),
-	middleName: z.string().optional(),
-	email: z.string().email('Некорректный email').optional().or(z.literal('')),
-	phone: z.string().optional().or(z.literal('')),
+	firstName: z.string().min(1, 'Имя обязательно').max(50, 'Имя слишком длинное'),
+	lastName: z.string().min(1, 'Фамилия обязательна').max(50, 'Фамилия слишком длинная'),
+	middleName: z.string().max(50, 'Отчество слишком длинное').optional(),
+	email: z
+		.string()
+		.email('Некорректный email')
+		.max(100, 'Email слишком длинный')
+		.optional()
+		.or(z.literal('')),
+	phone: z.string().max(20, 'Телефон слишком длинный').optional().or(z.literal('')),
 	isActive: z.boolean(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
 
 const classroomSchema = z.object({
-	number: z.number().int().positive('Номер кабинета должен быть положительным числом'),
+	number: z
+		.number()
+		.int()
+		.positive('Номер кабинета должен быть положительным числом')
+		.max(999, 'Номер кабинета должен быть не более 999'),
 	floor: z
 		.number()
 		.int()
 		.min(1, 'Этаж должен быть не менее 1')
 		.max(10, 'Этаж должен быть не более 10'),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
 
 const subjectSchema = z.object({
-	name: z.string().min(1, 'Название предмета обязательно'),
-	code: z.string().min(1, 'Код предмета обязателен'),
-	description: z.string().optional(),
+	name: z
+		.string()
+		.min(1, 'Название предмета обязательно')
+		.max(100, 'Название предмета слишком длинное'),
+	code: z.string().min(1, 'Код предмета обязателен').max(20, 'Код предмета слишком длинный'),
+	description: z.string().max(500, 'Описание слишком длинное').optional(),
+	createdAt: z.string(),
+	updatedAt: z.string(),
 });
 
 /**
@@ -216,7 +238,7 @@ export class ReferenceConfigFactory {
 	 * Универсальный метод для создания конфигурации
 	 * Позволяет легко добавлять новые типы сущностей
 	 */
-	static createConfig<T extends any>(
+	static createConfig<T extends ReferenceEntity>(
 		entityType: string,
 		title: string,
 		description: string,
@@ -228,7 +250,7 @@ export class ReferenceConfigFactory {
 		filters?: Array<{
 			key: string;
 			label: string;
-			type: string;
+			type: 'date' | 'text' | 'select';
 			options?: Array<{ value: string; label: string }>;
 		}>
 	): ReferenceConfig<T> {

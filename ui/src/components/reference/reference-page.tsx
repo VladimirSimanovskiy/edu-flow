@@ -158,18 +158,7 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 								<span>Добавить</span>
 							</ToolbarButton>
 						</ModalTrigger>
-						<ModalContent className="max-w-4xl">
-							<ModalHeader>
-								<ModalTitle>
-									Добавить {config.title.toLowerCase().slice(0, -1)}
-								</ModalTitle>
-								<ModalDescription>
-									Заполните форму для добавления нового{' '}
-									{config.title.toLowerCase().slice(0, -1)} в систему
-								</ModalDescription>
-							</ModalHeader>
-							<ModalBody>{renderForm(false)}</ModalBody>
-						</ModalContent>
+						<ModalContent>{renderForm(false)}</ModalContent>
 					</Modal>
 
 					<ToolbarSeparator />
@@ -212,17 +201,7 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 
 			{/* Диалог редактирования */}
 			<Modal open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-				<ModalContent className="max-w-4xl">
-					<ModalHeader>
-						<ModalTitle>
-							Редактировать {config.title.toLowerCase().slice(0, -1)}
-						</ModalTitle>
-						<ModalDescription>
-							Внесите изменения в данные {config.title.toLowerCase().slice(0, -1)}
-						</ModalDescription>
-					</ModalHeader>
-					<ModalBody>{renderForm(true)}</ModalBody>
-				</ModalContent>
+				<ModalContent>{renderForm(true)}</ModalContent>
 			</Modal>
 
 			{/* Диалог удаления */}

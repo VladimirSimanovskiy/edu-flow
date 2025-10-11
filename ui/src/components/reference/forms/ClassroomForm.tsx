@@ -2,27 +2,40 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { BaseReferenceForm } from './BaseReferenceForm';
+import { Building2, Hash } from 'lucide-react';
+import { Form } from '@/components/ui/form';
+import { FormField } from '@/components/ui/form/components/form-field/FormField';
+import { FormStack } from '@/components/ui/form/components/form-stack/FormStack';
+import { FormFooterTemplate } from '@/components/ui/form/templates/footer-template/FormFooterTemplate';
+import { FormSectionTitle } from '@/components/ui/form/components/form-section-title/FormSectionTitle';
+import { ModalBody, ModalHeaderTemplate } from '@/components/ui/modal';
+import { TextInput } from '@/components/ui/input';
 import type { ReferenceFormProps } from '@/types/reference-system';
 import type { Classroom } from '@/types/reference';
 
 // Схема валидации
 const classroomFormSchema = z.object({
-	number: z.number().int().positive('Номер кабинета должен быть положительным числом'),
+	number: z
+		.number({
+			required_error: 'Номер кабинета обязателен',
+			invalid_type_error: 'Номер кабинета должен быть числом',
+		})
+		.int('Номер кабинета должен быть целым числом')
+		.positive('Номер кабинета должен быть положительным числом'),
 	floor: z
-		.number()
-		.int()
-		.min(1, 'Этаж должен быть не менее 1')
-		.max(10, 'Этаж должен быть не более 10'),
+		.number({
+			required_error: 'Этаж обязателен',
+			invalid_type_error: 'Этаж должен быть числом',
+		})
+		.int('Этаж должен быть целым числом')
+		.positive('Этаж должен быть положительным числом'),
 });
 
 type ClassroomFormValues = z.infer<typeof classroomFormSchema>;
 
 /**
  * Форма для работы с кабинетами
- * Использует Composition Pattern - наследует структуру от BaseReferenceForm
+ * Использует FormField для консистентного UI
  */
 export const ClassroomForm: React.FC<ReferenceFormProps<Classroom>> = ({
 	entity: classroom,
@@ -30,11 +43,7 @@ export const ClassroomForm: React.FC<ReferenceFormProps<Classroom>> = ({
 	onCancel,
 	isLoading = false,
 }) => {
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<ClassroomFormValues>({
+	const form = useForm<ClassroomFormValues>({
 		resolver: zodResolver(classroomFormSchema),
 		defaultValues: {
 			number: classroom?.number || 0,
@@ -43,59 +52,79 @@ export const ClassroomForm: React.FC<ReferenceFormProps<Classroom>> = ({
 	});
 
 	const handleFormSubmit = (data: ClassroomFormValues) => {
-		onSubmit({
-			number: data.number,
-			floor: data.floor,
-		});
+		// Добавляем поля createdAt и updatedAt для совместимости с типом Classroom
+		const classroomData = {
+			...data,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		};
+		onSubmit(classroomData as Omit<Classroom, 'id'>);
 	};
 
 	return (
-		<BaseReferenceForm
-			entity={classroom}
-			onSubmit={onSubmit}
-			onCancel={onCancel}
-			isLoading={isLoading}
-			title={classroom ? 'Редактировать кабинет' : 'Добавить кабинет'}
-			description={
-				classroom
-					? 'Внесите изменения в информацию о кабинете'
-					: 'Заполните информацию о новом кабинете'
-			}
-			submitButtonText={classroom ? 'Обновить' : 'Создать'}
-		>
-			<div className="space-y-4">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					{/* Номер кабинета */}
-					<div className="space-y-2">
-						<Label htmlFor="number">Номер кабинета *</Label>
-						<Input
-							id="number"
-							type="number"
-							{...register('number', { valueAsNumber: true })}
-							placeholder="Введите номер кабинета"
-							className={errors.number ? 'border-red-500' : ''}
-						/>
-						{errors.number && (
-							<p className="text-sm text-red-500">{errors.number.message}</p>
-						)}
-					</div>
+		<Form {...form} asChild>
+			<form onSubmit={form.handleSubmit(handleFormSubmit)}>
+				<ModalHeaderTemplate
+					title={classroom ? 'Редактировать кабинет' : 'Добавить кабинет'}
+					description={
+						classroom
+							? 'Внесите изменения в информацию о кабинете'
+							: 'Заполните информацию о новом кабинете'
+					}
+				/>
 
-					{/* Этаж */}
-					<div className="space-y-2">
-						<Label htmlFor="floor">Этаж *</Label>
-						<Input
-							id="floor"
-							type="number"
-							{...register('floor', { valueAsNumber: true })}
-							placeholder="Введите этаж"
-							className={errors.floor ? 'border-red-500' : ''}
+				<ModalBody className="flex-1 p-6 pt-0">
+					<FormStack>
+						<FormSectionTitle>Информация о кабинете</FormSectionTitle>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									type="number"
+									placeholder="Введите номер кабинета"
+									startIcon={<Hash className="h-4 w-4" />}
+									{...field}
+									onChange={e => field.onChange(Number(e) || 0)}
+								/>
+							)}
+							name="number"
+							title="Номер кабинета"
+							description="Уникальный номер кабинета"
+							required
 						/>
-						{errors.floor && (
-							<p className="text-sm text-red-500">{errors.floor.message}</p>
-						)}
-					</div>
-				</div>
-			</div>
-		</BaseReferenceForm>
+
+						<FormField
+							control={({ field }) => (
+								<TextInput
+									type="number"
+									placeholder="Введите этаж"
+									startIcon={<Building2 className="h-4 w-4" />}
+									{...field}
+									onChange={e => field.onChange(Number(e) || 1)}
+								/>
+							)}
+							name="floor"
+							title="Этаж"
+							description="Этаж, на котором расположен кабинет"
+							required
+						/>
+					</FormStack>
+				</ModalBody>
+
+				<FormFooterTemplate
+					primaryButton={classroom ? 'Сохранить изменения' : 'Добавить кабинет'}
+					secondaryButton="Отмена"
+					primaryButtonProps={{
+						type: 'submit',
+						disabled: isLoading,
+					}}
+					secondaryButtonProps={{
+						type: 'button',
+						onClick: onCancel,
+					}}
+					className="!border-0 !px-6 !py-6 !pt-0"
+				/>
+			</form>
+		</Form>
 	);
 };

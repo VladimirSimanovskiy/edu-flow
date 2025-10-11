@@ -9,6 +9,13 @@ import {
 } from 'react-hook-form';
 import { FormFieldControl, FormControl } from '../../Form';
 import { Field } from '@/components/ui/field';
+import { tv } from 'tailwind-variants';
+
+const formFieldStyles = tv({
+	slots: {
+		label: 'w-44',
+	},
+});
 
 export type FormFieldControlRenderer<TFieldValues extends FieldValues = FieldValues> = (props: {
 	field: ControllerRenderProps<TFieldValues, FieldPath<TFieldValues>>;
@@ -84,10 +91,13 @@ export function FormField<
 	description,
 	control,
 	required,
+	className,
+	labelClassName,
 	layout = 'responsive',
 	readonly,
 }: FormFieldProps<TFieldValues, TName>) {
 	const form = useFormContext<TFieldValues>();
+	const styles = formFieldStyles();
 
 	return (
 		<FormFieldControl
@@ -102,6 +112,8 @@ export function FormField<
 						layout={layout}
 						readonly={readonly}
 						error={fieldState.error?.message}
+						className={className}
+						labelClassName={styles.label({ className: labelClassName })}
 						control={({ id, readonly: fieldReadonly }) => (
 							<FormControl id={id}>
 								{control({

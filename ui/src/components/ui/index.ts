@@ -82,3 +82,26 @@ export {
 	DropdownMenuRadioGroup,
 } from './dropdown';
 export { Toolbar, ToolbarButton, ToolbarSeparator, ToolbarText } from './toolbar';
+
+// Layout компоненты
+export {
+	PageLayout,
+	ContentLayout,
+	SectionLayout,
+	GridLayout,
+	StackLayout,
+	Breadcrumbs,
+	type PageLayoutProps,
+	type PageLayoutVariants,
+	type ContentLayoutProps,
+	type ContentLayoutVariants,
+	type SectionLayoutProps,
+	type SectionLayoutVariants,
+	type GridLayoutProps,
+	type GridLayoutVariants,
+	type StackLayoutProps,
+	type StackLayoutVariants,
+	type BreadcrumbsProps,
+	type BreadcrumbsVariants,
+	type BreadcrumbItem,
+} from './layout';

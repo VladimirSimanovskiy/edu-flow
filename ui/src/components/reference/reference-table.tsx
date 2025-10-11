@@ -1,7 +1,6 @@
 import React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 import type { Teacher, Classroom, Subject } from '../../types/reference';
 import type { ReferenceEntity } from '@/types/reference-system';
 import { DataTable } from '../ui/data-table';
@@ -15,6 +14,8 @@ interface ReferenceTableProps<T extends ReferenceEntity> {
 	onView?: (item: T) => void;
 	columns: ColumnDef<T, any>[];
 	entityType?: string;
+	rowSelection?: Record<string, boolean>;
+	onRowSelectionChange?: (selection: Record<string, boolean>) => void;
 }
 
 export const ReferenceTable = <T extends ReferenceEntity>({
@@ -24,9 +25,9 @@ export const ReferenceTable = <T extends ReferenceEntity>({
 	onDelete,
 	onView,
 	columns: inputColumns,
+	rowSelection = {},
+	onRowSelectionChange,
 }: ReferenceTableProps<T>) => {
-	const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({});
-	const [selected, setSelected] = React.useState<T[]>([]);
 	const columns = React.useMemo<ColumnDef<T, any>[]>(() => {
 		const leading = [createEditColumn<T>(onEdit)];
 		return [...leading, ...inputColumns];
@@ -41,48 +42,20 @@ export const ReferenceTable = <T extends ReferenceEntity>({
 	}
 
 	return (
-		<div className="space-y-3">
-			<div className="flex items-center justify-between">
-				<div className="font-medium">Справочник</div>
-				<div className="flex items-center gap-2">
-					{Object.keys(rowSelection).length > 0 ? (
-						<Button
-							variant="primary"
-							size="sm"
-							onClick={() => {
-								const ids = Object.keys(rowSelection)
-									.filter(k => rowSelection[k])
-									.map(Number);
-								ids.forEach(id => onDelete(id));
-								setRowSelection({});
-							}}
-						>
-							Удалить выбранные ({Object.keys(rowSelection).length})
-						</Button>
-					) : (
-						<Button
-							variant="primary"
-							size="sm"
-							onClick={() => onEdit(undefined as unknown as T)}
-						>
-							Добавить
-						</Button>
-					)}
-				</div>
-			</div>
-			<DataTable<T, any>
-				columns={columns}
-				enableRowSelection={true}
-				data={Array.isArray(data) ? data : []}
-				rowSelection={rowSelection}
-				onRowSelectionChange={updater => {
-					setRowSelection(prev =>
-						typeof updater === 'function' ? updater(prev) : updater
-					);
-				}}
-				getRowId={(row, index) => String((row as any).id ?? index)}
-			/>
-		</div>
+		<DataTable<T, any>
+			columns={columns}
+			enableRowSelection={true}
+			data={Array.isArray(data) ? data : []}
+			rowSelection={rowSelection}
+			onRowSelectionChange={updater => {
+				if (onRowSelectionChange) {
+					const newSelection =
+						typeof updater === 'function' ? updater(rowSelection) : updater;
+					onRowSelectionChange(newSelection);
+				}
+			}}
+			getRowId={(row, index) => String((row as any).id ?? index)}
+		/>
 	);
 };
 

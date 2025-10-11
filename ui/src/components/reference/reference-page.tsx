@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardFooter, CardSubTitle, CardTitle } from '@/components/ui/card';
+import { Plus, Filter, Trash2 } from 'lucide-react';
+import { PageLayout } from '@/components/ui/layout';
+import { Toolbar, ToolbarButton, ToolbarSeparator } from '@/components/ui/toolbar';
 import {
 	Modal,
 	ModalContent,
@@ -21,10 +21,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { AlertCircle } from 'lucide-react';
 import { useReferenceCrud } from '@/hooks/useReferenceCrud';
 import { ReferenceTable } from './reference-table';
-import { ReferencePagination } from './reference-pagination';
 import type { ReferencePageProps, ReferenceEntity } from '@/types/reference-system';
 
 /**
@@ -40,23 +38,18 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 	const [selectedItem, setSelectedItem] = useState<T | null>(null);
 	const [itemToDelete, setItemToDelete] = useState<T | null>(null);
 
+	// Состояние выбора строк в таблице
+	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+
 	// Хук для работы с данными
 	const {
 		data,
-		pagination,
 		isLoading,
-		filters,
-		updateFilters,
-		resetFilters,
 		create,
 		update,
 		delete: deleteRecord,
 		isCreating,
 		isUpdating,
-		isDeleting,
-		createError,
-		updateError,
-		deleteError,
 	} = useReferenceCrud<T>({
 		apiService: config.apiService,
 	});
@@ -110,12 +103,22 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 		setItemToDelete(null);
 	};
 
-	const handlePageChange = (page: number) => {
-		updateFilters({ page });
-	};
+	const handleBulkDelete = () => {
+		const selectedIds = Object.keys(rowSelection)
+			.filter(key => rowSelection[key])
+			.map(Number);
 
-	const handleLimitChange = (limit: number) => {
-		updateFilters({ limit, page: 1 });
+		selectedIds.forEach(id => {
+			const item = data.find(x => x.id === id);
+			if (item) {
+				deleteRecord(id, {
+					onSuccess: () => {
+						// Очищаем выбор после успешного удаления
+						setRowSelection({});
+					},
+				});
+			}
+		});
 	};
 
 	// Рендер формы в зависимости от типа сущности
@@ -144,59 +147,68 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 	};
 
 	return (
-		<div className="space-y-6">
-			{/* Заголовок */}
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold text-gray-900">{config.title}</h1>
-					<p className="text-gray-600 mt-1">{config.description}</p>
-				</div>
-				<Modal open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-					<ModalTrigger asChild>
-						<Button startIcon={Plus}>Добавить</Button>
-					</ModalTrigger>
-					<ModalContent className="max-w-4xl">
-						<ModalHeader>
-							<ModalTitle>
-								Добавить {config.title.toLowerCase().slice(0, -1)}
-							</ModalTitle>
-							<ModalDescription>
-								Заполните форму для добавления нового{' '}
-								{config.title.toLowerCase().slice(0, -1)} в систему
-							</ModalDescription>
-						</ModalHeader>
-						<ModalBody>{renderForm(false)}</ModalBody>
-					</ModalContent>
-				</Modal>
-			</div>
+		<>
+			<PageLayout title={config.title} description={config.description}>
+				{/* Тулбар таблицы */}
+				<Toolbar className="mb-4">
+					<Modal open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+						<ModalTrigger asChild>
+							<ToolbarButton>
+								<Plus className="h-4 w-4" />
+								<span>Добавить</span>
+							</ToolbarButton>
+						</ModalTrigger>
+						<ModalContent className="max-w-4xl">
+							<ModalHeader>
+								<ModalTitle>
+									Добавить {config.title.toLowerCase().slice(0, -1)}
+								</ModalTitle>
+								<ModalDescription>
+									Заполните форму для добавления нового{' '}
+									{config.title.toLowerCase().slice(0, -1)} в систему
+								</ModalDescription>
+							</ModalHeader>
+							<ModalBody>{renderForm(false)}</ModalBody>
+						</ModalContent>
+					</Modal>
 
-			{/* Таблица */}
-			<Card>
-				<CardTitle>Список {config.title.toLowerCase()}</CardTitle>
-				<CardSubTitle>Управление {config.title.toLowerCase()} в системе</CardSubTitle>
-				<CardFooter>
-					<ReferenceTable
-						data={data}
-						columns={config.columns}
-						isLoading={isLoading}
-						onEdit={handleEdit}
-						onDelete={(id: number) => {
-							const item = data.find(x => x.id === id);
-							if (item) handleDeleteClick(item);
-						}}
-						entityType={config.entityType as any}
-					/>
-				</CardFooter>
-			</Card>
+					<ToolbarSeparator />
 
-			{/* Пагинация */}
-			{pagination && (
-				<ReferencePagination
-					pagination={pagination}
-					onPageChange={handlePageChange}
-					onLimitChange={handleLimitChange}
+					<ToolbarButton>
+						<Filter className="h-4 w-4" />
+						<span>Фильтры</span>
+					</ToolbarButton>
+
+					{/* Кнопка удаления выбранных элементов */}
+					{Object.keys(rowSelection).length > 0 && (
+						<>
+							<ToolbarSeparator />
+							<ToolbarButton
+								onClick={handleBulkDelete}
+								className="text-red-600 hover:text-red-700 hover:bg-red-50"
+							>
+								<Trash2 className="h-4 w-4" />
+								<span>Удалить выбранные ({Object.keys(rowSelection).length})</span>
+							</ToolbarButton>
+						</>
+					)}
+				</Toolbar>
+
+				{/* Таблица данных */}
+				<ReferenceTable
+					data={data}
+					columns={config.columns}
+					isLoading={isLoading}
+					onEdit={handleEdit}
+					onDelete={(id: number) => {
+						const item = data.find(x => x.id === id);
+						if (item) handleDeleteClick(item);
+					}}
+					entityType={config.entityType as any}
+					rowSelection={rowSelection}
+					onRowSelectionChange={setRowSelection}
 				/>
-			)}
+			</PageLayout>
 
 			{/* Диалог редактирования */}
 			<Modal open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -234,23 +246,6 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-
-			{/* Ошибки */}
-			{(createError || updateError || deleteError) && (
-				<div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
-					<div className="flex items-center">
-						<AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-						<div>
-							<p className="text-sm font-medium text-red-800">Ошибка</p>
-							<p className="text-sm text-red-600">
-								{createError?.message ||
-									updateError?.message ||
-									deleteError?.message}
-							</p>
-						</div>
-					</div>
-				</div>
-			)}
-		</div>
+		</>
 	);
 };

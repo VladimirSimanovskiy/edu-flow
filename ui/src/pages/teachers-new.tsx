@@ -1,7 +1,7 @@
 import React from 'react';
 import { ReferencePage } from '@/components/reference/reference-page';
 import { ReferenceConfigFactory } from '@/services/reference-config-factory';
-import { TeacherForm } from '@/components/reference/forms/TeacherForm';
+import { TeacherForm } from '@/components/reference/teacher';
 
 /**
  * Страница управления учителями с новой архитектурой
@@ -9,13 +9,13 @@ import { TeacherForm } from '@/components/reference/forms/TeacherForm';
  * Следует принципу Open/Closed - легко расширяется
  */
 export const TeachersPageNew: React.FC = () => {
-  // Создаем конфигурацию для учителей
-  const config = ReferenceConfigFactory.createTeacherConfig();
-  
-  // Заменяем заглушку на реальный компонент формы
-  config.formComponent = TeacherForm;
+	// Создаем конфигурацию для учителей
+	const config = ReferenceConfigFactory.createTeacherConfig();
 
-  return <ReferencePage config={config} />;
+	// Заменяем заглушку на реальный компонент формы
+	config.formComponent = TeacherForm;
+
+	return <ReferencePage config={config} />;
 };
 
 export default TeachersPageNew;

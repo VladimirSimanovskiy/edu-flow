@@ -6,10 +6,10 @@ import type {
 } from '@/types/reference-system';
 import type { Teacher, Classroom, Subject } from '@/types/reference';
 import {
-	teacherColumns,
-	classroomColumns,
-	subjectColumns,
-} from '@/components/reference/reference-table';
+	teacherTableColumns,
+	classroomTableColumns,
+	subjectTableColumns,
+} from '@/components/reference';
 
 // Импортируем реальные API сервисы
 import { referenceService } from './reference.service';
@@ -139,7 +139,7 @@ export class ReferenceConfigFactory {
 			entityType: 'teachers',
 			title: 'Учителя',
 			description: 'Управление учителями в системе',
-			columns: teacherColumns,
+			columns: teacherTableColumns,
 			formComponent: () => null, // Будет заменено на реальный компонент
 			apiService: teacherApiService,
 			validationSchema: teacherSchema,
@@ -177,7 +177,7 @@ export class ReferenceConfigFactory {
 			entityType: 'classrooms',
 			title: 'Кабинеты',
 			description: 'Управление кабинетами в системе',
-			columns: classroomColumns,
+			columns: classroomTableColumns,
 			formComponent: () => null, // Будет заменено на реальный компонент
 			apiService: classroomApiService,
 			validationSchema: classroomSchema,
@@ -215,7 +215,7 @@ export class ReferenceConfigFactory {
 			entityType: 'subjects',
 			title: 'Предметы',
 			description: 'Управление предметами в системе',
-			columns: subjectColumns,
+			columns: subjectTableColumns,
 			formComponent: () => null, // Будет заменено на реальный компонент
 			apiService: subjectApiService,
 			validationSchema: subjectSchema,

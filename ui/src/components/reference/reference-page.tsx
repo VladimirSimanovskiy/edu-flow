@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { Plus, Filter, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/ui/layout';
 import { Toolbar, ToolbarButton, ToolbarSeparator } from '@/components/ui/toolbar';
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalTitle,
-	ModalBody,
-	ModalTrigger,
-	ModalDescription,
-} from '@/components/ui/modal';
+import { Modal, ModalContent, ModalTrigger } from '@/components/ui/modal';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -34,9 +26,9 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 	// Состояние модальных окон
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<T | null>(null);
-	const [itemToDelete, setItemToDelete] = useState<T | null>(null);
+	const [itemsToBulkDelete, setItemsToBulkDelete] = useState<T[]>([]);
 
 	// Состояние выбора строк в таблице
 	const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -79,28 +71,27 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 		}
 	};
 
-	const handleDeleteClick = (item: T) => {
-		setItemToDelete(item);
-		setIsDeleteDialogOpen(true);
-	};
-
-	const handleDeleteConfirm = () => {
-		if (itemToDelete) {
-			deleteRecord(itemToDelete.id, {
+	const handleBulkDeleteConfirm = () => {
+		// Вызываем onDelete для каждой выбранной записи
+		itemsToBulkDelete.forEach(item => {
+			deleteRecord(item.id, {
 				onSuccess: () => {
-					setIsDeleteDialogOpen(false);
-					setItemToDelete(null);
+					// Очищаем выбор после успешного удаления
+					setRowSelection({});
 				},
 			});
-		}
+		});
+
+		setIsBulkDeleteDialogOpen(false);
+		setItemsToBulkDelete([]);
 	};
 
 	const handleCancel = () => {
 		setIsCreateDialogOpen(false);
 		setIsEditDialogOpen(false);
-		setIsDeleteDialogOpen(false);
+		setIsBulkDeleteDialogOpen(false);
 		setSelectedItem(null);
-		setItemToDelete(null);
+		setItemsToBulkDelete([]);
 	};
 
 	const handleBulkDelete = () => {
@@ -108,17 +99,15 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 			.filter(key => rowSelection[key])
 			.map(Number);
 
-		selectedIds.forEach(id => {
-			const item = data.find(x => x.id === id);
-			if (item) {
-				deleteRecord(id, {
-					onSuccess: () => {
-						// Очищаем выбор после успешного удаления
-						setRowSelection({});
-					},
-				});
-			}
-		});
+		// Находим все выбранные элементы
+		const selectedItems = selectedIds
+			.map(id => data.find(x => x.id === id))
+			.filter((item): item is T => item !== undefined);
+
+		if (selectedItems.length > 0) {
+			setItemsToBulkDelete(selectedItems);
+			setIsBulkDeleteDialogOpen(true);
+		}
 	};
 
 	// Рендер формы в зависимости от типа сущности
@@ -126,7 +115,6 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 		const FormComponent = config.formComponent;
 		const onSubmit = (payload: Omit<T, 'id'>) => {
 			if (isEdit) {
-				// cast to Partial<T> is safe here because edit form may submit partial fields
 				handleUpdate(payload as Partial<T>);
 			} else {
 				handleCreate(payload);
@@ -189,10 +177,6 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 					columns={config.columns}
 					isLoading={isLoading}
 					onEdit={handleEdit}
-					onDelete={(id: number) => {
-						const item = data.find(x => x.id === id);
-						if (item) handleDeleteClick(item);
-					}}
 					entityType={config.entityType as any}
 					rowSelection={rowSelection}
 					onRowSelectionChange={setRowSelection}
@@ -205,22 +189,22 @@ export const ReferencePage = <T extends ReferenceEntity>({ config }: ReferencePa
 			</Modal>
 
 			{/* Диалог удаления */}
-			<AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+			<AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Подтвердите удаление</AlertDialogTitle>
 						<AlertDialogDescription>
-							Вы уверены, что хотите удалить этот элемент? Это действие нельзя
-							отменить.
+							Вы уверены, что хотите удалить выбранные элементы? Это действие
+							необратимо.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel onClick={handleCancel}>Отмена</AlertDialogCancel>
 						<AlertDialogAction
-							onClick={handleDeleteConfirm}
+							onClick={handleBulkDeleteConfirm}
 							className="bg-red-600 hover:bg-red-700"
 						>
-							Удалить
+							Удалить все
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
